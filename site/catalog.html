@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>전자 카탈로그 | 나무의공간</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Nanum+Myeongjo:wght@700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<style>
+  .pdfbox { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; margin-top: 26px; }
+  .pdfbox iframe { width: 100%; height: 80vh; border: 0; display: block; }
+  .pages { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-top: 26px; }
+  .pages img { border: 1px solid var(--line); border-radius: 8px; background: #fff; }
+  @media (max-width: 860px) { .pages { grid-template-columns: repeat(2, 1fr); } .pdfbox iframe { height: 60vh; } }
+</style>
+</head>
+<body>
+<header class="site">
+  <div class="wrap">
+    <a href="index.html" class="logo" data-logo aria-label="나무의공간"></a>
+    <nav class="main">
+      <a href="index.html#products">제품</a><a href="index.html#spec">규격·단면</a><a href="index.html#interior">연출 갤러리</a><a href="index.html#site">시공 현장</a><a href="order.html">도면 주문</a><a href="catalog.html" class="active">카탈로그</a><a href="index.html#contact">문의</a>
+    </nav>
+    <a class="tel-btn" data-tel href="#">📞 <span data-site="tel"></span></a>
+    <button class="menu-btn" aria-label="메뉴">☰</button>
+  </div>
+</header>
+
+<div class="wrap" style="padding:40px 20px 80px">
+  <div class="eyebrow">E-Catalog</div>
+  <h1 class="sec-title">전자 카탈로그 (A4 PDF)</h1>
+  <p class="sec-lead">제품 라인업, 규격·단면, 마감, 연출 예시, 시공 현장, 주문 방법을 11페이지에 담았습니다. 내려받아 인쇄하거나 고객에게 바로 전달하세요.</p>
+  <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:18px">
+    <a class="btn wood" href="catalog.pdf" download="나무의공간_템바보드_카탈로그.pdf">PDF 내려받기</a>
+    <a class="btn ghost" href="catalog.pdf" target="_blank">새 창에서 열기</a>
+    <a class="btn ghost" href="order.html">도면으로 주문하기</a>
+  </div>
+  <div class="pdfbox"><iframe src="catalog.pdf#view=FitH" title="카탈로그"></iframe></div>
+  <div class="pages">
+    <img src="img/catalog/p01.jpg" alt="표지"><img src="img/catalog/p02.jpg" alt="소개"><img src="img/catalog/p03.jpg" alt="라인업"><img src="img/catalog/p04.jpg" alt="규격"><img src="img/catalog/p05.jpg" alt="마감">
+    <img src="img/catalog/p06.jpg" alt="연출1"><img src="img/catalog/p07.jpg" alt="연출2"><img src="img/catalog/p08.jpg" alt="세로 시공"><img src="img/catalog/p09.jpg" alt="현장"><img src="img/catalog/p10.jpg" alt="주문"><img src="img/catalog/p11.jpg" alt="뒷표지">
+  </div>
+</div>
+
+<footer class="site"><div class="wrap"><a class="logo" data-logo href="index.html"></a><div><b data-site="name"></b> · 대표 <span data-site="ceo"></span> · <span data-site="tel"></span> · <span data-site="email"></span><br><span style="opacity:.7">사업자등록번호 <span data-site="bizno"></span> (<span data-site="bizname"></span>) · <span data-site="address"></span></span></div></div></footer>
+<div class="floating"><a data-tel href="#">전화</a><a class="dark" href="order.html">주문</a></div>
+<script src="js/logos.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

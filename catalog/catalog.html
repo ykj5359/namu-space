@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>나무의공간 템바보드 카탈로그</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Nanum+Myeongjo:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+  :root { --wood: #B9814A; --wood-dark: #8B5A2B; --wood-light: #D9B27F; --ink: #2B2B2B; --ink-2: #555; --ink-3: #888; --bg: #FBF8F3; --bg-2: #F3EBDD; --line: #E4DACB; --green: #2F4A3A; }
+  @page { size: A4; margin: 0; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: #999; font-family: 'Noto Sans KR', 'Malgun Gothic', sans-serif; color: var(--ink); -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .page { width: 210mm; height: 297mm; background: #fff; margin: 0 auto; position: relative; overflow: hidden; page-break-after: always; break-after: page; padding: 18mm 16mm 16mm; }
+  .page:last-child { page-break-after: auto; }
+  @media screen { .page { margin: 10mm auto; box-shadow: 0 5px 30px rgba(0,0,0,.3); } }
+  h1, h2, h3, h4 { margin: 0; line-height: 1.25; }
+  p { margin: 0 0 .7em; line-height: 1.6; }
+  img { display: block; }
+  .serif { font-family: 'Nanum Myeongjo', 'Batang', serif; }
+  .eyebrow { color: var(--wood); font-size: 9.5pt; letter-spacing: .25em; font-weight: 700; margin-bottom: 4mm; }
+  .title { font-size: 22pt; font-weight: 800; margin-bottom: 4mm; }
+  .lead { font-size: 10.5pt; color: var(--ink-2); max-width: 150mm; }
+  .foot { position: absolute; left: 16mm; right: 16mm; bottom: 9mm; display: flex; justify-content: space-between; font-size: 8pt; color: var(--ink-3); border-top: 1px solid var(--line); padding-top: 3mm; }
+  .foot .logo svg { height: 7mm; width: auto; }
+  .logo svg { display: block; }
+  .tag { display: inline-block; padding: 1mm 3.5mm; border-radius: 99px; background: var(--bg-2); color: var(--wood-dark); font-size: 8.5pt; font-weight: 700; }
+
+  /* cover */
+  .cover { padding: 0; color: #fff; }
+  .cover img.bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .cover .shade { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,.25), rgba(0,0,0,.05) 35%, rgba(20,12,5,.85)); }
+  .cover .top { position: absolute; top: 16mm; left: 16mm; right: 16mm; display: flex; justify-content: space-between; align-items: center; }
+  .cover .top .logo svg { height: 14mm; width: auto; }
+  .cover .top .logo svg text { fill: #fff; }
+  .cover .bottom { position: absolute; left: 16mm; right: 16mm; bottom: 20mm; }
+  .cover h1 { font-size: 40pt; font-weight: 800; line-height: 1.15; }
+  .cover .sub { font-size: 13pt; margin: 5mm 0 8mm; opacity: .92; }
+  .cover .meta { display: flex; gap: 8mm; font-size: 10pt; opacity: .9; }
+  .cover .year { font-size: 11pt; letter-spacing: .3em; opacity: .9; }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6mm; }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5mm; }
+  .stat { background: var(--ink); color: #fff; border-radius: 3mm; padding: 5mm; text-align: center; }
+  .stat b { display: block; font-size: 20pt; color: var(--wood-light); font-family: 'Nanum Myeongjo', serif; }
+  .stat span { font-size: 8.5pt; opacity: .85; }
+  .card { border: 1px solid var(--line); border-radius: 3mm; overflow: hidden; }
+  .card .pic { background: linear-gradient(160deg, #F7F1E7, #E9DCC8); height: 70mm; display: flex; align-items: center; justify-content: center; gap: 5mm; padding: 5mm; }
+  .card .pic img { max-height: 100%; width: auto; filter: drop-shadow(0 6mm 6mm rgba(60,30,0,.28)); }
+  .card .body { padding: 4mm 4.5mm 5mm; }
+  .card h3 { font-size: 13pt; margin: 2mm 0 2mm; }
+  .card ul { margin: 0; padding: 0; list-style: none; font-size: 8.8pt; color: var(--ink-2); line-height: 1.55; }
+  .card li::before { content: '· '; color: var(--wood); font-weight: 700; }
+  table.spec { width: 100%; border-collapse: collapse; font-size: 9.5pt; }
+  table.spec th, table.spec td { text-align: left; padding: 2.4mm 3mm; border-bottom: 1px solid var(--line); vertical-align: top; }
+  table.spec th { width: 34mm; color: var(--wood-dark); font-weight: 700; background: var(--bg); }
+  .photo { border-radius: 3mm; overflow: hidden; background: #eee; }
+  .photo img { width: 100%; height: 100%; object-fit: cover; }
+  figure { margin: 0; }
+  figcaption { font-size: 8.5pt; color: var(--ink-2); margin-top: 1.8mm; }
+  .gal { display: grid; grid-template-columns: 1fr 1fr; gap: 5mm; }
+  .gal .photo { height: 62mm; }
+  .gal3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4mm; }
+  .gal3 .photo { height: 62mm; }
+  .steps { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; }
+  .step { border: 1px solid var(--line); border-radius: 3mm; padding: 4mm; font-size: 9pt; color: var(--ink-2); }
+  .step b { display: inline-grid; place-items: center; width: 7mm; height: 7mm; border-radius: 50%; background: var(--wood); color: #fff; margin-bottom: 2mm; font-family: 'Nanum Myeongjo', serif; }
+  .step h4 { font-size: 11pt; color: var(--ink); margin-bottom: 1mm; }
+  .note { background: var(--bg-2); border-left: 1.2mm solid var(--wood); padding: 3mm 4mm; border-radius: 2mm; font-size: 9pt; color: var(--ink-2); }
+  .band { background: var(--green); color: #fff; border-radius: 3mm; padding: 6mm; }
+  .band h3 { font-family: 'Nanum Myeongjo', serif; font-size: 16pt; margin-bottom: 2mm; }
+  .band p { font-size: 9.5pt; opacity: .9; margin: 0; }
+  .back { background: var(--ink); color: #fff; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+  .back .logo svg { height: 22mm; width: auto; }
+  .back .logo svg text { fill: #fff; }
+  .back .ct { font-size: 12pt; margin-top: 10mm; line-height: 2; }
+  .back .ct b { color: var(--wood-light); }
+</style>
+</head>
+<body>
+
+<!-- 1. 표지 -->
+<section class="page cover">
+  <img class="bg" src="../site/img/interior/hero.jpg" alt="">
+  <div class="shade"></div>
+  <div class="top"><div class="logo" data-logo></div><div class="year">CATALOG 2026</div></div>
+  <div class="bottom">
+    <div class="tag" style="background:rgba(255,255,255,.2);color:#fff">나왕 원목 · 합판 바탕 · 주문 제작</div>
+    <h1 class="serif" style="margin-top:4mm">나무가 만드는<br>공간의 결</h1>
+    <div class="sub">30×30 나왕 각재 템바보드 · 도면 주문 · 현장 시공</div>
+    <div class="meta"><span>나무의공간</span><span>대표 이영석</span><span>010-3509-2230</span><span>ykj5359@daum.net</span><span>충남 홍성군 서부면 지산1길 25-17</span></div>
+  </div>
+</section>
+
+<!-- 2. 소개 -->
+<section class="page">
+  <div class="eyebrow">ABOUT</div>
+  <h2 class="title">나무의공간</h2>
+  <p class="lead">나무의공간은 나왕(라왕) 원목 각재를 합판에 고정해 만드는 <b>템바보드</b> 전문 제작사입니다. 정해진 규격의 제품을 파는 것이 아니라, 고객이 그린 도면 그대로 폭·높이·여백·코너까지 맞춰 제작하고 필요하면 현장 시공까지 직접 진행합니다.</p>
+  <div class="grid3" style="margin:6mm 0">
+    <div class="stat"><b>30×30</b><span>나왕 각재 규격 (mm)</span></div>
+    <div class="stat"><b>1220×2440</b><span>합판 원장 · 가로·세로 계속 이어 붙여 제작</span></div>
+    <div class="stat"><b>코너형</b><span>ㄱ자 코너 돌림 주문 가능</span></div>
+  </div>
+  <div class="grid2" style="margin-top:4mm">
+    <div class="photo" style="height:78mm"><img src="../site/img/detail/factory_stack1.jpg" alt=""></div>
+    <div class="photo" style="height:78mm"><img src="../site/img/site/site02.jpg" alt=""></div>
+  </div>
+  <div class="grid2" style="margin-top:6mm">
+    <div>
+      <h3 style="font-size:12pt;margin-bottom:2mm">왜 나왕 템바보드인가</h3>
+      <p style="font-size:9.5pt;color:var(--ink-2)">나왕은 결이 곧고 뒤틀림이 적어 긴 각재로 가공하기 좋은 수종입니다. 30mm 각재가 만드는 깊은 음영은 얇은 MDF 루버가 흉내 낼 수 없는 입체감을 만들고, 합판 바탕 덕분에 벽에 그대로 고정하면 시공이 끝납니다.</p>
+    </div>
+    <div>
+      <h3 style="font-size:12pt;margin-bottom:2mm">이렇게 일합니다</h3>
+      <ul style="font-size:9.5pt;color:var(--ink-2);margin:0;padding-left:4mm;line-height:1.7">
+        <li>도면(A·B·C·D·E·코너)대로 1장부터 주문 제작</li>
+        <li>대량 주문 가능 — 상가·사무실·숙박시설 전체 물량</li>
+        <li>자재 납품 또는 현장 시공 선택</li>
+        <li>무도장 / 오일 스테인 마감</li>
+      </ul>
+    </div>
+  </div>
+  <div class="foot"><div class="logo" data-logo></div><span>02</span></div>
+</section>
+
+<!-- 3. 라인업 -->
+<section class="page">
+  <div class="eyebrow">PRODUCTS</div>
+  <h2 class="title">제품 라인업</h2>
+  <p class="lead">모든 제품은 나왕 원목 각재를 합판 위에 접착·고정해 만듭니다. 무도장 또는 오일 스테인 마감을 선택할 수 있습니다.</p>
+  <div class="grid3" style="margin-top:6mm">
+    <div class="card">
+      <div class="pic"><img src="../site/img/product/slim_v_natural.png" alt="" style="height:100%"><img src="../site/img/product/slim_v_oil.png" alt="" style="height:100%"></div>
+      <div class="body"><span class="tag">촘촘한 결</span><h3>슬림 템바보드</h3>
+        <ul><li>좁은 나왕 살을 촘촘하게 배열</li><li>세로 롱 패널</li><li>아트월·기둥 마감에 적합</li><li>무도장 / 오일</li></ul></div>
+    </div>
+    <div class="card">
+      <div class="pic"><img src="../site/img/product/sq30_v_long.png" alt="" style="height:100%"><img src="../site/img/product/sq30_v_stain.png" alt="" style="height:92%"></div>
+      <div class="body"><span class="tag">주력 · 도면 주문</span><h3>30각 템바보드</h3>
+        <ul><li>나왕 30×30, 간격 30 (피치 60)</li><li>합판 8mm, 원장 1220×2440 이어 붙임</li><li>무도장 / 오일 스테인</li><li>코너형 제작 가능</li></ul></div>
+    </div>
+    <div class="card">
+      <div class="pic"><img src="../site/img/product/wide_board.png" alt="" style="height:100%"><img src="../site/img/product/wide_v_long.png" alt="" style="height:100%"></div>
+      <div class="body"><span class="tag">넓은 평살</span><h3>와이드 루버보드</h3>
+        <ul><li>넓은 평살을 일정 간격 배열</li><li>보드형 / 세로 롱 패널</li><li>가로 시공 시 공간 확장 효과</li><li>무도장 / 스테인</li></ul></div>
+    </div>
+  </div>
+  <div class="grid3" style="margin-top:6mm">
+    <figure><div class="photo" style="height:52mm"><img src="../site/img/detail/slim_tex1.jpg" alt=""></div><figcaption>슬림 · 촘촘한 살</figcaption></figure>
+    <figure><div class="photo" style="height:52mm"><img src="../site/img/detail/sq30_side3.jpg" alt=""></div><figcaption>30각 · 측면 음영</figcaption></figure>
+    <figure><div class="photo" style="height:52mm"><img src="../site/img/detail/wide_section.jpg" alt=""></div><figcaption>와이드 · 합판 바탕 단면</figcaption></figure>
+  </div>
+  <div class="foot"><div class="logo" data-logo></div><span>03</span></div>
+</section>
+
+<!-- 4. 30각 상세 -->
+<section class="page">
+  <div class="eyebrow">SPECIFICATION</div>
+  <h2 class="title">30각 템바보드 규격·단면</h2>
+  <p class="lead">각재 30×30, 간격 30, 합판 8은 고정 규격입니다. 폭(A)·높이(B)·여백(C·E)·각재 구간(D)은 주문 시 자유롭게 지정합니다.</p>
+  <div style="border:1px solid var(--line);border-radius:3mm;padding:4mm;margin-top:4mm">
+    <svg viewBox="0 0 560 250" width="100%" font-family="Noto Sans KR, sans-serif" font-size="12">
+      <rect x="40" y="170" width="420" height="16" fill="#E8D7B5" stroke="#8B5A2B"/><text x="470" y="182" fill="#555">합판 8</text>
+      <g fill="#C8935B" stroke="#6B3F1D"><rect x="40" y="110" width="60" height="60"/><rect x="160" y="110" width="60" height="60"/><rect x="280" y="110" width="60" height="60"/></g>
+      <g stroke="#1d4ed8" stroke-width="1" fill="#1d4ed8">
+        <line x1="40" y1="80" x2="40" y2="98"/><line x1="100" y1="80" x2="100" y2="98"/><line x1="160" y1="80" x2="160" y2="98"/><line x1="220" y1="80" x2="220" y2="98"/><line x1="40" y1="88" x2="220" y2="88"/>
+        <text x="58" y="76" text-anchor="middle" stroke="none">각재 30</text><text x="130" y="76" text-anchor="middle" stroke="none">간격 30</text><text x="190" y="76" text-anchor="middle" stroke="none">30</text>
+        <line x1="370" y1="110" x2="370" y2="170"/><line x1="360" y1="110" x2="380" y2="110"/><line x1="360" y1="170" x2="380" y2="170"/><text x="386" y="144" stroke="none">30</text>
+        <line x1="40" y1="210" x2="460" y2="210"/><line x1="40" y1="202" x2="40" y2="218"/><line x1="460" y1="202" x2="460" y2="218"/>
+        <text x="250" y="232" text-anchor="middle" stroke="none">피치 60mm 반복 · 패널 폭 A (합판 원장 1220×2440 이어 붙임)</text>
+      </g>
+      <text x="40" y="30" font-size="14" font-weight="700">단면 상세 (단위 mm)</text><text x="40" y="50" fill="#777">나왕 각재 30×30 · 간격 30 · 합판 8 바탕</text>
+    </svg>
+  </div>
+  <div class="grid2" style="margin-top:5mm">
+    <table class="spec">
+      <tr><th>수종</th><td>나왕(라왕) 원목 각재</td></tr>
+      <tr><th>각재 규격</th><td>30 × 30 mm (고정)</td></tr>
+      <tr><th>각재 간격</th><td>30 mm (고정, 피치 60 mm)</td></tr>
+      <tr><th>바탕재</th><td>합판 8 mm · 원하는 색상으로 도장 가능</td></tr>
+      <tr><th>크기</th><td>합판 원장 1220×2440 mm. 가로·세로 모두 계속 이어 붙여 제작 → 크기 제한 없음</td></tr>
+      <tr><th>폭·높이</th><td>A(폭), B(높이), C·E(여백), D(각재 구간) 자유 지정</td></tr>
+      <tr><th>코너</th><td>ㄱ자 코너형 (좌·우·양쪽), 돌림 길이 F 지정</td></tr>
+      <tr><th>마감</th><td>무도장 / 오일 스테인</td></tr>
+      <tr><th>수량·시공</th><td>1장부터 대량까지 · 납품 또는 현장 시공</td></tr>
+    </table>
+    <div>
+      <div style="border:1px solid var(--line);border-radius:3mm;padding:3mm">
+        <svg viewBox="0 0 300 250" width="100%" font-family="Noto Sans KR, sans-serif" font-size="11">
+          <text x="10" y="20" font-size="13" font-weight="700">코너 평면 상세 (ㄱ자 돌림)</text>
+          <rect x="30" y="100" width="240" height="10" fill="#E8D7B5" stroke="#8B5A2B"/>
+          <rect x="30" y="110" width="10" height="120" fill="#E8D7B5" stroke="#8B5A2B"/>
+          <g fill="#C8935B" stroke="#6B3F1D"><rect x="30" y="62" width="38" height="38"/><rect x="106" y="62" width="38" height="38"/><rect x="182" y="62" width="38" height="38"/><rect x="40" y="140" width="38" height="38"/><rect x="40" y="216" width="38" height="14"/></g>
+          <g stroke="#1d4ed8" fill="#1d4ed8"><line x1="40" y1="122" x2="68" y2="122"/><text x="54" y="135" text-anchor="middle" stroke="none">22</text><line x1="30" y1="52" x2="68" y2="52"/><text x="49" y="48" text-anchor="middle" stroke="none">30</text><line x1="90" y1="140" x2="90" y2="178"/><text x="98" y="163" stroke="none">30</text></g>
+          <text x="10" y="245" fill="#555" font-size="10">코너 각재가 합판 두께(8)를 덮어 22mm 노출 · 각재가 끊김 없이 돌아감</text>
+        </svg>
+      </div>
+      <div class="photo" style="height:44mm;margin-top:3mm"><img src="../site/img/detail/corner_joint2.jpg" alt=""></div>
+    </div>
+  </div>
+  <div class="foot"><div class="logo" data-logo></div><span>04</span></div>
+</section>
+
+<!-- 5. 마감 · 디테일 -->
+<section class="page">
+  <div class="eyebrow">FINISH & DETAIL</div>
+  <h2 class="title">마감과 디테일</h2>
+  <p class="lead">기본 마감은 오일 스테인이며, 원하는 색상으로 도장 주문 제작이 가능합니다. 모든 제품은 합판 바탕 위에 각재를 접착·고정해 만듭니다.</p>
+  <div class="grid2" style="margin-top:5mm">
+    <figure><div class="photo" style="height:96mm"><img src="../site/img/detail/sq30_stain_tex1.jpg" alt=""></div><figcaption><b>오일 스테인</b> — 따뜻한 갈색, 결이 깊어짐 · 원하는 색상 도장 주문 제작 가능</figcaption></figure>
+    <figure><div class="photo" style="height:96mm"><img src="../site/img/detail/crop_sq30_section.jpg" alt=""></div><figcaption><b>합판 바탕 단면</b> — 합판 위 30×30 각재, 30mm 간격 접착·고정 · 바탕 합판은 원하는 색상으로 도장 가능</figcaption></figure>
+  </div>
+  <div class="gal3" style="margin-top:5mm">
+    <figure><div class="photo"><img src="../site/img/detail/crop_slim_oil.jpg" alt=""></div><figcaption><b>슬림 오일</b> — 촘촘한 살, 광택 마감</figcaption></figure>
+    <figure><div class="photo"><img src="../site/img/detail/crop_wide_board.jpg" alt=""></div><figcaption><b>와이드 평살</b> — 넓은 면, 은은한 음영</figcaption></figure>
+    <figure><div class="photo"><img src="../site/img/detail/crop_sq30_stain_h.jpg" alt=""></div><figcaption><b>30각 스테인 가로</b> — 롱 패널</figcaption></figure>
+  </div>
+  <div class="foot"><div class="logo" data-logo></div><span>05</span></div>
+</section>
+
+<!-- 6. 연출 1 -->
+<section class="page">
+  <div class="eyebrow">INTERIOR IDEAS</div>
+  <h2 class="title">이렇게 쓰입니다 — 주거 공간</h2>
+  <p class="lead">실제 제품 사진을 바탕으로 연출한 예시 이미지입니다.</p>
+  <div class="gal" style="margin-top:4mm">
+    <figure><div class="photo"><img src="../site/img/interior/living_tv.jpg" alt=""></div><figcaption>거실 TV 아트월 · 슬림형</figcaption></figure>
+    <figure><div class="photo"><img src="../site/img/interior/bedroom_head.jpg" alt=""></div><figcaption>침실 헤드보드 벽 · 와이드 가로</figcaption></figure>
+    <figure><div class="photo"><img src="../site/img/interior/entrance.jpg" alt=""></div><figcaption>현관 벽면 · 슬림 오일</figcaption></figure>
+    <figure><div class="photo"><img src="../site/img/interior/stairs.jpg" alt=""></div><figcaption>계단실 벽 · 30각</figcaption></figure>
+    <figure><div class="photo"><img src="../site/img/interior/partition.jpg" alt=""></div><figcaption>거실·식당 가벽 파티션 · 30각</figcaption></figure>
+    <figure><div class="photo"><img src="../site/img/interior/corner_detail.jpg" alt=""></div><figcaption>코너 돌림 상세 · 코너형</figcaption></figure>
+  </div>
+  <div class="foot"><div class="logo" data-logo></div><span>06</span></div>
+</section>
+
+<!-- 7. 연출 2 -->
+<section class="page">
+  <div class="eyebrow">INTERIOR IDEAS</div>
+  <h2 class="title">이렇게 쓰입니다 — 상업·사무 공간</h2>
+  <p class="lead">카운터 뒷벽, 기둥, 천장, 로비까지. 대량 물량도 같은 품질로 제작합니다.</p>
+  <div class="gal" style="margin-top:4mm">
+    <figure><div class="photo"><img src="../site/img/interior/cafe_counter.jpg" alt=""></div><figcaption>카페 카운터 뒷벽 · 30각</figcaption></figure>
+    <figure><div class="photo"><img src="../site/img/interior/column_wrap.jpg" alt=""></div><figcaption>매장 기둥 감싸기 · 코너형</figcaption></figure>
+    <figure><div class="photo"><img src="../site/img/interior/ceiling.jpg" alt=""></div><figcaption>식당 천장 루버 · 30각</figcaption></figure>
+    <figure><div class="photo"><img src="../site/img/interior/office_lobby.jpg" alt=""></div><figcaption>사무실 로비 · 30각 스테인</figcaption></figure>
+    <figure><div class="photo"><img src="../site/img/interior/restaurant_wall.jpg" alt=""></div><figcaption>식당 룸 벽면 · 30각 스테인 가로</figcaption></figure>
+    <figure><div class="photo"><img src="../site/img/interior/hallway.jpg" alt=""></div><figcaption>호텔 복도 · 와이드 가로</figcaption></figure>
+  </div>
+  <div class="foot"><div class="logo" data-logo></div><span>07</span></div>
+</section>
+
+<!-- 8. 세로 시공 · 상가 -->
+<section class="page">
+  <div class="eyebrow">VERTICAL INSTALLATION</div>
+  <h2 class="title">세로 시공 — 상가·약국·병원</h2>
+  <p class="lead">실제 시공 현장을 바탕으로 연출한 세로 배열 예시. 기둥은 네 면을 감싸고, 벽면은 바닥부터 천장까지 이어집니다.</p>
+  <div class="gal" style="margin-top:4mm">
+    <figure><div class="photo"><img src="../site/img/interior/v_pharmacy.jpg" alt=""></div><figcaption>약국 카운터·기둥</figcaption></figure>
+    <figure><div class="photo"><img src="../site/img/interior/v_clinic.jpg" alt=""></div><figcaption>병원 접수·대기실</figcaption></figure>
+    <figure><div class="photo"><img src="../site/img/interior/v_store_column.jpg" alt=""></div><figcaption>의류 매장 기둥 감싸기</figcaption></figure>
+    <figure><div class="photo"><img src="../site/img/interior/v_bank.jpg" alt=""></div><figcaption>은행 창구 벽·기둥</figcaption></figure>
+    <figure><div class="photo"><img src="../site/img/interior/v_restaurant.jpg" alt=""></div><figcaption>식당 벽면·주방 기둥</figcaption></figure>
+    <figure><div class="photo"><img src="../site/img/interior/v_cafe_pillar.jpg" alt=""></div><figcaption>카페 중앙 기둥</figcaption></figure>
+  </div>
+  <div class="foot"><div class="logo" data-logo></div><span>08</span></div>
+</section>
+
+<!-- 9. 시공 현장 -->
+<section class="page">
+  <div class="eyebrow">ON SITE</div>
+  <h2 class="title">시공 현장</h2>
+  <p class="lead">상가 내부 벽면과 기둥을 30각 세로 템바보드로 마감한 현장. 자재 납품부터 현장 시공까지 직접 진행합니다.</p>
+  <div class="gal3" style="margin-top:4mm">
+    <figure><div class="photo"><img src="../site/img/site/site01.jpg" alt=""></div><figcaption>기둥·벽면 세로 시공</figcaption></figure>
+    <figure><div class="photo"><img src="../site/img/site/site02.jpg" alt=""></div><figcaption>출입구 양측 벽면</figcaption></figure>
+    <figure><div class="photo"><img src="../site/img/site/site03.jpg" alt=""></div><figcaption>전면 창 옆 기둥</figcaption></figure>
+  </div>
+  <div class="gal3" style="margin-top:4mm">
+    <figure><div class="photo"><img src="../site/img/site/site04.jpg" alt=""></div><figcaption>천장 간접조명과 함께</figcaption></figure>
+    <figure><div class="photo"><img src="../site/img/site/site06.jpg" alt=""></div><figcaption>코너 기둥 돌림</figcaption></figure>
+    <figure><div class="photo"><img src="../site/img/site/site08.jpg" alt=""></div><figcaption>합판 바탕 위 각재 고정</figcaption></figure>
+  </div>
+  <div class="band" style="margin-top:6mm">
+    <h3>대량 주문과 현장 시공, 한 번에.</h3>
+    <p>상가·사무실·주택 어디든. 수량이 많아도, 현장 시공이 필요해도 나무의공간이 직접 진행합니다.</p>
+  </div>
+  <div class="foot"><div class="logo" data-logo></div><span>09</span></div>
+</section>
+
+<!-- 9. 주문 방법 -->
+<section class="page">
+  <div class="eyebrow">HOW TO ORDER</div>
+  <h2 class="title">도면으로 주문하기</h2>
+  <p class="lead">아래 여섯 가지 치수만 알려 주시면 됩니다. 홈페이지 도면 주문 페이지에서 입력하면 도면이 자동으로 그려지고, 이메일로 접수됩니다.</p>
+  <div class="grid2" style="margin-top:4mm;align-items:start">
+    <div style="border:1px solid var(--line);border-radius:3mm;padding:3mm">
+      <svg viewBox="0 0 320 300" width="100%" font-family="Noto Sans KR, sans-serif" font-size="11">
+        <rect x="70" y="30" width="200" height="220" fill="#F1E6D0" stroke="#8B5A2B"/>
+        <g fill="#C8935B" stroke="#6B3F1D">
+          <rect x="70" y="52" width="200" height="14"/><rect x="70" y="80" width="200" height="14"/><rect x="70" y="108" width="200" height="14"/><rect x="70" y="136" width="200" height="14"/><rect x="70" y="164" width="200" height="14"/><rect x="70" y="192" width="200" height="14"/>
+        </g>
+        <g stroke="#1d4ed8" fill="#1d4ed8" stroke-width="1">
+          <line x1="70" y1="270" x2="270" y2="270"/><text x="170" y="286" text-anchor="middle" stroke="none" font-weight="700">A 폭 (각재 길이)</text>
+          <line x1="290" y1="30" x2="290" y2="250"/><text x="300" y="145" stroke="none" font-weight="700">B</text>
+          <line x1="50" y1="30" x2="50" y2="52"/><text x="30" y="45" stroke="none" font-weight="700">C</text>
+          <line x1="50" y1="52" x2="50" y2="206"/><text x="30" y="133" stroke="none" font-weight="700">D</text>
+          <line x1="50" y1="206" x2="50" y2="250"/><text x="30" y="232" stroke="none" font-weight="700">E</text>
+        </g>
+        <text x="70" y="20" fill="#555">입면 (가로 배열 예시)</text>
+      </svg>
+    </div>
+    <table class="spec">
+      <tr><th>A 폭</th><td>패널 가로 길이. 가로 배열이면 각재 길이 (합판 원장 1220×2440을 이어 붙여 제한 없음)</td></tr>
+      <tr><th>B 높이</th><td>패널 세로 길이</td></tr>
+      <tr><th>C 시작 여백</th><td>합판 끝에서 첫 각재까지</td></tr>
+      <tr><th>D 각재 구간</th><td>각재가 배열되는 길이 (60mm 단위로 맞춤)</td></tr>
+      <tr><th>E 끝 여백</th><td>마지막 각재에서 합판 끝까지</td></tr>
+      <tr><th>F 코너 돌림</th><td>코너형일 때 꺾여 돌아가는 면의 폭 (좌·우·양쪽)</td></tr>
+      <tr><th>마감·수량</th><td>무도장 / 오일 스테인 · 1장부터 대량</td></tr>
+      <tr><th>시공</th><td>자재 납품 또는 현장 시공 포함</td></tr>
+    </table>
+  </div>
+  <div class="steps" style="margin-top:5mm">
+    <div class="step"><b>1</b><h4>도면 작성</h4>홈페이지 도면 주문 페이지에서 A~F 입력, 코너·마감·수량 선택</div>
+    <div class="step"><b>2</b><h4>주문서 전송</h4>주문자·연락처 입력 후 도면 이미지를 ykj5359@daum.net 으로 접수</div>
+    <div class="step"><b>3</b><h4>견적·확인</h4>담당자가 연락드려 수량·마감·시공 여부 확인 후 견적</div>
+    <div class="step"><b>4</b><h4>제작·납품·시공</h4>주문 제작 후 납품 또는 현장 시공</div>
+  </div>
+  <div class="note" style="margin-top:5mm">손으로 그린 도면 사진이나 치수 메모만 보내 주셔도 됩니다. 전화 <b>010-3509-2230</b> 으로 바로 문의하셔도 됩니다.</div>
+  <div class="foot"><div class="logo" data-logo></div><span>10</span></div>
+</section>
+
+<!-- 10. 뒷표지 -->
+<section class="page back">
+  <div class="logo" data-logo></div>
+  <div class="ct">
+    <div><b>나무의공간</b> · 대표 이영석</div>
+    <div>전화 <b>010-3509-2230</b></div>
+    <div>이메일 <b>ykj5359@daum.net</b></div>
+    <div style="font-size:10.5pt;opacity:.85">주소 충청남도 홍성군 서부면 지산1길 25-17</div>
+    <div style="font-size:10.5pt;opacity:.85">사업자등록번호 131-36-54075 (둥지인테리어 · 대표 이영석)</div>
+    <div style="font-size:9.5pt;opacity:.6;margin-top:6mm">나왕 30×30 템바보드 · 도면 주문 제작 · 대량 주문 · 현장 시공</div>
+  </div>
+</section>
+
+<script src="../site/js/logos.js"></script>
+<script>
+  // ?logo=N 으로 로고 지정 (기본 1)
+  (function () {
+    const id = +(new URLSearchParams(location.search).get('logo') || 1);
+    const l = NW_LOGOS.find(x => x.id === id) || NW_LOGOS[0];
+    document.querySelectorAll('[data-logo]').forEach(el => el.innerHTML = l.svg);
+  })();
+</script>
+</body>
+</html>

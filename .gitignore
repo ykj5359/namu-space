@@ -1,0 +1,7 @@
+.env
+이미지/
+img-original/
+tools/ref/
+tools/*.log
+.claude/
+__pycache__/
