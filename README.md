@@ -71,3 +71,14 @@ python tools/process_images.py cutout     # 누끼 (rembg)
 node tools/gen-interiors.mjs              # 없는 연출 이미지만 생성, FORCE=1 로 재생성
 python tools/build_catalog.py 1           # 카탈로그 PDF (로고 1번)
 ```
+
+## 배포
+
+GitHub 저장소 `ykj5359/namu-space` 의 `main` 에 푸시하면 Actions 워크플로(`.github/workflows/pages.yml`)가 `site/` 폴더를 GitHub Pages 로 배포합니다.
+주소: https://ykj5359.github.io/namu-space/
+
+```bash
+git add -A
+git commit -m "내용 수정"
+git push
+```
