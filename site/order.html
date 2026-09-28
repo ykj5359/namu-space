@@ -6,7 +6,7 @@
 <title>도면 주문 | 나무의공간</title>
 <meta name="description" content="폭·높이·여백·코너를 입력하면 템바보드 도면이 자동으로 그려집니다. 도면 이미지와 함께 주문을 접수하세요.">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Nanum+Myeongjo:wght@700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/style.css?v=20260929d">
 <style>
   .order { display: grid; grid-template-columns: 400px 1fr; gap: 28px; align-items: start; padding: 30px 0 60px; }
   .panel { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 22px; position: sticky; top: 90px; max-height: calc(100vh - 110px); overflow: auto; }
@@ -34,6 +34,17 @@
   .warnbox ul { margin: 0; padding-left: 18px; }
   #done { background: #ECFDF5; border-left: 4px solid #10B981; padding: 12px 16px; border-radius: 8px; font-size: 14.5px; }
   .legend { font-size: 13px; color: var(--ink-2); background: var(--bg-2); border-radius: 10px; padding: 12px 14px; display: grid; gap: 3px; }
+  .diagram-card { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 18px 22px 10px; margin-top: 24px; }
+  .diagram-card h3 { font-size: 15px; letter-spacing: .1em; color: var(--wood-dark); margin: 0 0 6px; }
+  .diagram { position: relative; max-width: 940px; container-type: inline-size; }
+  .diagram .dbox { position: absolute; box-sizing: border-box; border: 2px solid #222; border-radius: 0; background: #fff; font-family: var(--font); font-weight: 700; font-size: 2.4cqw; text-align: center; padding: 0; color: #111; -moz-appearance: textfield; }
+  .diagram .dbox::-webkit-outer-spin-button, .diagram .dbox::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .diagram .dbox:focus { outline: 3px solid var(--wood); }
+  .sim-grid { display: grid; grid-template-columns: 3fr 2fr; gap: 14px; margin-top: 12px; align-items: stretch; }
+  .sim-photo { margin: 0; border-radius: 12px; overflow: hidden; background: #fff; border: 1px solid var(--line); display: flex; flex-direction: column; }
+  .sim-photo img { width: 100%; flex: 1; object-fit: cover; min-height: 0; }
+  .sim-photo figcaption { padding: 10px 14px; font-size: 14px; line-height: 1.5; }
+  @media (max-width: 960px) { .sim-grid { grid-template-columns: 1fr; } .sim-photo img { height: 260px; flex: none; } }
   @media (max-width: 960px) { .order { grid-template-columns: 1fr; } .panel { position: static; max-height: none; } .summary { grid-template-columns: repeat(2, 1fr); } }
 </style>
 </head>
@@ -56,6 +67,31 @@
     <p class="sec-lead">치수를 입력하면 오른쪽 도면이 실시간으로 바뀝니다. 완성된 도면은 이미지로 저장되며, 주문자 정보와 함께 <b data-site="email"></b> 로 접수됩니다.</p>
   </div>
 
+  <div class="diagram-card">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:10px">
+      <div><h3>도면에 치수 입력 (mm)</h3>
+      <p class="hint" style="margin:0 0 8px">네모칸에 숫자를 넣으면 아래 도면과 주문서가 바로 바뀝니다. 세로 치수는 왼쪽, 가로 치수는 위·아래에 표시됩니다. K는 코너형일 때 꺾여 돌아가는 면의 폭입니다.</p></div>
+      <div class="seg" style="min-width:260px">
+        <label><input type="radio" name="dir2" data-k="dir" value="v" checked><span>세로 배열</span></label>
+        <label><input type="radio" name="dir2" data-k="dir" value="h"><span>가로 배열</span></label>
+      </div>
+    </div>
+    <div class="diagram" id="diagram"></div>
+  </div>
+
+  <div class="diagram-card" id="card3d">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+      <div><h3 style="margin:0">3D 시뮬레이션</h3><p class="hint" style="margin:2px 0 0">치수에 맞춰 자동으로 장면을 고릅니다. 화면이 천천히 돌아가며, 마우스로 직접 돌리거나 휠로 확대할 수 있습니다.</p></div>
+      <div class="filters" id="scene3d" style="margin:0">
+        <button class="on" data-scene="auto">자동</button><button data-scene="wall">벽면</button><button data-scene="column">기둥</button><button data-scene="desk">상담 책상</button><button data-scene="upper">벽 상단</button><button data-scene="product">제품만</button>
+      </div>
+    </div>
+    <div class="sim-grid">
+      <div id="view3d" style="position:relative;height:520px;border-radius:12px;overflow:hidden;background:#e9e4dc"><div id="view3dNote" style="position:absolute;left:12px;bottom:10px;font-size:13px;color:#555;background:rgba(255,255,255,.8);padding:4px 10px;border-radius:8px"></div></div>
+      <figure class="sim-photo" id="simPhoto"><img src="img/interior/sim_wall_stain.jpg" alt="실사 예시"><figcaption><b>실사 예시</b> · <span id="simPhotoCap">벽면 부착 · 오일 스테인</span><br><span class="hint">같은 장면의 대표 사진입니다. 입력한 치수와 정확히 같지는 않습니다.</span></figcaption></figure>
+    </div>
+  </div>
+
   <div class="order">
     <aside class="panel">
       <h3>1. 각재 배열</h3>
@@ -69,9 +105,11 @@
       <div class="g">
         <label>A 폭 <input type="number" data-k="A" min="100" max="12000" step="10"></label>
         <label>B 높이 <input type="number" data-k="B" min="100" max="12000" step="10"></label>
-        <label>C 시작 여백 <input type="number" data-k="C" min="0" max="5000" step="5"></label>
-        <label>E 끝 여백 <input type="number" data-k="E" min="0" max="5000" step="5"></label>
-        <label class="one" style="grid-column:1/-1">D 각재 구간 <span class="hint">(B − C − E, 60mm 단위로 맞춰짐 · 직접 고치면 B가 바뀝니다)</span><input type="number" data-k="D" min="0" max="12000" step="60"></label>
+        <label>C 각재 길이 <span class="hint">(길이 − D)</span><input type="number" data-k="C" min="0" max="12000" step="10"></label>
+        <label>D 끝 여백 <span class="hint">(각재 끝 뒤 합판 여백)</span><input type="number" data-k="D" min="0" max="5000" step="5"></label>
+        <label>F 시작 여백 <input type="number" data-k="F" min="0" max="5000" step="5"></label>
+        <label>G 끝 여백 <span class="hint">(남는 치수 자동 반영)</span><input type="number" data-k="G" min="0" max="5000" step="5"></label>
+        <label class="one" style="grid-column:1/-1">E 각재 구간 <span class="hint">(첫 각재 왼쪽 끝~마지막 각재 오른쪽 끝 · 직접 고치면 폭이 바뀝니다)</span><input type="number" data-k="E" min="0" max="12000" step="60"></label>
       </div>
       <p class="hint" style="margin:8px 0 0">각재 30×30 · 간격 30 · 합판 8 은 고정입니다. 합판 원장은 1220×2440이며 가로·세로 모두 계속 이어 붙여 제작하므로 크기 제한이 없습니다.</p>
 
@@ -82,14 +120,14 @@
         <label><input type="radio" name="corner" data-k="corner" value="right"><span>우측</span></label>
         <label><input type="radio" name="corner" data-k="corner" value="both"><span>양쪽</span></label>
       </div>
-      <div id="cornerF" style="margin-top:10px">
-        <label>F 코너 돌림 길이 (mm) <span class="hint">ㄱ자로 꺾여 돌아가는 면의 폭</span><input type="number" data-k="F" min="30" max="12000" step="10"></label>
+      <div id="cornerK" style="margin-top:10px">
+        <label>K 코너 돌림 길이 (mm) <span class="hint">ㄱ자로 꺾여 돌아가는 면의 폭</span><input type="number" data-k="K" min="30" max="12000" step="10"></label>
       </div>
 
       <h3>4. 마감 · 수량 · 시공</h3>
       <div class="seg">
-        <label><input type="radio" name="finish" data-k="finish" value="무도장" checked><span>무도장</span></label>
-        <label><input type="radio" name="finish" data-k="finish" value="오일 스테인"><span>오일 스테인</span></label>
+        <label><input type="radio" name="finish" data-k="finish" value="오일 스테인" checked><span>오일 스테인</span></label>
+        <label><input type="radio" name="finish" data-k="finish" value="무도장"><span>무도장</span></label>
       </div>
       <div class="g" style="margin-top:10px">
         <label>수량 (장) <input type="number" data-k="qty" min="1" max="9999" step="1"></label>
@@ -102,7 +140,7 @@
       <div class="g">
         <label>이름 * <input type="text" data-k="name" placeholder="홍길동"></label>
         <label>연락처 * <input type="tel" data-k="tel" placeholder="010-0000-0000"></label>
-        <label style="grid-column:1/-1">이메일 <input type="email" data-k="email" placeholder="답장 받을 이메일 (선택)"></label>
+        <label style="grid-column:1/-1">이메일 * <input type="email" data-k="email" placeholder="답장 받을 이메일 (필수)" required></label>
         <label style="grid-column:1/-1">현장 주소 <input type="text" data-k="addr" placeholder="납품·시공 주소 (선택)"></label>
         <label style="grid-column:1/-1">메모 <textarea data-k="memo" placeholder="희망 일정, 색상, 기타 요청"></textarea></label>
       </div>
@@ -111,7 +149,7 @@
     <div class="preview">
       <div class="summary">
         <div>각재 개수 / 장<b><span id="sumN">0</span>개</b></div>
-        <div>실제 D / 조정 E<b><span id="sumD">0</span> / <span id="sumE">0</span></b></div>
+        <div>실제 E / 조정 G<b><span id="sumE">0</span> / <span id="sumG">0</span></b></div>
         <div>합판 원장 이음<b style="font-size:15px;padding-top:6px" id="sumSeg">없음</b></div>
         <div>각재 총길이<b><span id="sumM">0</span> m</b></div>
         <div>패널 면적<b><span id="sumA">0</span> ㎡</b></div>
@@ -126,7 +164,7 @@
       </div>
       <div id="done" style="display:none"></div>
       <div class="legend">
-        <span><b>A</b> 패널 폭 · <b>B</b> 패널 높이 · <b>C</b> 시작 여백 · <b>D</b> 각재 배열 구간 · <b>E</b> 끝 여백 · <b>F</b> 코너 돌림 길이</span>
+        <span><b>A</b> 패널 폭 · <b>B</b> 패널 높이 · <b>C</b> 각재 길이 · <b>D</b> 각재 끝 여백 · <b>F</b> 시작 여백 · <b>E</b> 각재 구간 · <b>G</b> 끝 여백 · <b>K</b> 코너 돌림 길이</span>
         <span>파란 치수선은 mm 단위, 주황 점선은 코너 접힘선, 회색 점선은 합판 원장(1220×2440) 이음선입니다.</span>
         <span>도면을 스케치한 손도면(노트)과 같은 방식으로 그려지며, 접수 후 담당자가 확인 전화를 드립니다.</span>
       </div>
@@ -142,10 +180,22 @@
 </footer>
 <div class="floating"><a data-tel href="#">전화</a></div>
 
-<script src="js/logos.js"></script>
-<script src="js/main.js"></script>
+<script src="js/logos.js?v=20260928h"></script>
+<script src="js/main.js?v=20260929d"></script>
 <!-- 이메일 자동 발송(EmailJS)을 쓰려면 아래 주석을 풀고 main.js 의 SITE.emailjs 값을 채우세요.
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script> -->
-<script src="js/order.js"></script>
+<script src="js/order.js?v=20260929g"></script>
+<script type="importmap">{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/" } }</script>
+<script type="module" src="js/view3d.js?v=20260929c"></script>
+<script>
+// 3D 장면·마감에 맞는 실사 예시 사진
+document.addEventListener('scene3d', e => {
+  const { mode, finish, dir } = e.detail; const fin = finish === '무도장' ? 'natural' : 'stain', pre = dir === 'h' ? 'sim_h_' : 'sim_';
+  const map = { wall: 'wall', column: 'column', desk: 'desk', upper: 'upper', product: 'wall' };
+  const names = { wall: '벽면 부착', column: '기둥 감싸기', desk: '상담 책상 전면', upper: '벽 상단 부착', product: '벽면 부착' };
+  document.querySelector('#simPhoto img').src = `img/interior/${pre}${map[mode]}_${fin}.jpg`;
+  document.getElementById('simPhotoCap').textContent = `${names[mode]} · ${dir === 'h' ? '가로 배열' : '세로 배열'} · ${finish}`;
+});
+</script>
 </body>
 </html>

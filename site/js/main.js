@@ -52,7 +52,7 @@ window.SITE = {
     }
     // 갤러리 필터
     document.querySelectorAll('.filters').forEach(fl => {
-      const target = document.querySelector(fl.dataset.target);
+      const target = fl.dataset.target ? document.querySelector(fl.dataset.target) : null; if (!target) return;
       fl.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
         fl.querySelectorAll('button').forEach(x => x.classList.remove('on')); b.classList.add('on');
         const k = b.dataset.f;
@@ -61,11 +61,26 @@ window.SITE = {
     });
     // 문의 폼 → mailto (이메일 자동전송은 보류 상태)
     const cf = document.querySelector('form.f');
-    if (cf) cf.addEventListener('submit', e => {
-      e.preventDefault();
-      const d = Object.fromEntries(new FormData(cf).entries());
-      const body = `[나무의공간 홈페이지 문의]\n이름: ${d.name}\n연락처: ${d.tel}\n관심 제품: ${d.product}\n내용:\n${d.msg}`;
-      location.href = `mailto:${SITE.email}?subject=${encodeURIComponent('[문의] ' + d.name + ' 님')}&body=${encodeURIComponent(body)}`;
-    });
+    if (cf) {
+      // 현장 사진 첨부: 미리보기 + 긴 변 1600px 로 축소 (최대 8장)
+      let photos = [];
+      const fin = cf.querySelector('#cfPhotos'), pv = cf.querySelector('#cfPreview');
+      const shrink = file => new Promise(res => { const img = new Image(); img.onload = () => { const k = Math.min(1, 1600 / Math.max(img.width, img.height)); const c = document.createElement('canvas'); c.width = Math.round(img.width * k); c.height = Math.round(img.height * k); c.getContext('2d').drawImage(img, 0, 0, c.width, c.height); c.toBlob(b => res(new File([b], file.name.replace(/\.[^.]+$/, '') + '.jpg', { type: 'image/jpeg' })), 'image/jpeg', 0.85); URL.revokeObjectURL(img.src); }; img.onerror = () => res(file); img.src = URL.createObjectURL(file); });
+      const render = () => { pv.innerHTML = photos.map((f, i) => `<div class="p"><img src="${URL.createObjectURL(f)}" alt=""><button type="button" data-i="${i}" aria-label="삭제">×</button></div>`).join(''); };
+      if (fin) fin.addEventListener('change', async () => { for (const f of fin.files) { if (photos.length >= 8) break; photos.push(await shrink(f)); } fin.value = ''; render(); });
+      if (pv) pv.addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; photos.splice(+b.dataset.i, 1); render(); });
+      cf.addEventListener('submit', async e => {
+        e.preventDefault();
+        const d = Object.fromEntries(new FormData(cf).entries());
+        const list = photos.length ? `\n첨부 사진 ${photos.length}장: ${photos.map(f => f.name).join(', ')}` : '';
+        const body = `[나무의공간 홈페이지 문의]\n이름: ${d.name}\n연락처: ${d.tel}\n관심 제품: ${d.product}\n내용:\n${d.msg}${list}`;
+        const subject = `[문의] ${d.name} 님 · ${d.product}`;
+        if (photos.length && navigator.canShare && navigator.canShare({ files: photos })) { // 휴대폰: 사진 첨부 공유
+          try { await navigator.share({ files: photos, title: subject, text: body + `\n받는 곳: ${SITE.email}` }); return; } catch (err) { if (err.name === 'AbortError') return; }
+        }
+        location.href = `mailto:${SITE.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body + (photos.length ? '\n\n※ 선택하신 현장 사진을 이 메일에 첨부해 주세요.' : ''))}`;
+        const note = cf.querySelector('#cfNote'); if (note && photos.length) note.innerHTML = `메일 앱이 열렸습니다. <b>선택한 사진 ${photos.length}장을 메일에 직접 첨부</b>해서 보내 주세요. 메일 앱이 열리지 않으면 <b>${SITE.email}</b> 로 보내 주세요.`;
+      });
+    }
   });
 })();
