@@ -166,3 +166,52 @@ footer.site b { color: #fff; }
 .floating { position: fixed; right: 18px; bottom: 18px; z-index: 40; display: grid; gap: 10px; }
 .floating a { display: grid; place-items: center; width: 56px; height: 56px; border-radius: 50%; background: var(--wood); color: #fff; font-weight: 800; font-size: 13px; box-shadow: 0 10px 24px rgba(0,0,0,.25); }
 .floating a.dark { background: var(--ink); }
+
+/* ---- 장바구니 · 주문내역 팝업 ---- */
+.cart-fab { position: fixed; right: 0; top: 50%; transform: translateY(-50%); z-index: 45; writing-mode: vertical-rl; background: var(--ink); color: #fff; border: 0; border-radius: 12px 0 0 12px; padding: 16px 10px; font-family: var(--font); font-weight: 800; font-size: 14px; letter-spacing: .1em; cursor: pointer; box-shadow: 0 10px 24px rgba(0,0,0,.25); }
+.cart-fab b { writing-mode: horizontal-tb; display: inline-grid; place-items: center; min-width: 22px; height: 22px; border-radius: 11px; background: var(--wood); margin-top: 8px; font-size: 12px; padding: 0 5px; }
+.cart-pop { position: fixed; right: 54px; top: 50%; transform: translateY(-50%) translateX(20px); width: min(380px, calc(100vw - 70px)); max-height: 80vh; overflow: auto; background: #fff; border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 20px 50px rgba(0,0,0,.2); z-index: 46; opacity: 0; pointer-events: none; transition: .2s; padding: 16px; }
+.cart-pop.open { opacity: 1; pointer-events: auto; transform: translateY(-50%); }
+.cp-head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.cp-head b { font-size: 17px; } .cp-head span { color: var(--ink-3); font-size: 13px; flex: 1; }
+.cp-x { background: none; border: 0; font-size: 24px; cursor: pointer; color: var(--ink-2); }
+.cp-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.cp-list li { display: grid; grid-template-columns: 56px 1fr auto; gap: 10px; align-items: center; padding: 8px; border: 1px solid var(--line); border-radius: 10px; font-size: 13px; }
+.cp-list img { width: 56px; height: 40px; object-fit: cover; border-radius: 6px; border: 1px solid var(--line); background: #fff; }
+.cp-list li div { display: grid; gap: 2px; min-width: 0; } .cp-list li b { font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .cp-list li span { color: var(--ink-3); }
+.cp-list li em { font-style: normal; font-weight: 700; white-space: nowrap; }
+.cp-sum { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--line); font-size: 14px; display: grid; gap: 4px; }
+.cp-sum div { display: flex; justify-content: space-between; } .cp-sum .tot { font-size: 17px; margin-top: 4px; } .cp-sum .tot b { color: var(--wood-dark); }
+.cp-sum p { margin: 6px 0 0; font-size: 12px; color: var(--ink-3); }
+.cp-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; } .cp-btns .btn { justify-content: center; }
+.cp-empty { color: var(--ink-2); font-size: 14px; line-height: 1.6; margin: 6px 0 4px; }
+/* 담기 툴바 */
+.add-bar { display: flex; align-items: center; justify-content: flex-end; gap: 10px; flex-wrap: wrap; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); }
+.add-bar .qty { display: inline-flex; align-items: center; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; }
+.add-bar .qty button { width: 38px; height: 40px; border: 0; background: #fff; font-size: 20px; cursor: pointer; font-family: var(--font); }
+.add-bar .qty input { width: 56px; height: 40px; border: 0; text-align: center; font-family: var(--font); font-size: 16px; font-weight: 700; -moz-appearance: textfield; }
+.add-bar .qty input::-webkit-inner-spin-button { -webkit-appearance: none; }
+.add-bar .est { margin-right: auto; font-size: 14px; color: var(--ink-2); } .add-bar .est b { color: var(--wood-dark); font-size: 16px; }
+.add-toast { position: fixed; left: 50%; bottom: 90px; transform: translateX(-50%); background: var(--ink); color: #fff; padding: 12px 20px; border-radius: 999px; font-size: 14px; z-index: 60; opacity: 0; transition: .25s; pointer-events: none; }
+.add-toast.show { opacity: 1; }
+/* 장바구니 · 결제 페이지 */
+.cart-wrap { display: grid; grid-template-columns: 1fr 360px; gap: 26px; align-items: start; padding: 30px 0 70px; }
+.cart-list { display: grid; gap: 14px; }
+.ci { display: grid; grid-template-columns: 200px 1fr auto; gap: 18px; background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; align-items: center; }
+.ci img { width: 200px; border-radius: 8px; border: 1px solid var(--line); background: #fff; cursor: zoom-in; }
+.ci h4 { font-size: 16px; margin-bottom: 6px; } .ci .meta { font-size: 13.5px; color: var(--ink-2); line-height: 1.7; }
+.ci .acts { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+.ci .acts a, .ci .acts button { font-family: var(--font); font-size: 13px; padding: 7px 12px; border-radius: 999px; border: 1px solid var(--line); background: #fff; cursor: pointer; }
+.ci .right { text-align: right; display: grid; gap: 8px; justify-items: end; } .ci .right b { font-size: 18px; } .ci .right small { color: var(--ink-3); }
+.sumbox { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 22px; position: sticky; top: 90px; display: grid; gap: 10px; }
+.sumbox .row { display: flex; justify-content: space-between; font-size: 15px; } .sumbox .row.tot { font-size: 20px; font-weight: 800; padding-top: 10px; border-top: 1px solid var(--line); } .sumbox .row.tot b { color: var(--wood-dark); }
+.sumbox .btn { justify-content: center; width: 100%; }
+.sumbox p.note { font-size: 12.5px; color: var(--ink-3); margin: 0; }
+.pay-methods { display: grid; gap: 10px; }
+.pay-methods label { display: flex; gap: 12px; align-items: flex-start; padding: 14px 16px; border: 1.5px solid var(--line); border-radius: 12px; cursor: pointer; background: #fff; }
+.pay-methods label:has(input:checked) { border-color: var(--ink); background: var(--bg-2); }
+.pay-methods input { margin-top: 4px; } .pay-methods b { display: block; } .pay-methods small { color: var(--ink-2); }
+.done-box { text-align: center; background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 40px 24px; }
+.done-box .no { font-family: var(--serif); font-size: 32px; color: var(--wood-dark); margin: 8px 0 16px; }
+.sheets { display: grid; gap: 14px; margin-top: 26px; } .sheets img { width: 100%; border: 1px solid var(--line); border-radius: 8px; }
+@media (max-width: 900px) { .cart-wrap { grid-template-columns: 1fr; } .sumbox { position: static; } .ci { grid-template-columns: 1fr; } .ci img { width: 100%; } .ci .right { justify-items: start; text-align: left; } .cart-pop { right: 46px; } }

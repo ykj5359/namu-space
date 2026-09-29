@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>주문 완료 | 나무의공간</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Nanum+Myeongjo:wght@700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css?v=20260929e">
+</head>
+<body>
+<header class="site">
+  <div class="wrap">
+    <a href="index.html" class="logo" data-logo aria-label="나무의공간"></a>
+    <nav class="main"><a href="index.html#products">제품</a><a href="order.html">도면 주문</a><a href="cart.html">장바구니</a><a href="catalog.html">카탈로그</a><a href="index.html#contact">문의</a></nav>
+    <a class="tel-btn" data-tel href="#">📞 <span data-site="tel"></span></a>
+    <button class="menu-btn" aria-label="메뉴">☰</button>
+  </div>
+</header>
+
+<div class="wrap" style="padding:40px 20px 80px;max-width:900px">
+  <div class="done-box" id="done"></div>
+  <div class="sheets" id="sheets"></div>
+</div>
+
+<footer class="site"><div class="wrap"><a class="logo" data-logo href="index.html"></a><div><b data-site="name"></b> · 대표 <span data-site="ceo"></span> · <span data-site="tel"></span> · <span data-site="email"></span></div></div></footer>
+
+<script src="js/logos.js?v=20260928h"></script>
+<script src="js/main.js?v=20260929f"></script>
+<script src="js/cart.js?v=20260929f"></script>
+<script src="js/payments.js?v=20260929e"></script>
+<script>
+(function () {
+  const qp = new URLSearchParams(location.search), no = qp.get('order'), won = NW_CART.won;
+  const box = document.getElementById('done'), sheets = document.getElementById('sheets');
+  let order = NW_PAY.orders().find(o => o.no === no);
+  if (!order) { box.innerHTML = `<h2>주문 정보를 찾을 수 없습니다</h2><p style="color:var(--ink-2)">이미 처리되었거나 다른 기기에서 주문한 내역입니다.</p><a class="btn wood" href="order.html">도면으로 주문하기</a>`; return; }
+  // 토스 결제 성공으로 돌아온 경우 (paymentKey 존재): 서버 승인 전 단계 표시
+  const paymentKey = qp.get('paymentKey');
+  if (paymentKey && order.status === 'pending') order = NW_PAY.setStatus(no, 'paid_unconfirmed', { paymentKey, amount: +qp.get('amount') });
+  if (order.status === 'pending' || !order.status) order = NW_PAY.setStatus(no, 'simulated');
+  const methodName = { card: '신용·체크카드', transfer: '계좌이체', vbank: '가상계좌', bank: '무통장입금' }[order.method] || order.method;
+  const statusText = { simulated: '주문이 접수되었습니다', awaiting_deposit: '입금 대기 중입니다', paid_unconfirmed: '결제가 접수되었습니다', paid: '결제가 완료되었습니다' }[order.status] || '주문이 접수되었습니다';
+  const t = order.totals, c = order.customer;
+  box.innerHTML = `<div class="eyebrow">Order Complete</div><h2 style="font-size:26px">${statusText}</h2><div class="no">${order.no}</div>
+    <p style="color:var(--ink-2)">${c.name} 님, 도면 ${order.items.length}건(총 ${t.count}장)의 주문을 받았습니다. 담당자가 도면을 확인한 뒤 <b>${c.tel}</b> 또는 <b>${c.email}</b>로 연락드립니다.</p>
+    <table class="spec" style="margin:14px auto 18px;max-width:520px;font-size:14px;border-collapse:collapse;width:100%">
+      <tr><th style="text-align:left;padding:6px 10px;color:var(--wood-dark)">결제 방법</th><td style="text-align:right;padding:6px 10px">${methodName}</td></tr>
+      ${order.method === 'bank' || order.status === 'awaiting_deposit' ? `<tr><th style="text-align:left;padding:6px 10px;color:var(--wood-dark)">입금 계좌</th><td style="text-align:right;padding:6px 10px">${SITE.payment.bank}</td></tr>` : ''}
+      <tr><th style="text-align:left;padding:6px 10px;color:var(--wood-dark)">공급가 / 부가세</th><td style="text-align:right;padding:6px 10px">${won(t.supply)} / ${won(t.vat)}</td></tr>
+      <tr><th style="text-align:left;padding:6px 10px;color:var(--wood-dark)">합계 (예상)</th><td style="text-align:right;padding:6px 10px;font-weight:800;font-size:16px">${won(t.total)}</td></tr>
+      <tr><th style="text-align:left;padding:6px 10px;color:var(--wood-dark)">납품·시공 주소</th><td style="text-align:right;padding:6px 10px">${c.addr || '-'}</td></tr>
+    </table>
+    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+      <button type="button" class="btn wood" id="btnMail">주문서 이메일로 보내기</button>
+      <button type="button" class="btn ghost" id="btnSave">도면 이미지 저장</button>
+      <a class="btn ghost" href="index.html">홈으로</a>
+    </div>
+    <p class="hint" style="margin-top:14px;color:var(--ink-3)">주문서를 이메일로 보내 주시면 접수가 더 빨라집니다. 아래 도면이 주문 내용입니다.</p>`;
+  sheets.innerHTML = order.items.map((it, i) => `<figure style="margin:0"><img src="${it.sheet}" alt="도면 ${i + 1}"><figcaption style="font-size:14px;color:var(--ink-2);margin-top:6px">도면 ${i + 1} · ${NW_CART.label(it)} · ${it.qty}장 · ${won(NW_CART.price(it).sub)}</figcaption></figure>`).join('');
+  // 주문서 텍스트
+  const text = () => `[나무의공간 템바보드 주문] ${order.no}\n주문자: ${c.name} / ${c.tel} / ${c.email}\n주소: ${c.addr}\n결제: ${methodName} · 합계(예상) ${won(t.total)} (공급가 ${won(t.supply)} + 부가세 ${won(t.vat)})\n요청: ${c.memo || '-'}\n\n` +
+    order.items.map((it, i) => { const k = it.calc; return `${i + 1}. ${it.dir === 'v' ? '세로' : '가로'} A${it.A}×B${it.B} · C${k.C}/D${k.D} · F${it.F}/E${k.Ereal}/G${k.Gadj} · 코너 ${it.corner === 'none' ? '없음' : it.corner + ' K' + it.K} · ${it.finish} · ${it.install} · 각재 ${k.totalBattens}개 · 원장 ${k.sheets}장 · ${it.qty}장 · ${won(NW_CART.price(it).sub)}`; }).join('\n') +
+    `\n\n※ 도면 이미지 ${order.items.length}장을 첨부해 주세요.`;
+  const dataFiles = () => order.items.map((it, i) => { const b = atob(it.sheet.split(',')[1]); const u = new Uint8Array(b.length); for (let j = 0; j < b.length; j++) u[j] = b.charCodeAt(j); return new File([u], `${order.no}_도면${i + 1}.jpg`, { type: 'image/jpeg' }); });
+  document.getElementById('btnSave').addEventListener('click', () => { dataFiles().forEach((f, i) => setTimeout(() => { const a = document.createElement('a'); a.href = URL.createObjectURL(f); a.download = f.name; a.click(); }, i * 400)); });
+  document.getElementById('btnMail').addEventListener('click', async () => {
+    const subject = `[주문] ${order.no} ${c.name} 님 · 도면 ${order.items.length}건 ${t.count}장`;
+    const files = dataFiles();
+    if (navigator.canShare && navigator.canShare({ files })) { try { await navigator.share({ files, title: subject, text: text() + `\n받는 곳: ${SITE.email}` }); return; } catch (e) { if (e.name === 'AbortError') return; } }
+    document.getElementById('btnSave').click();
+    location.href = `mailto:${SITE.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(text())}`;
+  });
+  // 접수 완료 후 장바구니 비우기 (한 번만)
+  if (!order.cartCleared) { NW_CART.clear(); NW_PAY.setStatus(no, order.status, { cartCleared: true }); }
+})();
+</script>
+</body>
+</html>

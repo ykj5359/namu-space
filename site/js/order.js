@@ -283,6 +283,7 @@
     text(`${SITE.name}  |  ${SITE.tel}  |  사업자등록번호 ${SITE.bizno} (${SITE.bizname})  |  ${SITE.address}`, 50, H - 38, { c: '#666' });
     updateSummary(r); updateDiagram();
     if (window.update3D) window.update3D();
+    document.dispatchEvent(new CustomEvent('order:drawn'));
   }
   function updateSummary(r) {
     const s = state; if (!$('#sumN')) return;
@@ -380,9 +381,44 @@
     if (!el) return;
     if (el.type === 'radio') { const r = document.querySelector(`input[name=${k}][value="${v}"]`); if (r) r.checked = true; } else el.value = state[k];
   });
-  window.NW_ORDER = { get: () => ({ s: state, r: calc(), BAT, GAP, PITCH, PLY }) };
+  // ---- 장바구니 연동: 현재 도면 스냅샷 / 불러오기 / 새 도면 ----
+  const DIM_KEYS = ['dir', 'A', 'B', 'D', 'F', 'G', 'corner', 'K', 'finish', 'install'];
+  function scaled(w, q) { const c = document.createElement('canvas'); c.width = w; c.height = Math.round(H * w / W); c.getContext('2d').drawImage(cv, 0, 0, c.width, c.height); return c.toDataURL('image/jpeg', q); }
+  function snapshot(qty) {
+    draw(); const r = calc(); const it = {};
+    DIM_KEYS.forEach(k => it[k] = state[k]); it.qty = Math.max(1, qty | 0);
+    it.calc = { C: r.C, D: r.D, Ereal: r.Ereal, Gadj: Math.round(r.Gadj), n: r.n, totalBattens: r.totalBattens, totW: r.totW, totH: r.totH, sheets: r.sheets, area: Math.round(r.totW * r.totH / 1e6 * 100) / 100, meters: Math.round(r.totalBattens * r.battenLen / 1000 * 10) / 10 };
+    it.thumb = scaled(320, 0.7); it.sheet = scaled(1200, 0.78);
+    return it;
+  }
+  function loadItem(it) {
+    DIM_KEYS.forEach(k => { if (it[k] !== undefined) state[k] = it[k]; });
+    DIM_KEYS.forEach(k => syncInputs(k, null));
+    $('#cornerK').style.display = state.corner === 'none' ? 'none' : ''; syncDerived(); draw();
+  }
+  function resetItem() { loadItem({ dir: 'v', A: 1200, B: 2400, D: 100, F: 60, G: 60, corner: 'none', K: 300, finish: '오일 스테인', install: '자재 납품' }); }
+  window.NW_ORDER = { get: () => ({ s: state, r: calc(), BAT, GAP, PITCH, PLY }), snapshot, load: loadItem, reset: resetItem };
   if (qp.get('dir') === 'h' && !qp.has('A') && !qp.has('B')) { state.A = 2400; state.B = 1200; syncInputs('A', null); syncInputs('B', null); } // 가로 배열 링크: 기본 A=2400·B=1200
   bind(); initDiagram(); syncDerived();
   if (qp.get('only') === '1') { document.body.innerHTML = ''; document.body.style.margin = '0'; cv.style.width = W + 'px'; document.body.appendChild(cv); }
   (document.fonts ? document.fonts.ready : Promise.resolve()).then(draw); draw();
+
+  // ---- 장바구니 담기 툴바 ----
+  const editId = qp.get('item');                                  // cart.html 에서 '수정' 으로 들어온 경우
+  if (editId && window.NW_CART) { const it = NW_CART.find(editId); if (it) { loadItem(it); const q = $('#addQty'); if (q) q.value = it.qty; } }
+  const est = () => { if (!window.NW_CART || !$('#addEst')) return; const it = {}; DIM_KEYS.forEach(k => it[k] = state[k]); const r = calc(); it.calc = { area: r.totW * r.totH / 1e6 }; it.qty = Math.max(1, +($('#addQty').value || 1)); const p = NW_CART.price(it); $('#addEst').innerHTML = `예상 <b>${NW_CART.won(p.unit)}</b>/장 · ${it.qty}장 ${NW_CART.won(p.sub)} <span class="hint">(부가세 별도)</span>`; };
+  document.addEventListener('order:drawn', est);
+  const qtyEl = $('#addQty');
+  if (qtyEl) {
+    qtyEl.addEventListener('input', est); $('#qtyMinus').addEventListener('click', () => { qtyEl.value = Math.max(1, +qtyEl.value - 1); est(); }); $('#qtyPlus').addEventListener('click', () => { qtyEl.value = Math.min(999, +qtyEl.value + 1); est(); });
+    const toast = msg => { let t = $('#addToast'); if (!t) { t = document.createElement('div'); t.id = 'addToast'; t.className = 'add-toast'; document.body.appendChild(t); } t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2200); };
+    $('#btnAdd').addEventListener('click', () => {
+      const it = snapshot(+qtyEl.value || 1);
+      if (editId && NW_CART.find(editId)) { NW_CART.update(editId, it); toast('도면을 수정했습니다.'); history.replaceState(null, '', 'order.html'); }
+      else { NW_CART.add(it); toast(`장바구니에 ${it.qty}장을 담았습니다.`); }
+      NW_CART.open();
+    });
+    $('#btnNew').addEventListener('click', () => { resetItem(); qtyEl.value = 1; est(); history.replaceState(null, '', 'order.html'); $('#diagram').scrollIntoView({ behavior: 'smooth', block: 'center' }); });
+    est();
+  }
 })();

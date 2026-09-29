@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>결제 | 나무의공간</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Nanum+Myeongjo:wght@700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css?v=20260929e">
+</head>
+<body>
+<header class="site">
+  <div class="wrap">
+    <a href="index.html" class="logo" data-logo aria-label="나무의공간"></a>
+    <nav class="main"><a href="index.html#products">제품</a><a href="index.html#spec">규격·단면</a><a href="index.html#interior">연출 갤러리</a><a href="index.html#site">시공 현장</a><a href="order.html">도면 주문</a><a href="cart.html">장바구니</a><a href="catalog.html">카탈로그</a><a href="index.html#contact">문의</a></nav>
+    <a class="tel-btn" data-tel href="#">📞 <span data-site="tel"></span></a>
+    <button class="menu-btn" aria-label="메뉴">☰</button>
+  </div>
+</header>
+
+<div class="wrap">
+  <div style="padding-top:40px">
+    <div class="eyebrow">Checkout</div>
+    <h1 class="sec-title">주문·결제</h1>
+    <p class="sec-lead">주문자 정보를 입력하고 결제 방법을 고르면 주문이 접수됩니다. 결제 후에도 담당자가 도면을 확인하고 연락드립니다.</p>
+    <div class="note" id="failNote" style="display:none;margin-top:12px">결제가 완료되지 않았습니다. 다시 시도하거나 다른 결제 방법을 선택해 주세요.</div>
+  </div>
+  <div class="cart-wrap">
+    <div style="display:grid;gap:22px">
+      <form class="f" id="coForm">
+        <h3 style="font-size:17px">주문자 정보</h3>
+        <div class="two">
+          <label>이름 * <input name="name" required placeholder="홍길동"></label>
+          <label>연락처 * <input name="tel" required placeholder="010-0000-0000"></label>
+        </div>
+        <label>이메일 * <input name="email" type="email" required placeholder="답장 받을 이메일 (필수)"></label>
+        <label>납품·시공 주소 * <input name="addr" required placeholder="시·군·구부터 상세 주소까지"></label>
+        <label>요청 사항 <textarea name="memo" placeholder="희망 일정, 색상, 현장 조건 등"></textarea></label>
+      </form>
+      <div class="f" style="background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:26px;display:grid;gap:12px">
+        <h3 style="font-size:17px">결제 방법</h3>
+        <div class="pay-methods">
+          <label><input type="radio" name="method" value="card" checked><span><b>신용·체크카드</b><small>카드 결제창에서 바로 결제합니다.</small></span></label>
+          <label><input type="radio" name="method" value="transfer"><span><b>계좌이체</b><small>은행 앱으로 실시간 이체합니다.</small></span></label>
+          <label><input type="radio" name="method" value="vbank"><span><b>가상계좌</b><small>발급된 계좌로 입금하면 접수가 확정됩니다.</small></span></label>
+          <label><input type="radio" name="method" value="bank"><span><b>무통장입금</b><small id="bankInfo">아래 계좌로 입금 후 담당자가 확인합니다.</small></span></label>
+        </div>
+        <label style="display:flex;gap:8px;align-items:flex-start;font-size:14px;font-weight:500"><input type="checkbox" id="agree" style="margin-top:4px"> 주문 내용과 예상 금액을 확인했으며, 실제 견적은 담당자 확인 후 확정된다는 점에 동의합니다.</label>
+        <p class="note" id="payNote" style="margin:0"></p>
+      </div>
+    </div>
+    <aside class="sumbox" id="coSum"></aside>
+  </div>
+</div>
+
+<footer class="site"><div class="wrap"><a class="logo" data-logo href="index.html"></a><div><b data-site="name"></b> · 대표 <span data-site="ceo"></span> · <span data-site="tel"></span> · <span data-site="email"></span><br><span style="opacity:.7">사업자등록번호 <span data-site="bizno"></span> (<span data-site="bizname"></span>) · <span data-site="address"></span></span></div></div></footer>
+
+<script src="js/logos.js?v=20260928h"></script>
+<script src="js/main.js?v=20260929f"></script>
+<script src="js/cart.js?v=20260929f"></script>
+<script src="js/payments.js?v=20260929e"></script>
+<script>
+(function () {
+  const form = document.getElementById('coForm'), sum = document.getElementById('coSum'), won = NW_CART.won;
+  if (new URLSearchParams(location.search).get('fail')) document.getElementById('failNote').style.display = '';
+  document.getElementById('bankInfo').textContent = '입금 계좌: ' + (SITE.payment.bank || '접수 후 안내');
+  const live = !!(SITE.payment && SITE.payment.provider === 'toss' && SITE.payment.clientKey);
+  document.getElementById('payNote').textContent = live ? '결제는 토스페이먼츠 결제창에서 안전하게 진행됩니다.' : '현재 온라인 결제 연동 전이라 주문만 접수됩니다. 결제 방법을 고르면 주문번호가 발급되고, 담당자가 확인 후 입금 안내와 함께 연락드립니다.';
+  // 저장된 주문자 정보 채우기
+  const c = NW_CART.customer(); ['name', 'tel', 'email', 'addr', 'memo'].forEach(k => { if (c[k] && form[k]) form[k].value = c[k]; });
+  form.addEventListener('input', () => NW_CART.customer(Object.fromEntries(new FormData(form).entries())));
+  function render() {
+    const items = NW_CART.items(), t = NW_CART.totals(items);
+    if (!items.length) { sum.innerHTML = `<div class="note">담긴 도면이 없습니다.</div><a class="btn wood" href="order.html">도면 만들러 가기</a>`; return; }
+    sum.innerHTML = `<div style="display:grid;gap:8px;max-height:280px;overflow:auto">${items.map(it => `<div style="display:grid;grid-template-columns:64px 1fr auto;gap:10px;align-items:center;font-size:13px"><img src="${it.thumb}" style="width:64px;border-radius:6px;border:1px solid var(--line)" alt=""><span>${NW_CART.label(it)}<br><span style="color:var(--ink-3)">${it.qty}장</span></span><b>${won(NW_CART.price(it).sub)}</b></div>`).join('')}</div>
+      <div class="row" style="margin-top:6px"><span>공급가</span><b>${won(t.supply)}</b></div><div class="row"><span>부가세 10%</span><b>${won(t.vat)}</b></div>
+      <div class="row tot"><span>결제 예정 금액</span><b>${won(t.total)}</b></div>
+      <p class="note">예상 금액 기준이며 실제 견적은 확인 후 확정됩니다.</p>
+      <button type="button" class="btn wood" id="btnPay">결제하기</button><a class="btn ghost" href="cart.html">장바구니로 돌아가기</a>`;
+    document.getElementById('btnPay').addEventListener('click', submit);
+  }
+  async function submit() {
+    if (!form.reportValidity()) return;
+    if (!document.getElementById('agree').checked) { alert('주문 내용 확인에 동의해 주세요.'); return; }
+    const items = NW_CART.items(); if (!items.length) return;
+    const btn = document.getElementById('btnPay'); btn.disabled = true; btn.textContent = '처리 중…';
+    const order = { items, customer: Object.fromEntries(new FormData(form).entries()), totals: NW_CART.totals(items), method: document.querySelector('input[name=method]:checked').value };
+    try { await NW_PAY.pay(order); } catch (e) { console.error(e); alert('결제창을 열지 못했습니다. ' + (e.message || '')); btn.disabled = false; btn.textContent = '결제하기'; }
+  }
+  document.addEventListener('cart:change', render); render();
+})();
+</script>
+</body>
+</html>

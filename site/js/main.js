@@ -12,6 +12,10 @@ window.SITE = {
   defaultLogo: 1,                  // 기본 로고 번호 (logo.html 에서 선택하면 브라우저에 저장됨)
   // 이메일 자동 전송(EmailJS) — 계정 발급 후 아래 세 값을 채우면 주문서가 자동 발송됩니다.
   emailjs: { publicKey: '', serviceId: '', templateId: '' },
+  // 예상 금액 단가 (원) — 실제 단가로 바꿔 주세요. 면적은 코너 돌림을 포함한 패널 면적(㎡) 기준, 부가세 별도.
+  price: { natural: 150000, stain: 150000, corner: 30000, install: 40000, min: 50000 }, // natural/stain: ㎡당, corner: 코너 1면당, install: 현장 시공 ㎡당, min: 1장 최소
+  // 결제 — provider 'toss' 로 두고 clientKey 를 넣으면 토스페이먼츠 결제창이 열립니다. 비어 있으면 모의 결제(주문 접수만)로 동작합니다.
+  payment: { provider: 'toss', clientKey: '', successUrl: 'complete.html', failUrl: 'checkout.html', bank: '농협 000-0000-0000-00 (예금주 이영석)' },
 };
 
 (function () {
