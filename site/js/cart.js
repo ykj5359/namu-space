@@ -30,15 +30,24 @@
   }
   // 원본(3600) 사용 본 수: 각재 개수 ÷ (3600 ÷ C, 버림) 올림
   function sticks(totalBattens, C) { const len = (SITE.cost && SITE.cost.battenLen) || 3600; const per = Math.max(1, Math.floor(len / Math.max(1, C || len))); return { per, sticks: Math.ceil((totalBattens || 0) / per) }; }
-  function totals(items) {
+  // 배송비: SITE.ship[key] → { key, label, mode, amount, text(표시 문구), fee(합계에 더할 금액) }
+  function shipping(key) {
+    const S = (SITE.ship || {})[key] || (SITE.ship || {}).later || { label: '협의 후 결정', mode: 'separate', amount: 0 };
+    const mode = S.mode || 'separate', amount = Math.max(0, +S.amount || 0);
+    const text = mode === 'amount' ? (amount ? won(amount) : '무료') : mode === 'cod' ? '착불 (배송 시 기사에게 결제)' : '별도 (접수 후 안내)';
+    return { key: key || 'later', label: S.label || key, mode, amount, fee: mode === 'amount' ? amount : 0, text };
+  }
+  // 합계: 공급가 + 부가세 (+ 배송비, 배송 방법 키를 주면)
+  function totals(items, shipKey) {
     const supply = items.reduce((s, it) => s + price(it).sub, 0);
     const vat = SITE.price && SITE.price.vat === false ? 0 : Math.round(supply * 0.1);
-    return { supply, vat, total: supply + vat, count: items.reduce((s, it) => s + it.qty, 0) };
+    const sh = shipKey ? shipping(shipKey) : null;
+    return { supply, vat, shipping: sh ? sh.fee : 0, shipText: sh ? sh.text : '', shipLabel: sh ? sh.label : '', total: supply + vat + (sh ? sh.fee : 0), count: items.reduce((s, it) => s + it.qty, 0) };
   }
   const label = it => `${it.dir === 'v' ? '세로' : '가로'} ${it.A}×${it.B}${it.corner !== 'none' ? ' · 코너 ' + ({ left: '2면 좌', right: '2면 우', both: '3면', column: '4면 기둥' })[it.corner] + ' K' + it.K : ''} · ${it.finishText || it.finish}${it.install === '현장 시공 포함' ? ' · 시공' : ''}`;
 
   const api = {
-    get: load, save, price, cost, totals, sticks, won, label,
+    get: load, save, price, cost, totals, shipping, sticks, won, label,
     items: () => load().items,
     add(item) { const c = load(); item.id = 'i' + Date.now().toString(36); item.addedAt = Date.now(); c.items.push(item); save(c); return item.id; },
     update(id, patch) { const c = load(); const it = c.items.find(x => x.id === id); if (it) Object.assign(it, patch); save(c); },
@@ -66,7 +75,7 @@
     const base = location.pathname.endsWith('/') ? '' : '';
     pop.innerHTML = `<div class="cp-head"><b>주문내역</b><span>${items.length}건 · ${t.count}장</span><button type="button" class="cp-x" aria-label="닫기">×</button></div>
       ${items.length ? `<ul class="cp-list">${items.map(it => `<li><img src="${it.thumb}" alt=""><div><b>${label(it)}</b><span>${it.qty}장 × ${won(price(it).unit)}</span></div><em>${won(price(it).sub)}</em></li>`).join('')}</ul>
-      <div class="cp-sum"><div><span>공급가</span><b>${won(t.supply)}</b></div><div><span>${t.vat ? '부가세 10%' : '부가세 없음'}</span><b>${won(t.vat)}</b></div><div class="tot"><span>예상 합계</span><b>${won(t.total)}</b></div><p>예상 금액입니다. 실제 견적은 접수 후 확인해 드립니다.</p></div>
+      <div class="cp-sum"><div><span>공급가</span><b>${won(t.supply)}</b></div><div><span>${t.vat ? '부가세 10%' : '부가세 없음'}</span><b>${won(t.vat)}</b></div><div class="tot"><span>예상 합계</span><b>${won(t.total)}</b></div><p>예상 금액입니다(배송비 별도 · 결제 단계에서 배송 방법 선택). 실제 견적은 접수 후 확인해 드립니다.</p></div>
       <div class="cp-btns"><a class="btn ghost sm" href="cart.html">장바구니로 가기</a><a class="btn wood sm" href="checkout.html">결제하기</a></div>`
       : `<p class="cp-empty">담긴 도면이 없습니다.<br>도면에 치수를 넣고 <b>장바구니에 담기</b>를 눌러 주세요.</p><div class="cp-btns"><a class="btn wood sm" href="order.html">도면으로 주문하기</a></div>`}`;
     pop.querySelector('.cp-x').addEventListener('click', () => pop.classList.remove('open'));

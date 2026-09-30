@@ -30,6 +30,7 @@ var DEFAULT_CONFIG = {
   payment: { bank: '농협 000-0000-0000-00', holder: '이영석', clientKey: '', methods: { card: true, transfer: true, vbank: true, bank: true } },
   texts: { heroTitle: '나무가 만드는\n공간의 결', hero: '서두르는 손이 아니라 준비된 나무가 벽을 완성합니다. 현장은 고요하고, 마감은 고릅니다.',
     notice: { on: false, text: '', from: '', to: '' } },
+  ship: { later: { label: '협의 후 결정', mode: 'separate', amount: 0 }, parcel: { label: '택배 (소량·소형, 1장 기준 1200 이하)', mode: 'amount', amount: 6000 }, freight: { label: '화물·용달 (대형·다량)', mode: 'cod', amount: 0 }, pickup: { label: '직접 방문 수령 (충남 홍성 공방)', mode: 'amount', amount: 0 }, site: { label: '현장 시공 (시공 포함 주문 · 직접 설치)', mode: 'separate', amount: 0 } },
   logo: 1,
 };
 var STATUSES = ['접수', '상담중', '견적확정', '입금대기', '입금완료', '제작중', '시공중', '완료', '취소'];
@@ -173,6 +174,7 @@ function renderDoc_(doc, cfg, no, imgKeys, forCustomer, ackHead) {
       '<table style="width:100%;border-collapse:collapse;font-size:14px">' +
       '<tr><td style="padding:5px 12px;color:#666">공급가</td><td style="padding:5px 12px;text-align:right">' + wonf(t.supply) + '</td></tr>' +
       '<tr><td style="padding:5px 12px;color:#666">부가세' + (num_(t.vat) ? ' 10%' : '') + '</td><td style="padding:5px 12px;text-align:right">' + wonf(t.vat) + '</td></tr>' +
+      (t.shipText ? '<tr><td style="padding:5px 12px;color:#666">배송비</td><td style="padding:5px 12px;text-align:right">' + h(t.shipText) + '</td></tr>' : '') +
       '<tr><td style="padding:9px 12px;border-top:2px solid #2b2b2b;font-weight:900;font-size:15px">합계' + (doc.estimated ? ' (예상)' : '') + '</td><td style="padding:9px 12px;border-top:2px solid #2b2b2b;text-align:right;font-weight:900;font-size:18px;color:#8b5a2b">' + wonf(t.total) + '</td></tr>' +
       '</table></td></tr></table>');
   }
@@ -217,9 +219,9 @@ function getConfig_() {
 }
 function saveConfig_(c) {
   if (!c || typeof c !== 'object') return { ok: false, error: 'no config' };
-  var sh = sheetCfg_(), keys = ['mail', 'company', 'price', 'cost', 'payment', 'texts', 'logo'];
+  var sh = sheetCfg_(), keys = ['mail', 'company', 'price', 'cost', 'payment', 'texts', 'ship', 'logo'];
   var rows = [['키', '값(JSON)', '설명']];
-  var desc = { mail: '이메일 수신·확인 메일', company: '회사 정보', price: '판매 단가', cost: '원가 기준', payment: '결제·입금 계좌', texts: '화면 문구·공지', logo: '로고 번호' };
+  var desc = { mail: '이메일 수신·확인 메일', company: '회사 정보', price: '판매 단가', cost: '원가 기준', payment: '결제·입금 계좌', texts: '화면 문구·공지', ship: '배송 방법별 배송비', logo: '로고 번호' };
   keys.forEach(function (k) { if (c[k] !== undefined) rows.push([k, JSON.stringify(c[k]), desc[k]]); });
   sh.clearContents(); sh.getRange(1, 1, rows.length, 3).setValues(rows);
   return { ok: true, config: getConfig_() };

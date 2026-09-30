@@ -343,7 +343,8 @@
       ['1장 단가', `${won(raw)} → 100원 단위 반올림${pr.unit > Math.round(raw / 100) * 100 ? ` · 최소 ${won(P.min || 0)} 적용` : ''} = <em>${won(pr.unit)}</em>`],
       ['공급가', `${won(pr.unit)} × ${it.qty}장 = <em>${won(tt.supply)}</em>`],
       ['부가세', tt.vat ? `${won(tt.supply)} × 10% = <em>${won(tt.vat)}</em>` : '없음'],
-      ['예상 합계', `${won(tt.supply)} + ${won(tt.vat)} = <em>${won(tt.total)}</em>`],
+      ['배송비', (() => { const S = SITE.ship || {}; if (s.install === '현장 시공 포함') { const sh = NW_CART.shipping('site'); return `현장 시공: ${sh.text}${sh.fee ? ` → 합계에 추가` : ''}`; } const list = ['parcel', 'freight', 'pickup'].map(k => { const sh = NW_CART.shipping(k); return `${(S[k] || {}).label ? (S[k].label.split(' (')[0]) : k} ${sh.text}`; }); return `결제 단계에서 배송 방법 선택 · ${list.join(' / ')}`; })()],
+      ['예상 합계', (() => { const sh = s.install === '현장 시공 포함' ? NW_CART.shipping('site') : null; return sh && sh.fee ? `${won(tt.supply)} + ${won(tt.vat)} + 배송비 ${won(sh.fee)} = <em>${won(tt.total + sh.fee)}</em>` : `${won(tt.supply)} + ${won(tt.vat)} = <em>${won(tt.total)}</em>${sh ? ' (+ 배송비 ' + sh.text + ')' : ' (+ 배송비)'}`; })()],
     ];
     let adm = false; try { adm = !!sessionStorage.getItem('nw_admin_token'); } catch (e) {}
     if (adm) { const c = NW_CART.cost(it), st2 = NW_CART.sticks(r.totalBattens, r.C);

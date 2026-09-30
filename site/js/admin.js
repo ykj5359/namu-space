@@ -264,6 +264,10 @@
         ${F('texts.notice.text', '공지 내용', { ph: '예: 10월 3일~6일 연휴 휴무입니다. 접수는 정상 처리됩니다.' })}
         <div class="row2">${F('logo', '홈페이지 로고', { type: 'select', num: true, options: logos })}<div id="logoPrev" style="height:60px;display:grid;align-items:end"></div></div>
       </div></div>
+      <div class="ad-panel"><h2>7. 배송비 <small>배송 방법별로 금액 · 착불 · 별도(접수 후 안내)를 정합니다. 금액 0원은 무료</small></h2><div class="ad-form">
+        ${['later', 'parcel', 'freight', 'pickup', 'site'].map(k => `<div class="row3">${F('ship.' + k + '.label', '배송 방법 이름')}${F('ship.' + k + '.mode', '배송비 방식', { type: 'select', options: [{ v: 'amount', t: '금액 (합계에 추가)' }, { v: 'cod', t: '착불 (배송 시 결제)' }, { v: 'separate', t: '별도 (접수 후 안내)' }] })}${F('ship.' + k + '.amount', '금액', { type: 'num', unit: '원' })}</div>`).join('')}
+        <small class="help">현장 시공은 시공 포함 주문일 때 도면 페이지 예상 금액에 미리 표시되고, 나머지는 주문 접수 페이지에서 배송 방법을 고를 때 합계에 반영됩니다.</small>
+      </div></div>
       <div class="ad-save"><span class="ad-count" id="cfgMsg">저장하면 홈페이지에 바로 반영됩니다(방문자는 새로 열 때 적용).</span><button type="button" class="btn light" id="cfgReset">되돌리기</button><button type="submit" class="btn wood">설정 저장</button></div>
     </form>`;
     const prev = () => { const id = +$('[data-p="logo"]').value, l = (window.NW_LOGOS || []).find(x => x.id === id); $('#logoPrev').innerHTML = l ? `<div style="height:52px">${l.svg.replace('<svg', '<svg style="height:52px;width:auto"')}</div>` : ''; };

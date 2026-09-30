@@ -23,6 +23,8 @@ window.SITE = {
   cost: { batten: 3600, battenLen: 3600, plywood: 18000, labor: 30000, stain: 0 },
   // 결제 — provider 'toss' 로 두고 clientKey 를 넣으면 토스페이먼츠 결제창이 열립니다. 비어 있으면 모의 결제(주문 접수만)로 동작합니다.
   payment: { provider: 'toss', clientKey: '', successUrl: 'complete.html', failUrl: 'checkout.html', bank: '농협 000-0000-0000-00', holder: '이영석', methods: { card: true, transfer: true, vbank: true, bank: true } },
+  // 배송 방법별 배송비 — mode: 'amount'(금액, 0이면 무료) · 'cod'(착불) · 'separate'(별도, 접수 후 안내). 관리자 페이지 설정 → 배송비 에서 수정
+  ship: { later: { label: '협의 후 결정', mode: 'separate', amount: 0 }, parcel: { label: '택배 (소량·소형, 1장 기준 1200 이하)', mode: 'amount', amount: 6000 }, freight: { label: '화물·용달 (대형·다량)', mode: 'cod', amount: 0 }, pickup: { label: '직접 방문 수령 (충남 홍성 공방)', mode: 'amount', amount: 0 }, site: { label: '현장 시공 (시공 포함 주문 · 직접 설치)', mode: 'separate', amount: 0 } },
 };
 
 // ---- 관리자 페이지(admin.html)에서 저장한 설정을 적용: 브라우저 캐시 → 즉시, 서버 → 백그라운드 갱신 ----
@@ -33,6 +35,7 @@ window.NW_APPLY_CONFIG = function (c) {
   if (c.cost) Object.assign(SITE.cost, c.cost);
   if (c.payment) { const pm = SITE.payment.methods; Object.assign(SITE.payment, c.payment); if (c.payment.methods) SITE.payment.methods = Object.assign({}, pm, c.payment.methods); }
   if (c.texts) { SITE.texts = Object.assign({}, SITE.texts, c.texts); if (c.texts.notice) SITE.texts.notice = Object.assign({}, c.texts.notice); }
+  if (c.ship) Object.keys(c.ship).forEach(k => { SITE.ship[k] = Object.assign({}, SITE.ship[k] || {}, c.ship[k]); });
   if (c.logo) SITE.defaultLogo = +c.logo;
   SITE.configLoaded = true;
   if (document.readyState !== 'loading' && window.NW_RENDER_SITE) NW_RENDER_SITE();
