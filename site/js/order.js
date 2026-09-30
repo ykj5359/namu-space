@@ -12,7 +12,7 @@
   cv.width = W; cv.height = H;
 
   // 세로 배열 기본: A=1200·B=2400, 가로 배열로 바꾸면 A=2400·B=1200
-  const state = { dir: 'v', A: 1200, B: 2400, D: 100, F: 60, G: 60, corner: 'none', K: 0, finish: '오일 스테인', extra: '합판 흑도장', paint: '#2a2724', paint2: '#2a2724', ply: '내추럴', qty: 1, install: '자재 납품', name: '', tel: '', email: '', addr: '', memo: '' };
+  const state = { dir: 'v', A: 1200, B: 2400, D: 100, F: 60, G: 60, corner: 'none', K: 0, finish: '오일 스테인', extra: '합판 흑도장', paint: '#2a2724', paint2: '#2a2724', ply: '내추럴', qty: 1, install: '자재 납품', name: '', tel: '', email: '', addr: '', ship: '협의 후 결정', memo: '' };
 
   // ---- 마감 해석: 합판·각재 색 ----
   //  오일 스테인 / 무도장 / 추가옵션(합판 흑도장 · 각재만 도색 · 합판만 도색 · 합판+각재 도색)
@@ -294,9 +294,9 @@
     const oy2 = el.y + el.h + 16;
     ctx.strokeStyle = '#ddd'; ctx.strokeRect(el.x, oy2, el.w, 1150 - oy2);
     text('주문자 정보', el.x + 14, oy2 + 32, { w: 700 });
-    const who = [['이름', s.name, 0, 0], ['연락처', s.tel, 1, 0], ['이메일', s.email, 2, 0], ['배송 주소', s.addr, 0, 1], ['메모', s.memo, 1, 1]];
+    const who = [['이름', s.name, 0, 0], ['연락처', s.tel, 1, 0], ['이메일', s.email, 2, 0], ['배송 주소', s.addr, 0, 1], ['배송 방법', s.ship, 1, 1], ['메모', s.memo, 2, 1]];
     who.forEach(([k2, v2, cx2, ry2]) => {
-      const bx = el.x + 14 + cx2 * 370, by = oy2 + 46 + ry2 * 92, bw = k2 === '메모' ? 740 - 14 : 350;
+      const bx = el.x + 14 + cx2 * 370, by = oy2 + 46 + ry2 * 92, bw = 350;
       ctx.fillStyle = '#F7F2EA'; ctx.fillRect(bx, by, bw, 82);
       text(k2, bx + 12, by + 32, { c: '#8B5A2B', w: 700 }); text(String(v2 || '-').slice(0, k2 === '메모' ? 46 : 20), bx + 12, by + 66);
     });
@@ -308,15 +308,28 @@
   }
   function updateSummary(r) {
     const s = state; if (!$('#sumN')) return;
-    $('#sumN').textContent = r.totalBattens; $('#sumE').textContent = r.Ereal; $('#sumG').textContent = Math.round(r.Gadj);
-    const st = NW_CART.sticks(r.totalBattens, r.C); const stEl = $('#sumSticks'); if (stEl) stEl.textContent = `${st.sticks}본 (1본당 ${st.per}개)`;
-    $('#sumSeg').textContent = r.sheets > 1 ? `원장 ${r.sheets}장 (${r.nx}×${r.ny}) 이어 붙임` : '없음 (원장 1장)';
+    $('#sumN').textContent = r.totalBattens;
+    const st = NW_CART.sticks(r.totalBattens, r.C);
+    $('#sumSticks').textContent = st.sticks; $('#sumSticksNote').textContent = `1본당 ${st.per}개 (${r.C} mm 기준)`;
+    $('#sumSheets').textContent = r.sheets; $('#sumSeg').textContent = r.sheets > 1 ? `${r.nx}×${r.ny} 이어 붙임` : '이음 없음';
     $('#sumM').textContent = r.meters; $('#sumA').textContent = r.area;
+    // 계산 내용
+    const v = s.dir === 'v', acrossName = v ? '폭 A' : '높이 B', alongName = v ? '높이 B' : '폭 A', G0 = s.G, extraG = Math.round(r.Gadj - G0), qtyTxt = s.qty > 1 ? ` × 수량 ${s.qty}장` : '';
+    const cornerTxt = r.cornerN ? (v ? ` + 코너 ${r.cornerN}면 × ${r.cornerBattens}개 (K ${s.K}: (${s.K}+30)÷60 버림)` : ` (코너 ${r.cornerN}면은 각재가 K ${s.K}만큼 길어짐)`) : '';
+    const rows = [
+      ['각재 구간 E', `${acrossName} ${r.across} − 시작 여백 F ${s.F} − 끝 여백 G ${G0} = <em>${r.E}</em>`],
+      ['각재 개수', `(E ${r.E} + 간격 30) ÷ 피치 60 = ${((r.E + GAP) / PITCH).toFixed(2)} → 버림 <em>${r.n}개</em>${cornerTxt}${r.cornerN && v ? ` = 총 <em>${r.totalBattens}개</em>` : ''}`],
+      ['실제 E · 조정 G', `각재 ${r.n}개 × 60 − 30 = 실제 E <em>${r.Ereal}</em>` + (extraG ? ` · 남는 ${extraG} mm는 끝 여백 G에 더해 G = <em>${Math.round(r.Gadj)}</em>` : ' · 남는 치수 없음 (G 그대로)')],
+      ['각재 길이 C', `${alongName} ${r.along} − 끝 여백 D ${r.D} = <em>${r.C}</em>${r.battenLen !== r.C ? ` (코너 포함 ${r.battenLen})` : ''}`],
+      ['원본 각재 3600', `3600 ÷ ${r.C} = ${(3600 / Math.max(1, r.C)).toFixed(2)} → 1본당 ${st.per}개 · ${r.totalBattens}개 ÷ ${st.per} = ${(r.totalBattens / st.per).toFixed(2)} → 올림 <em>${st.sticks}본</em>`],
+      ['합판 원장', `패널 ${r.totW} × ${r.totH} 에 원장 ${r.sheetX}×${r.sheetY} 배치: 가로 ${r.nx}장 × 세로 ${r.ny}장 = <em>${r.sheets}장</em>${r.sheets > 1 ? ' (도면의 회색 점선이 이음 위치)' : ''}`],
+      ['각재 총길이', `${r.totalBattens}개 × ${r.battenLen} mm${qtyTxt} = <em>${r.meters} m</em>`],
+      ['패널 면적', `${r.totW} × ${r.totH} ÷ 1,000,000${qtyTxt} = <em>${r.area} ㎡</em>${r.left || r.right ? ' (코너 돌림 K 포함 폭)' : ''}`],
+    ];
+    $('#calcRows').innerHTML = rows.map(x => `<div class="calc-row"><b>${x[0]}</b><span>${x[1]}</span></div>`).join('');
     $('#dirNote').textContent = s.dir === 'v' ? '세로 배열: 각재 길이 C는 높이(B) 방향, F·E·G는 폭(A) 방향' : '가로 배열: 각재 길이 C는 폭(A) 방향, F·E·G는 높이(B) 방향';
     const warn = [];
-    if (r.sheets > 1) warn.push(`합판 원장(1220×2440) ${r.sheets}장을 이어 붙여 제작합니다. 도면의 회색 점선이 이음 위치입니다.`);
     if (r.n === 0) warn.push('각재 구간(E)이 60mm보다 작아 각재가 들어가지 않습니다. F·G 여백을 줄이거나 크기를 키우세요.');
-    if (r.E !== r.Ereal) warn.push(`각재 ${r.n}개 기준 E(첫 각재 왼쪽 끝~마지막 각재 오른쪽 끝)는 ${r.Ereal}이고, 남는 ${Math.round(r.Gadj - s.G)}mm는 끝 여백 G에 더해져 G=${Math.round(r.Gadj)}입니다.`);
     $('#warn').innerHTML = warn.map(w => `<li>${w}</li>`).join('');
     $('#warn').parentElement.style.display = warn.length ? '' : 'none';
   }
@@ -361,7 +374,7 @@
   function orderText() {
     const r = calc(), s = state;
     return `[나무의공간 템바보드 주문 접수]\n` +
-      `주문자: ${s.name}\n연락처: ${s.tel}\n이메일: ${s.email || '-'}\n배송 주소: ${s.addr || '-'}\n\n` +
+      `주문자: ${s.name}\n연락처: ${s.tel}\n이메일: ${s.email || '-'}\n배송 주소: ${s.addr || '-'}\n배송 방법: ${s.ship || '-'}\n\n` +
       `제품: 30각 템바보드 (나왕 30×30, 간격 30, 합판 8)\n각재 방향: ${s.dir === 'h' ? '가로' : '세로'}\n` +
       `A 폭 ${s.A} × B 높이 ${s.B}\nC 각재 길이 ${r.C} / D 끝 여백 ${r.D}\nF ${s.F} / E ${r.Ereal} / G ${Math.round(r.Gadj)}\n` +
       `코너: ${s.corner === 'none' ? '없음' : s.corner + ' K=' + s.K}\n각재 개수: ${r.totalBattens}개/장 (원본 3600 ${NW_CART.sticks(r.totalBattens, r.C).sticks}본)\n합판 원장: ${r.sheets}장 (1220×2440)\n` +
@@ -383,11 +396,11 @@
       const t = NW_CART.totals([it]), c = NW_CART.cost(it); return { qty: it.qty, area: +(it.calc.area * it.qty).toFixed(3), supply: t.supply, vat: t.vat, total: t.total, cost: c.sub, method: '' }; } catch (e) { return {}; } })();
     const estText = meta.total ? `\n\n예상 금액: ${NW_CART.won(meta.total)} (공급가 ${NW_CART.won(meta.supply)} + 부가세 ${NW_CART.won(meta.vat)})` : '';
     const doc = (() => { const r = calc(), s = state, fi = finishInfo(s); const unit = meta.qty ? Math.round(meta.supply / meta.qty) : 0;
-      return { kind: 'drawing', title: '주문내역서', estimated: true, customer: { name: s.name, tel: s.tel, email: s.email, addr: s.addr },
+      return { kind: 'drawing', title: '주문내역서', estimated: true, customer: { name: s.name, tel: s.tel, email: s.email, addr: s.addr, ship: s.ship },
         items: [{ name: `고운결 ${s.dir === 'h' ? '가로' : '세로'} 템바보드 (나왕 30×30 · 간격 30 · 합판 8t)`, spec: [`A 폭 ${s.A} × B 높이 ${s.B} mm`, `C 각재 길이 ${r.C} / D 끝 여백 ${r.D} · F ${s.F} / E ${r.Ereal} / G ${Math.round(r.Gadj)}`, `코너 돌림 ${s.corner === 'none' ? '없음' : s.corner + ' K=' + s.K}`, `마감 ${fi.text} · 시공 ${s.install}`, `각재 ${r.totalBattens}개 (원본 3600 ${NW_CART.sticks(r.totalBattens, r.C).sticks}본) · 합판 원장 ${r.sheets}장 (1220×2440) · 면적 ${(r.totW * r.totH / 1e6).toFixed(2)}㎡`], qty: meta.qty || s.qty, unit, sub: meta.supply || 0 }],
         totals: { supply: meta.supply || 0, vat: meta.vat || 0, total: meta.total || 0 }, payment: { method: '접수 후 안내', bank: SITE.payment.bank ? SITE.payment.bank + (SITE.payment.holder ? ' (예금주 ' + SITE.payment.holder + ')' : '') : '' },
         message: s.memo || '', notes: ['예상 금액이며 실제 견적은 담당자 확인 후 확정됩니다.', '치수 단위 mm · 각재 30×30, 간격 30, 합판 8t 고정 · 합판 원장 1220×2440 을 이어 붙여 제작'], adminNote: (() => { try { const it = {}; DIM_KEYS.forEach(k => it[k] = s[k]); it.calc = { area: r.totW * r.totH / 1e6, C: r.C, totalBattens: r.totalBattens, sheets: r.sheets }; it.qty = meta.qty || 1; it.finish = s.finish; const c = NW_CART.cost(it); return `각재 30×30-3600 ${c.sticks}본 ${NW_CART.won(c.battens)} + 합판 ${r.sheets}장 ${NW_CART.won(c.ply)} + 인건비 ${NW_CART.won(c.labor)} = ${NW_CART.won(c.unit)}/장 × ${it.qty}장 = ${NW_CART.won(c.sub)}`; } catch (e) { return ''; } })() }; })();
-    const sentAuto = await NW_SEND({ type: 'drawing', subject, text: orderText() + estText, customer: { name: state.name, tel: state.tel, email: state.email, addr: state.addr }, meta, doc, files: [file] });
+    const sentAuto = await NW_SEND({ type: 'drawing', subject, text: orderText() + estText, customer: { name: state.name, tel: state.tel, email: state.email, addr: state.addr, ship: state.ship }, meta, doc, files: [file] });
     btnS.disabled = false; btnS.textContent = '주문서 이메일로 접수';
     if (sentAuto) { $('#done').style.display = ''; $('#done').innerHTML = `<b>주문서가 접수되었습니다.</b> ${state.email} 로 접수 확인 메일을 보내 드렸고, 담당자가 확인 후 연락드리겠습니다.`; return; }
     const ej = SITE.emailjs;
