@@ -19,7 +19,7 @@
     const cfg = SITE.payment || {};
     order.no = order.no || orderNo(); order.createdAt = new Date().toISOString(); order.status = 'pending';
     saveOrder(order);
-    if (cfg.provider === 'toss' && cfg.clientKey) {
+    if (cfg.provider === 'toss' && cfg.clientKey && order.method !== 'quote') {
       const Toss = await loadToss(); const toss = Toss(cfg.clientKey);
       const methodMap = { card: '카드', transfer: '계좌이체', vbank: '가상계좌' };
       const base = location.href.replace(/[^/]*$/, '');
@@ -32,7 +32,7 @@
       return; // 결제창으로 이동 (성공 시 successUrl 로 돌아옴)
     }
     // 모의 결제: 바로 접수 처리
-    order.status = order.method === 'vbank' || order.method === 'bank' ? 'awaiting_deposit' : 'simulated';
+    order.status = order.method === 'quote' ? 'quoted' : (order.method === 'vbank' || order.method === 'bank' ? 'awaiting_deposit' : 'simulated');
     saveOrder(order);
     location.href = 'complete.html?order=' + order.no;
   }

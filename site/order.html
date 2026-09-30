@@ -6,7 +6,7 @@
 <title>도면 주문 | 나무의공간</title>
 <meta name="description" content="폭·높이·여백·코너를 입력하면 템바보드 도면이 자동으로 그려집니다. 도면 이미지와 함께 주문을 접수하세요.">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Nanum+Myeongjo:wght@700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=20261001k">
+<link rel="stylesheet" href="css/style.css?v=20261001p">
 <style>
   .order { display: grid; grid-template-columns: 520px 1fr; gap: 24px; align-items: start; padding: 30px 0 10px; }
   .panel { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 16px 20px 20px; }
@@ -54,16 +54,9 @@
   .actions { display: flex; gap: 10px; flex-wrap: wrap; }
   .actions-main { background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; }
   .actions-main .btn { flex: 1 1 auto; justify-content: center; }
+  .actions-main #btnPay { flex: 1 1 100%; display: grid; gap: 2px; padding: 14px 20px; font-size: 16px; }
   .sheet-sec { padding: 14px 0 60px; display: grid; gap: 14px; }
   .sec-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; }
-  .cart-sheets { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; }
-  .cart-sheets figure { margin: 0; background: #fff; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
-  .cart-sheets img { width: 100%; display: block; border-bottom: 1px solid var(--line); }
-  .cart-sheets figcaption { padding: 12px 14px; font-size: 13.5px; display: grid; gap: 6px; }
-  .cart-sheets figcaption b { font-size: 14px; }
-  .cart-sheets .cs-btns { display: flex; gap: 8px; margin-top: 4px; }
-  .cart-sheets .cs-btns .btn { padding: 7px 14px; font-size: 13px; }
-  .cart-sheets .cs-btns .del { color: #b91c1c; border-color: #b91c1c; }
   .warnbox { background: #FFF4E5; border-left: 4px solid #F59E0B; border-radius: 8px; padding: 10px 16px; font-size: 14px; }
   .warnbox ul { margin: 0; padding-left: 18px; }
   #done { background: #ECFDF5; border-left: 4px solid #10B981; padding: 12px 16px; border-radius: 8px; font-size: 14.5px; }
@@ -98,7 +91,7 @@
   <div style="padding-top:40px">
     <div class="eyebrow">Order by Drawing</div>
     <h1 class="sec-title">도면으로 주문하기</h1>
-    <p class="sec-lead">치수를 입력하면 오른쪽 도면이 실시간으로 바뀝니다. 완성된 도면은 이미지로 저장되며, 주문자 정보와 함께 <b data-site="email"></b> 로 접수됩니다.</p>
+    <p class="sec-lead">치수를 입력하면 도면이 실시간으로 바뀝니다. 도면을 장바구니에 담아 여러 장을 만든 뒤, <b>접수·결제하기</b>에서 주문자 정보를 한 번만 입력하면 도면 전체와 견적이 함께 접수됩니다.</p>
   </div>
 
   <div class="diagram-card">
@@ -192,17 +185,6 @@
         <div id="paintRow2" style="display:none;margin-top:8px;align-items:center;gap:10px;font-size:13px;font-weight:600;color:var(--ink-2)"><span style="min-width:96px">합판 도색 색상</span> <input type="color" data-k="paint2" value="#2a2724" style="width:48px;height:32px;padding:0;border:1px solid var(--line);border-radius:6px;background:#fff"></div>
       </div>
 
-      <h3>4. 주문자 정보</h3>
-      <div class="g g3">
-        <label>이름 * <input type="text" data-k="name" placeholder="홍길동"></label>
-        <label>연락처 * <input type="tel" data-k="tel" placeholder="010-0000-0000"></label>
-        <label>이메일 * <input type="email" data-k="email" placeholder="답장 받을 이메일" required></label>
-      </div>
-      <div class="g" style="margin-top:10px">
-        <label style="grid-column:1/-1">배송 주소 <span class="hint" style="font-weight:400">(선택 · 납품·시공 장소)</span><div data-addr="addr" data-k-mode></div></label>
-        <label>배송 방법 <select data-k="ship"><option>협의 후 결정</option><option>택배 (소량·소형, 1장 기준 1200 이하)</option><option>화물·용달 (대형·다량, 착불)</option><option>직접 방문 수령 (충남 홍성 공방)</option><option>현장 시공 (시공 포함 주문 · 직접 설치)</option></select></label>
-        <label>메모 <textarea data-k="memo" placeholder="희망 일정, 색상, 기타 요청"></textarea></label>
-      </div>
     </aside>
 
     <div class="preview">
@@ -216,12 +198,10 @@
       <div class="calcbox" id="calcBox"><div class="calc-title">예상 금액 계산 <small>예상 금액이며 실제 견적은 접수 후 담당자가 확정합니다 · 부가세 별도 표시</small></div><div id="calcRows"></div></div>
       <div class="warnbox" style="display:none"><ul id="warn"></ul></div>
       <div class="actions actions-main">
-        <button class="btn wood" id="btnSend">주문서 이메일로 접수</button>
-        <button class="btn" id="btnPay" style="background:var(--green)">결제하기</button>
+        <button class="btn wood" id="btnPay">접수·결제하기 <small class="hint" style="color:#fff;opacity:.85;font-weight:500">지금 도면을 담고 주문 페이지로</small></button>
         <button class="btn ghost" id="btnDown">도면 이미지 저장 (PNG)</button>
         <button class="btn ghost" id="btnPrint">인쇄</button>
       </div>
-      <div id="done" style="display:none"></div>
     </div>
   </div>
 
@@ -248,11 +228,11 @@
 <div class="floating"><a data-tel href="#">전화</a><a class="dark" href="cart.html">장바구니</a></div>
 
 <script src="js/logos.js?v=20260928h"></script>
-<script src="js/main.js?v=20261001m"></script>
-<script src="js/cart.js?v=20261001m"></script>
+<script src="js/main.js?v=20261001p"></script>
+<script src="js/cart.js?v=20261001p"></script>
 <!-- 이메일 자동 발송(EmailJS)을 쓰려면 아래 주석을 풀고 main.js 의 SITE.emailjs 값을 채우세요.
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script> -->
-<script src="js/order.js?v=20261001o"></script>
+<script src="js/order.js?v=20261001q"></script>
 <script type="importmap">{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/" } }</script>
 <script type="module" src="js/view3d.js?v=20260930p"></script>
 <script>

@@ -267,10 +267,10 @@
     text('나무의공간  ·  템바보드 주문 도면', 50, 74, { c: '#fff', w: 800 });
     const today = new Date(); const ds = `${today.getFullYear()}.${String(today.getMonth() + 1).padStart(2, '0')}.${String(today.getDate()).padStart(2, '0')}`;
     text(`작성일 ${ds}   |   대표 ${SITE.ceo}  ${SITE.tel}  ${SITE.email}`, W - 50, 74, { c: '#D9B27F', a: 'right' });
-    const el = { x: 50, y: 120, w: 1120, h: 790 };
+    const el = { x: 50, y: 120, w: 1120, h: 1000 };
     ctx.strokeStyle = '#ddd'; ctx.lineWidth = 1; ctx.strokeRect(el.x, el.y, el.w, el.h);
     text('입면도  (30각 템바보드 · 단위 mm)', el.x + 14, el.y + 34, { w: 700 });
-    text(`각재 ${r.totalBattens}개 (원본 3600 ${NW_CART.sticks(r.totalBattens, r.C).sticks}본) × ${s.dir === 'h' ? '가로' : '세로'} 배열 · 30×30 · 간격 30 · 합판 8`, el.x + el.w - 14, el.y + 34, { c: '#555', a: 'right' });
+    text(`각재 ${r.totalBattens}개 (원본 3600 ${NW_CART.sticks(r.totalBattens, r.C).sticks}본) × ${s.dir === 'h' ? '가로' : '세로'} 배열 · 30×30 · 간격 30 · 합판 8`, el.x + 14, el.y + el.h - 14, { c: '#555' });
     drawScene({ x: el.x + 10, y: el.y + 50, w: el.w - 20, h: el.h - 60 });
     const rx = 1195, rw = W - 30 - rx - 20;
     ctx.strokeStyle = '#ddd'; ctx.strokeRect(rx - 10, el.y, rw + 20, 1030);
@@ -291,15 +291,6 @@
     const rowH = s.corner !== 'none' ? 31 : 41;   // 14행이 같은 높이에 들어가도록
     y += 6; text('사양', rx + 4, y + 24, { w: 700 }); y += 40;
     rows.forEach((rw2, i) => { ctx.fillStyle = i % 2 ? '#fff' : '#F7F2EA'; ctx.fillRect(rx - 4, y, rw + 8, rowH); text(rw2[0], rx + 4, y + rowH * 0.68, { c: '#8B5A2B', w: 700 }); text(rw2[1], rx + 200, y + rowH * 0.68); y += rowH; });
-    const oy2 = el.y + el.h + 16;
-    ctx.strokeStyle = '#ddd'; ctx.strokeRect(el.x, oy2, el.w, 1150 - oy2);
-    text('주문자 정보', el.x + 14, oy2 + 32, { w: 700 });
-    const who = [['이름', s.name, 0, 0], ['연락처', s.tel, 1, 0], ['이메일', s.email, 2, 0], ['배송 주소', s.addr, 0, 1], ['배송 방법', s.ship, 1, 1], ['메모', s.memo, 2, 1]];
-    who.forEach(([k2, v2, cx2, ry2]) => {
-      const bx = el.x + 14 + cx2 * 370, by = oy2 + 46 + ry2 * 92, bw = 350;
-      ctx.fillStyle = '#F7F2EA'; ctx.fillRect(bx, by, bw, 82);
-      text(k2, bx + 12, by + 32, { c: '#8B5A2B', w: 700 }); text(String(v2 || '-').slice(0, k2 === '메모' ? 46 : 20), bx + 12, by + 66);
-    });
     text('※ 각재 30×30·간격 30·합판 8 고정. 합판 원장 1220×2440을 가로·세로로 이어 붙여 제작(크기 제한 없음). 견적은 접수 후 담당자가 연락드립니다.', 50, H - 68, { c: '#666' });
     text(`${SITE.name}  |  ${SITE.tel}  |  사업자등록번호 ${SITE.bizno} (${SITE.bizname})  |  ${SITE.address}`, 50, H - 38, { c: '#666' });
     updateSummary(r); updateDiagram();
@@ -379,58 +370,10 @@
   }
 
   // ---- 저장·전송 ----
-  function fileName() { const d = new Date(); return `나무의공간_주문도면_${state.name || '무기명'}_${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}.png`; }
+  function fileName() { const d = new Date(); return `나무의공간_주문도면_${state.A}x${state.B}_${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}.png`; }
   function toBlob() { return new Promise(res => cv.toBlob(res, 'image/png')); }
   async function download() { const b = await toBlob(); const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = fileName(); a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 5000); }
-  function orderText() {
-    const r = calc(), s = state;
-    return `[나무의공간 템바보드 주문 접수]\n` +
-      `주문자: ${s.name}\n연락처: ${s.tel}\n이메일: ${s.email || '-'}\n배송 주소: ${s.addr || '-'}\n배송 방법: ${s.ship || '-'}\n\n` +
-      `제품: 30각 템바보드 (나왕 30×30, 간격 30, 합판 8)\n각재 방향: ${s.dir === 'h' ? '가로' : '세로'}\n` +
-      `A 폭 ${s.A} × B 높이 ${s.B}\nC 각재 길이 ${r.C} / D 끝 여백 ${r.D}\nF ${s.F} / E ${r.Ereal} / G ${Math.round(r.Gadj)}\n` +
-      `코너: ${s.corner === 'none' ? '없음' : s.corner + ' K=' + s.K}\n각재 개수: ${r.totalBattens}개/장 (원본 3600 ${NW_CART.sticks(r.totalBattens, r.C).sticks}본)\n합판 원장: ${r.sheets}장 (1220×2440)\n` +
-      `마감: ${finishInfo(s).text}\n수량: ${s.qty}장\n시공: ${s.install}\n메모: ${s.memo || '-'}\n\n※ 도면 이미지(${fileName()})를 첨부해 주세요.`;
-  }
-  function validate() {
-    if (!state.name || !state.tel) { alert('주문자 이름과 연락처를 입력해 주세요.'); $('[data-k=name]').focus(); return false; }
-    if (!state.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(state.email)) { alert('답장 받을 이메일을 입력해 주세요.'); $('[data-k=email]').focus(); return false; }
-    return true;
-  }
-  async function send() {
-    if (!validate()) return;
-    draw();
-    const blob = await toBlob();
-    const file = new File([blob], fileName(), { type: 'image/png' });
-    const subject = `[템바보드 주문] ${state.name} 님 ${state.A}×${state.B}${state.corner !== 'none' ? ' 코너형' : ''} ${state.qty}장`;
-    const btnS = $('#btnSend'); btnS.disabled = true; btnS.textContent = '접수 중…';
-    const meta = (() => { try { const r = calc(); const it = {}; DIM_KEYS.forEach(k => it[k] = state[k]); it.calc = { area: r.totW * r.totH / 1e6, C: r.C, totalBattens: r.totalBattens, sheets: r.sheets }; it.qty = Math.max(1, +state.qty || 1); it.finish = state.finish; it.extra = state.extra; it.corner = state.corner; it.install = state.install;
-      const t = NW_CART.totals([it]), c = NW_CART.cost(it); return { qty: it.qty, area: +(it.calc.area * it.qty).toFixed(3), supply: t.supply, vat: t.vat, total: t.total, cost: c.sub, method: '' }; } catch (e) { return {}; } })();
-    const estText = meta.total ? `\n\n예상 금액: ${NW_CART.won(meta.total)} (공급가 ${NW_CART.won(meta.supply)} + 부가세 ${NW_CART.won(meta.vat)})` : '';
-    const doc = (() => { const r = calc(), s = state, fi = finishInfo(s); const unit = meta.qty ? Math.round(meta.supply / meta.qty) : 0;
-      return { kind: 'drawing', title: '주문내역서', estimated: true, customer: { name: s.name, tel: s.tel, email: s.email, addr: s.addr, ship: s.ship },
-        items: [{ name: `고운결 ${s.dir === 'h' ? '가로' : '세로'} 템바보드 (나왕 30×30 · 간격 30 · 합판 8t)`, spec: [`A 폭 ${s.A} × B 높이 ${s.B} mm`, `C 각재 길이 ${r.C} / D 끝 여백 ${r.D} · F ${s.F} / E ${r.Ereal} / G ${Math.round(r.Gadj)}`, `코너 돌림 ${s.corner === 'none' ? '없음' : s.corner + ' K=' + s.K}`, `마감 ${fi.text} · 시공 ${s.install}`, `각재 ${r.totalBattens}개 (원본 3600 ${NW_CART.sticks(r.totalBattens, r.C).sticks}본) · 합판 원장 ${r.sheets}장 (1220×2440) · 면적 ${(r.totW * r.totH / 1e6).toFixed(2)}㎡`], qty: meta.qty || s.qty, unit, sub: meta.supply || 0 }],
-        totals: { supply: meta.supply || 0, vat: meta.vat || 0, total: meta.total || 0 }, payment: { method: '접수 후 안내', bank: SITE.payment.bank ? SITE.payment.bank + (SITE.payment.holder ? ' (예금주 ' + SITE.payment.holder + ')' : '') : '' },
-        message: s.memo || '', notes: ['예상 금액이며 실제 견적은 담당자 확인 후 확정됩니다.', '치수 단위 mm · 각재 30×30, 간격 30, 합판 8t 고정 · 합판 원장 1220×2440 을 이어 붙여 제작'], adminNote: (() => { try { const it = {}; DIM_KEYS.forEach(k => it[k] = s[k]); it.calc = { area: r.totW * r.totH / 1e6, C: r.C, totalBattens: r.totalBattens, sheets: r.sheets }; it.qty = meta.qty || 1; it.finish = s.finish; const c = NW_CART.cost(it); return `각재 30×30-3600 ${c.sticks}본 ${NW_CART.won(c.battens)} + 합판 ${r.sheets}장 ${NW_CART.won(c.ply)} + 인건비 ${NW_CART.won(c.labor)} = ${NW_CART.won(c.unit)}/장 × ${it.qty}장 = ${NW_CART.won(c.sub)}`; } catch (e) { return ''; } })() }; })();
-    const sentAuto = await NW_SEND({ type: 'drawing', subject, text: orderText() + estText, customer: { name: state.name, tel: state.tel, email: state.email, addr: state.addr, ship: state.ship }, meta, doc, files: [file] });
-    btnS.disabled = false; btnS.textContent = '주문서 이메일로 접수';
-    if (sentAuto) { $('#done').style.display = ''; $('#done').innerHTML = `<b>주문서가 접수되었습니다.</b> ${state.email} 로 접수 확인 메일을 보내 드렸고, 담당자가 확인 후 연락드리겠습니다.`; return; }
-    const ej = SITE.emailjs;
-    if (ej && ej.publicKey && ej.serviceId && ej.templateId && window.emailjs) {
-      try {
-        const dataUrl = cv.toDataURL('image/jpeg', 0.85);
-        await emailjs.send(ej.serviceId, ej.templateId, { to_email: SITE.email, subject, message: orderText(), name: state.name, tel: state.tel, drawing: dataUrl }, ej.publicKey);
-        $('#done').style.display = ''; $('#done').textContent = '주문서가 이메일로 전송되었습니다. 담당자가 곧 연락드립니다.'; return;
-      } catch (e) { console.warn('EmailJS 실패, 대체 전송', e); }
-    }
-    if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      try { await navigator.share({ files: [file], title: subject, text: orderText() + `\n받는 곳: ${SITE.email}` }); $('#done').style.display = ''; $('#done').textContent = `공유 창에서 메일 앱을 선택해 ${SITE.email} 로 보내 주세요.`; return; } catch (e) { if (e.name === 'AbortError') return; }
-    }
-    await download();
-    location.href = `mailto:${SITE.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(orderText())}`;
-    $('#done').style.display = ''; $('#done').innerHTML = `도면 이미지가 다운로드되었습니다. 열린 메일에 <b>다운로드된 도면 파일을 첨부</b>해서 보내 주세요. 메일 앱이 열리지 않으면 <b>${SITE.email}</b> 로 직접 보내 주세요.`;
-  }
   $('#btnDown').addEventListener('click', () => { draw(); download(); });
-  $('#btnSend').addEventListener('click', send);
   $('#btnPrint').addEventListener('click', () => { draw(); const w = window.open(''); w.document.write(`<img src="${cv.toDataURL()}" style="width:100%" onload="window.print()">`); });
 
   // URL 파라미터로 미리 채우기: order.html?dir=v&A=1200&B=2400&D=0&F=60&G=60&corner=left&K=300
@@ -488,7 +431,7 @@
       else { NW_CART.add(it); toast(`장바구니에 ${it.qty}장을 담았습니다.`); }
       NW_CART.open();
     });
-    // 결제하기: 현재 도면을 장바구니에 담고(수정 중이면 갱신) 결제 페이지로 이동
+    // 접수·결제하기: 현재 도면을 장바구니에 담고(수정 중이면 갱신) 접수·결제 페이지로 이동
     const btnPay = $('#btnPay');
     if (btnPay) btnPay.addEventListener('click', () => {
       const it = snapshot(+qtyEl.value || 1);

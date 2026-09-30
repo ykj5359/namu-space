@@ -251,3 +251,17 @@ footer .gear:hover { opacity: 1; }
 .addr-embed { position: relative; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: #fff; }
 .addr-embed-in { height: 440px; }
 .addr-close { position: absolute; right: 6px; top: 6px; z-index: 2; width: 30px; height: 30px; border: 0; border-radius: 50%; background: var(--ink); color: #fff; font-size: 18px; cursor: pointer; }
+
+/* 담긴 도면 나열 (도면 페이지 하단 · 주문 접수 페이지) */
+.cart-sheets { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; }
+.cart-sheets figure { margin: 0; background: #fff; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+.cart-sheets img { width: 100%; display: block; border-bottom: 1px solid var(--line); }
+.cart-sheets figcaption { padding: 12px 14px; font-size: 13.5px; display: grid; gap: 6px; }
+.cart-sheets figcaption b { font-size: 14px; }
+.cart-sheets .cs-btns { display: flex; gap: 8px; margin-top: 4px; }
+.cart-sheets .cs-btns .btn { padding: 7px 14px; font-size: 13px; }
+.cart-sheets .cs-btns .del { color: #b91c1c; border-color: #b91c1c; }
+.cart-sheets .cs-num { display: inline-block; background: var(--ink); color: #fff; font-size: 12px; padding: 2px 8px; border-radius: 999px; margin-right: 6px; }
+.co-steps { display: flex; gap: 8px; flex-wrap: wrap; margin: 14px 0 0; }
+.co-steps span { font-size: 13px; color: var(--ink-2); background: var(--bg-2); border-radius: 999px; padding: 5px 12px; }
+.co-steps span b { color: var(--wood-dark); }

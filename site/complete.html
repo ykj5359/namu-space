@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>주문 완료 | 나무의공간</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Nanum+Myeongjo:wght@700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=20261001k">
+<link rel="stylesheet" href="css/style.css?v=20261001p">
 </head>
 <body>
 <header class="site">
@@ -25,9 +25,9 @@
 <footer class="site"><div class="wrap"><a class="logo" data-logo href="index.html"></a><div><b data-site="name"></b> · 대표 <span data-site="ceo"></span> · <span data-site="tel"></span> · <span data-site="email"></span> <a href="admin.html" class="gear" title="관리자" aria-label="관리자">⚙</a></div></div></footer>
 
 <script src="js/logos.js?v=20260928h"></script>
-<script src="js/main.js?v=20261001m"></script>
-<script src="js/cart.js?v=20261001m"></script>
-<script src="js/payments.js?v=20260929e"></script>
+<script src="js/main.js?v=20261001p"></script>
+<script src="js/cart.js?v=20261001p"></script>
+<script src="js/payments.js?v=20261001p"></script>
 <script>
 (function () {
   const qp = new URLSearchParams(location.search), no = qp.get('order'), won = NW_CART.won;
@@ -38,11 +38,11 @@
   const paymentKey = qp.get('paymentKey');
   if (paymentKey && order.status === 'pending') order = NW_PAY.setStatus(no, 'paid_unconfirmed', { paymentKey, amount: +qp.get('amount') });
   if (order.status === 'pending' || !order.status) order = NW_PAY.setStatus(no, 'simulated');
-  const methodName = { card: '신용·체크카드', transfer: '계좌이체', vbank: '가상계좌', bank: '무통장입금' }[order.method] || order.method;
-  const statusText = { simulated: '주문이 접수되었습니다', awaiting_deposit: '입금 대기 중입니다', paid_unconfirmed: '결제가 접수되었습니다', paid: '결제가 완료되었습니다' }[order.status] || '주문이 접수되었습니다';
+  const methodName = { quote: '견적 확인 후 결제', card: '신용·체크카드', transfer: '계좌이체', vbank: '가상계좌', bank: '무통장입금' }[order.method] || order.method;
+  const statusText = { quoted: '주문이 접수되었습니다', simulated: '주문이 접수되었습니다', awaiting_deposit: '입금 대기 중입니다', paid_unconfirmed: '결제가 접수되었습니다', paid: '결제가 완료되었습니다' }[order.status] || '주문이 접수되었습니다';
   const t = order.totals, c = order.customer;
   box.innerHTML = `<div class="eyebrow">Order Complete</div><h2 style="font-size:26px">${statusText}</h2><div class="no">${order.no}</div>
-    <p style="color:var(--ink-2)">${c.name} 님, 도면 ${order.items.length}건(총 ${t.count}장)의 주문을 받았습니다. 담당자가 도면을 확인한 뒤 <b>${c.tel}</b> 또는 <b>${c.email}</b>로 연락드립니다.</p>
+    <p style="color:var(--ink-2)">${c.name} 님, 도면 ${order.items.length}건(총 ${t.count}장)의 주문을 받았습니다. 담당자가 도면을 확인한 뒤 <b>${c.tel}</b> 또는 <b>${c.email}</b>로 ${order.method === 'quote' ? '확정 견적과 결제 방법을 안내드립니다' : '연락드립니다'}.</p>
     <table class="spec" style="margin:14px auto 18px;max-width:520px;font-size:14px;border-collapse:collapse;width:100%">
       <tr><th style="text-align:left;padding:6px 10px;color:var(--wood-dark)">결제 방법</th><td style="text-align:right;padding:6px 10px">${methodName}</td></tr>
       ${order.method === 'bank' || order.status === 'awaiting_deposit' ? `<tr><th style="text-align:left;padding:6px 10px;color:var(--wood-dark)">입금 계좌</th><td style="text-align:right;padding:6px 10px">${SITE.payment.bank}${SITE.payment.holder ? ' (예금주 ' + SITE.payment.holder + ')' : ''}</td></tr>` : ''}
