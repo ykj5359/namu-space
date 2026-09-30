@@ -6,7 +6,7 @@
 <meta name="robots" content="noindex, nofollow">
 <title>관리자 | 나무의공간</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=20261001v">
+<link rel="stylesheet" href="css/style.css?v=20261001w">
 <link rel="stylesheet" href="css/admin.css?v=20261001d">
 </head>
 <body class="admin">
@@ -32,6 +32,7 @@
       <button data-v="dash" class="on">대시보드</button>
       <button data-v="list">접수·주문</button>
       <button data-v="pay">입금·취소</button>
+      <button data-v="samples">샘플 신청</button>
       <button data-v="sales">매출</button>
       <button data-v="settings">설정</button>
       <button data-v="account">계정</button>
@@ -60,6 +61,10 @@
       <div class="ad-filters" style="margin-top:10px"><b style="font-size:15px">취소 내역</b><span class="ad-count" id="cancelCount"></span></div>
       <div class="ad-table-wrap"><table class="ad-table" id="cancelTable"><thead><tr><th>취소일시</th><th>접수번호</th><th>구분</th><th>이름</th><th class="r">합계</th><th class="r">입금액</th><th>이전 상태</th><th>취소 사유</th></tr></thead><tbody></tbody></table></div>
     </section>
+    <section id="v-samples" class="ad-view" style="display:none">
+      <div class="ad-filters"><select id="sStatus"><option value="">전체 상태</option></select><input id="sQ" placeholder="상호·대표자·휴대폰·업종·주소 검색"><span class="ad-count" id="sampleCount"></span></div>
+      <div class="ad-table-wrap"><table class="ad-table" id="sampleTable"><thead><tr><th>신청일시</th><th>상호 · 대표자</th><th>휴대폰</th><th>업종</th><th>시공 의사</th><th>안내 수신</th><th>상태</th></tr></thead><tbody></tbody></table></div>
+    </section>
     <section id="v-sales" class="ad-view" style="display:none"></section>
     <section id="v-settings" class="ad-view" style="display:none"></section>
     <section id="v-account" class="ad-view" style="display:none"></section>
@@ -71,7 +76,7 @@
 </div>
 
 <script src="js/logos.js?v=20260928h"></script>
-<script src="js/main.js?v=20261001v"></script>
-<script src="js/admin.js?v=20261001u"></script>
+<script src="js/main.js?v=20261001w"></script>
+<script src="js/admin.js?v=20261001w"></script>
 </body>
 </html>

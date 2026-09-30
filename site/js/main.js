@@ -11,7 +11,7 @@ window.SITE = {
   hours: '평일 09:00 ~ 18:00',      // 상담 가능 시간
   texts: { heroTitle: '나무가 만드는\n공간의 결', hero: '서두르는 손이 아니라 준비된 나무가 벽을 완성합니다. 현장은 고요하고, 마감은 고릅니다.', notice: { on: false, text: '', from: '', to: '' },
     // 팝업창: 홈 첫 방문 시 이미지 팝업 (관리자 설정 → 팝업창 에서 이미지 업로드·기간·링크 변경). pages: 'home'(홈만) | 'all'(모든 페이지)
-    popup: { on: true, image: 'img/popup/sample.jpg', link: 'index.html?sample=1#contact', title: '템바보드 샘플 무료 배송 이벤트', from: '', to: '', pages: 'home' } },
+    popup: { on: true, image: 'img/popup/sample.jpg', link: 'sample.html', title: '템바보드 샘플 무료 배송 이벤트', from: '', to: '', pages: 'home', pos: 'center', size: 'm' } },
   defaultLogo: 1,                  // 기본 로고 번호 (logo.html 에서 선택하면 브라우저에 저장됨)
   // 이메일 자동 전송(EmailJS) — 계정 발급 후 아래 세 값을 채우면 주문서가 자동 발송됩니다.
   emailjs: { publicKey: '', serviceId: '', templateId: '' },
@@ -138,7 +138,7 @@ window.NW_ADDR = (function () {
     const onPage = P.pages === 'all' || isHome || qs.get('popup');
     const openPopup = () => {
       if (document.getElementById('nwPopup')) return;
-      const pop = document.createElement('div'); pop.id = 'nwPopup'; pop.className = 'nw-popup';
+      const pop = document.createElement('div'); pop.id = 'nwPopup'; pop.className = 'nw-popup pos-' + (P.pos || 'center') + ' size-' + (P.size || 'm');
       pop.innerHTML = `<div class="nw-popup-box"><button type="button" class="nw-popup-x" aria-label="닫기">×</button>${P.link ? `<a href="${escH(P.link)}" class="nw-popup-img">` : '<div class="nw-popup-img">'}<img src="${escH(P.image)}" alt="${escH(P.title || '이벤트')}">${P.link ? '</a>' : '</div>'}<div class="nw-popup-bar"><label><input type="checkbox" id="nwPopupToday"> 오늘 하루 보지 않기</label><button type="button" class="nw-popup-close">닫기</button></div></div>`;
       document.body.appendChild(pop);
       const close = () => { try { if (document.getElementById('nwPopupToday').checked) localStorage.setItem('nw_popup_hide', sig); } catch (e) {} pop.remove(); };

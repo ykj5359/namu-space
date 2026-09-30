@@ -5,7 +5,8 @@
   const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
   const TOKEN = 'nw_admin_token';
   let token = sessionStorage.getItem(TOKEN) || '';
-  let D = { rows: [], payments: [], cancels: [], sales: [], config: null, statuses: [] };
+  let D = { rows: [], payments: [], cancels: [], samples: [], sales: [], config: null, statuses: [] };
+  const SAMPLE_ST = ['신청', '발송', '완료', '보류'];
   let cfgDraft = null;
 
   // 삭제 확인: 브라우저 확인창 대신 같은 버튼을 5초 안에 한 번 더 누르면 실행
@@ -49,7 +50,7 @@
   let view = 'dash';
   $('#tabs').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; show(b.dataset.v); });
   function show(v) { view = v; $$('#tabs button').forEach(b => b.classList.toggle('on', b.dataset.v === v)); $$('.ad-view').forEach(s => s.style.display = s.id === 'v-' + v ? '' : 'none'); }
-  function renderAll() { renderDash(); renderList(); renderPay(); renderSales(); renderSettings(); renderAccount(); }
+  function renderAll() { renderDash(); renderList(); renderPay(); renderSamples(); renderSales(); renderSettings(); renderAccount(); }
 
   // ---------------- 대시보드 ----------------
   const today = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
@@ -66,6 +67,7 @@
         <div class="ad-card"><small>이번 달 입금</small><b>${won(m.paid)}</b></div>
         <div class="ad-card"><small>미수금 (전체)</small><b style="color:${dueAll ? '#b91c1c' : 'inherit'}">${won(dueAll)}</b></div>
         <div class="ad-card"><small>진행 중 주문</small><b>${active}건</b><em>문의 ${m.contacts}건 이달</em></div>
+        <div class="ad-card" style="cursor:pointer" data-go-samples><small>샘플 신청 (발송 대기)</small><b>${(D.samples || []).filter(s => s.status === '신청').length}건</b><em>전체 ${(D.samples || []).length}건</em></div>
         <div class="ad-card"><small>${year}년 누적 수주</small><b>${won(y.sales)}</b><em>${y.orders}건</em></div>
         <div class="ad-card"><small>${year}년 누적 입금</small><b>${won(y.paid)}</b><em>원가 ${won(y.cost)}</em></div>
       </div>
@@ -76,6 +78,7 @@
       <div class="ad-panel"><h2>최근 접수 <small>최근 8건</small></h2>${rowsTable(D.rows.slice(0, 8))}</div>`;
     $('#v-dash').querySelectorAll('[data-go]').forEach(b => b.addEventListener('click', () => { $('#fStatus').value = b.dataset.go; $('#fType').value = ''; renderList(); show('list'); }));
     bindRows($('#v-dash'));
+    const gs = $('#v-dash [data-go-samples]'); if (gs) gs.addEventListener('click', () => show('samples'));
   }
   function rowsTable(rows) {
     if (!rows.length) return '<div class="ad-empty">접수 내역이 없습니다.</div>';
@@ -191,6 +194,40 @@
     tb.querySelectorAll('[data-del]').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); armed(b, async () => { try { await api('admin.delPay', { id: b.dataset.del }); toast('입금 기록을 삭제했습니다'); await load(); } catch (err) { toast(err.message, true); } }); }));
   }
 
+  // ---------------- 샘플 신청자 ----------------
+  const SLBL = { company: '상호', bizno: '사업자등록번호', ceo: '대표자(담당자)', tel: '휴대폰', email: '이메일', addr: '받으실 주소', web: '웹사이트', sns: 'SNS', biz: '업종', intent: '시공 의사', when: '예상 시공 시기', size: '예상 규모', place: '시공 장소', finish: '관심 마감', kind: '샘플 종류', source: '알게 된 경로', memo: '요청 사항', agree: '개인정보 동의', marketing: '안내 수신 동의' };
+  ['sQ', 'sStatus'].forEach(id => { const el = $('#' + id); if (el) el.addEventListener('input', renderSamples); });
+  function renderSamples() {
+    const tb = $('#sampleTable tbody'); if (!tb) return;
+    const q = ($('#sQ').value || '').trim().toLowerCase(), st = $('#sStatus').value;
+    const list = (D.samples || []).filter(s => (!st || s.status === st) && (!q || [s.company, s.ceo, s.tel, s.email, s.biz, s.addr, s.no].join(' ').toLowerCase().includes(q)));
+    $('#sampleCount').textContent = `${list.length}건 · 발송 대기 ${(D.samples || []).filter(s => s.status === '신청').length}건`;
+    tb.innerHTML = list.length ? list.map(s => `<tr data-sno="${esc(s.no)}"><td>${esc(s.at)}</td><td><b>${esc(s.company)}</b><br><span class="ad-type">${esc(s.ceo)}</span></td><td>${esc(s.tel)}</td><td class="ad-type">${esc(s.biz)}</td><td>${esc(s.intent)}</td><td class="ad-type">${esc(s.marketing)}</td><td><span class="st" data-s="${esc(s.status)}">${esc(s.status)}</span></td></tr>`).join('') : '<tr><td colspan="7" class="ad-empty">샘플 신청이 없습니다.</td></tr>';
+    tb.querySelectorAll('tr[data-sno]').forEach(tr => tr.addEventListener('click', () => openSample(tr.dataset.sno)));
+    const stSel = $('#sStatus'); if (stSel && stSel.options.length <= 1) stSel.innerHTML = '<option value="">전체 상태</option>' + SAMPLE_ST.map(x => `<option>${x}</option>`).join('');
+  }
+  function openSample(no) {
+    const s = (D.samples || []).find(x => x.no === no); if (!s) return;
+    const keys = ['company', 'bizno', 'ceo', 'tel', 'email', 'addr', 'web', 'sns', 'biz', 'intent', 'when', 'size', 'place', 'finish', 'kind', 'source', 'agree', 'marketing'];
+    $('#detailBox').innerHTML = `
+      <h2><span>샘플 신청 <span class="mono">${esc(s.no)}</span> <span class="st" data-s="${esc(s.status)}">${esc(s.status)}</span></span><button type="button" class="x" data-x>×</button></h2>
+      <div class="ad-kv">${keys.map(k => `<div><small>${SLBL[k]}</small><span>${k === 'web' && s[k] ? `<a href="${esc(/^https?:/.test(s[k]) ? s[k] : 'https://' + s[k])}" target="_blank" rel="noopener" style="color:var(--wood-dark);text-decoration:underline">${esc(s[k])}</a>` : esc(s[k] || '-')}</span></div>`).join('')}</div>
+      ${s.memo ? `<div><b style="font-size:14px">요청 사항</b><pre class="ad-pre">${esc(s.memo)}</pre></div>` : ''}
+      <form id="sForm" class="ad-form">
+        <div class="row3">
+          <label>상태 <select name="status">${SAMPLE_ST.map(x => `<option ${x === s.status ? 'selected' : ''}>${x}</option>`).join('')}</select></label>
+          <label>송장번호 (택배사) <input name="tracking" value="${esc(s.tracking)}" placeholder="예: CJ대한통운 1234-5678-9012"></label>
+          <label>신청일시 <input value="${esc(s.at)}" disabled></label>
+        </div>
+        <label>메모 (관리자) <textarea name="note">${esc(s.note)}</textarea></label>
+        <div class="ad-actions"><button type="submit" class="btn wood sm">저장</button><a class="btn light sm" href="tel:${esc(String(s.tel).replace(/-/g, ''))}">📞 전화</a><a class="btn light sm" href="sms:${esc(String(s.tel).replace(/-/g, ''))}">💬 문자</a>${s.email ? `<a class="btn light sm" href="mailto:${esc(s.email)}">✉ 메일</a>` : ''}<button type="button" class="btn ghost sm" id="sDel" style="margin-left:auto;color:#b91c1c;border-color:#b91c1c">신청 삭제</button></div>
+      </form>`;
+    $('#detail').style.display = '';
+    $('#detailBox [data-x]').addEventListener('click', closeDetail);
+    $('#sForm').addEventListener('submit', async e => { e.preventDefault(); const f = e.target; try { await api('admin.sampleUpdate', { no, patch: { status: f.status.value, tracking: f.tracking.value, note: f.note.value } }); toast('저장했습니다'); await load(); openSample(no); } catch (err) { toast(err.message, true); } });
+    $('#sDel').addEventListener('click', e => armed(e.currentTarget, async () => { try { await api('admin.sampleDelete', { no }); toast('삭제했습니다'); closeDetail(); await load(); } catch (err) { toast(err.message, true); } }));
+  }
+
   // ---------------- 매출 ----------------
   function renderSales() {
     const years = [...new Set(D.sales.map(s => s.month.slice(0, 4)))].sort().reverse();
@@ -270,8 +307,9 @@
       </div></div>
       <div class="ad-panel"><h2>8. 팝업창 <small>홈 첫 화면에 뜨는 이미지 팝업 · 이미지를 올리거나 기본 이미지를 쓰고, 기간과 클릭 시 이동할 주소를 정합니다</small></h2><div class="ad-form">
         <div class="row3">${F('texts.popup.on', '팝업 켜기', { type: 'check' })}${F('texts.popup.from', '시작일', { type: 'date' })}${F('texts.popup.to', '종료일', { type: 'date', help: '비우면 기간 제한 없음' })}</div>
-        <div class="row2">${F('texts.popup.title', '팝업 제목 (대체 문구)', { ph: '템바보드 샘플 무료 배송 이벤트' })}${F('texts.popup.pages', '표시 위치', { type: 'select', options: [{ v: 'home', t: '홈 첫 화면만' }, { v: 'all', t: '모든 페이지' }] })}</div>
-        ${F('texts.popup.link', '클릭 시 이동 주소', { ph: 'index.html?sample=1#contact (문의 폼에서 무료 샘플 신청이 선택됨)', help: '비우면 클릭해도 이동하지 않음' })}
+        <div class="row2">${F('texts.popup.title', '팝업 제목 (대체 문구)', { ph: '템바보드 샘플 무료 배송 이벤트' })}${F('texts.popup.pages', '표시 페이지', { type: 'select', options: [{ v: 'home', t: '홈 첫 화면만' }, { v: 'all', t: '모든 페이지' }] })}</div>
+        <div class="row2">${F('texts.popup.pos', '화면 위치', { type: 'select', options: [{ v: 'center', t: '가운데 (배경 어둡게)' }, { v: 'tl', t: '왼쪽 위' }, { v: 'tr', t: '오른쪽 위' }, { v: 'bl', t: '왼쪽 아래' }, { v: 'br', t: '오른쪽 아래' }], help: '구석 위치는 배경을 가리지 않고 화면 한쪽에만 뜹니다' })}${F('texts.popup.size', '크기', { type: 'select', options: [{ v: 's', t: '작게 (300px)' }, { v: 'm', t: '보통 (400px)' }, { v: 'l', t: '크게 (520px)' }] })}</div>
+        ${F('texts.popup.link', '클릭 시 이동 주소', { ph: 'sample.html (무료 샘플 신청 페이지)', help: '비우면 클릭해도 이동하지 않음' })}
         ${F('texts.popup.image', '팝업 이미지 주소', { help: '아래 업로드를 쓰면 자동 입력. 기본 이미지: img/popup/sample.jpg' })}
         <div class="row2"><label>이미지 올리기 <span class="hint">JPG·PNG, 세로형 권장(가로 900 기준), 자동으로 1400px 이하로 줄여 저장</span><input type="file" id="popupFile" accept="image/*"></label><div class="ad-actions"><button type="button" class="btn light sm" id="popupDefault">기본 이미지 사용</button><span class="ad-count" id="popupUpMsg"></span></div></div>
         <div id="popupPrev" style="max-width:260px;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#2b2b2b"></div>

@@ -40,7 +40,9 @@ var H_IN = ['번호', '접수일시', '구분', '이름', '연락처', '이메�
 var H_PAY = ['입금ID', '입금일', '접수번호', '이름', '금액', '방법', '메모', '등록일시'];
 var H_SALES = ['월', '주문건수', '수주액(합계)', '원가(추정)', '입금액', '미수금', '문의건수', '취소건수'];
 var H_CANCEL = ['취소일시', '번호', '구분', '이름', '연락처', '합계', '입금액', '이전 상태', '취소 사유'];
-var TYPE_NAME = { contact: '문의', drawing: '도면 주문', order: '장바구니 주문' };
+var TYPE_NAME = { contact: '문의', drawing: '도면 주문', order: '장바구니 주문', sample: '샘플 신청' };
+var H_SAMPLE = ['번호', '신청일시', '상호', '사업자번호', '대표자', '휴대폰', '이메일', '주소', '웹사이트', 'SNS', '업종', '시공 의사', '시공 시기', '예상 규모', '시공 장소', '관심 마감', '샘플 종류', '알게 된 경로', '요청 사항', '개인정보 동의', '안내 수신 동의', '상태', '송장번호', '메모', '갱신일시'];
+var KEY_SAMPLE = ['no', 'at', 'company', 'bizno', 'ceo', 'tel', 'email', 'addr', 'web', 'sns', 'biz', 'intent', 'when', 'size', 'place', 'finish', 'kind', 'source', 'memo', 'agree', 'marketing', 'status', 'tracking', 'note', 'updated'];
 
 // =============================== 진입점 ===============================
 function doGet(e) {
@@ -71,6 +73,8 @@ function doPost(e) {
       case 'admin.changePw': return json_(changePw_(body.pw));
       case 'admin.rebuild': rebuildSales_(); return json_({ ok: true });
       case 'admin.upload': return json_(uploadImage_(body));
+      case 'admin.sampleUpdate': return json_(sampleUpdate_(body.no, body.patch || {}));
+      case 'admin.sampleDelete': return json_(sampleDelete_(body.no));
       default: return json_({ ok: false, error: 'unknown action' });
     }
   } catch (err) {
@@ -92,7 +96,7 @@ function submit_(body) {
     var bytes = Utilities.base64Decode(String(a.data || '').replace(/^data:[^,]+,/, ''));
     return Utilities.newBlob(bytes, a.mime || 'image/jpeg', a.name || 'file.jpg');
   });
-  var no = meta.no || ('R' + Utilities.formatDate(new Date(), TZ, 'yyMMdd') + '-' + Math.random().toString(36).slice(2, 6).toUpperCase());
+  var no = meta.no || ((type === 'sample' ? 'S' : 'R') + Utilities.formatDate(new Date(), TZ, 'yyMMdd') + '-' + Math.random().toString(36).slice(2, 6).toUpperCase());
   if (meta.no && findRow_(meta.no)) return { ok: true, no: no, duplicate: true };   // 같은 주문번호가 이미 접수됨 → 중복 발송·기록 방지
 
   // 1) 도면·사진을 드라이브에 보관
@@ -122,8 +126,13 @@ function submit_(body) {
     GmailApp.sendEmail(customer.email, ack, ackText, { name: M.fromName, replyTo: cfg.company.email || to, htmlBody: ackHtml, inlineImages: doc ? inline : undefined, attachments: atts });
   }
 
-  // 4) 접수 탭 기록
+  // 4) 기록 — 샘플 신청은 '샘플' 탭, 나머지는 '접수' 탭
   var now = stamp_();
+  if (type === 'sample') {
+    var sm = meta.sample || {};
+    sheetSample_().appendRow([no, now, sm.company || customer.name || '', "'" + (sm.bizno || ''), sm.ceo || '', "'" + (sm.tel || customer.tel || ''), sm.email || customer.email || '', sm.addr || customer.addr || '', sm.web || '', sm.sns || '', sm.biz || '', sm.intent || '', sm.when || '', sm.size || '', sm.place || '', sm.finish || '', sm.kind || '', sm.source || '', sm.memo || '', sm.agree || '동의', sm.marketing || '', '신청', '', '', now]);
+    return { ok: true, no: no };
+  }
   var total = num_(meta.total), supply = num_(meta.supply), vat = num_(meta.vat);
   sheetIn_().appendRow([no, now, TYPE_NAME[type] || type, customer.name || '', "'" + (customer.tel || ''), customer.email || '', customer.addr || '',
     subject, text.slice(0, 5000), num_(meta.qty), num_(meta.area), supply, vat, total, num_(meta.cost), 0, type === 'contact' ? '접수' : (total ? '입금대기' : '접수'),
@@ -155,11 +164,20 @@ function renderDoc_(doc, cfg, no, imgKeys, forCustomer, ackHead) {
   out.push('<div style="padding:24px 28px">');
   if (forCustomer && ackHead) out.push('<p style="margin:0 0 18px;font-size:15px;white-space:pre-wrap">' + h(ackHead) + '</p>');
   // 고객 정보
-  out.push('<h3 style="margin:0 0 8px;font-size:15px;color:#8b5a2b">' + (kind === 'contact' ? '문의자 정보' : '주문자 정보') + '</h3>');
+  out.push('<h3 style="margin:0 0 8px;font-size:15px;color:#8b5a2b">' + (kind === 'contact' ? '문의자 정보' : kind === 'sample' ? '신청자 정보' : '주문자 정보') + '</h3>');
   out.push('<table style="width:100%;border-collapse:collapse;border-top:2px solid #b9814a;margin-bottom:22px">' +
     '<tr><th style="' + th + '">이름</th><td style="' + td + '">' + h(c.name || '-') + '</td><th style="' + th + '">연락처</th><td style="' + td + '">' + h(c.tel || '-') + '</td></tr>' +
-    '<tr><th style="' + th + '">이메일</th><td style="' + td + '">' + h(c.email || '-') + '</td><th style="' + th + '">' + (kind === 'contact' ? '관심 제품' : '배송 주소') + '</th><td style="' + td + '">' + h(c.addr || '-') + '</td></tr>' +
+    '<tr><th style="' + th + '">이메일</th><td style="' + td + '">' + h(c.email || '-') + '</td><th style="' + th + '">' + (kind === 'contact' ? '관심 제품' : kind === 'sample' ? '받으실 주소' : '배송 주소') + '</th><td style="' + td + '">' + h(c.addr || '-') + '</td></tr>' +
     (c.ship ? '<tr><th style="' + th + '">배송 방법</th><td style="' + td + '" colspan="3">' + h(c.ship) + '</td></tr>' : '') + '</table>');
+  // 추가 항목 표 (샘플 신청서 등)
+  if (doc.fields && doc.fields.length) {
+    out.push('<h3 style="margin:0 0 8px;font-size:15px;color:#8b5a2b">신청 내용</h3><table style="width:100%;border-collapse:collapse;border-top:2px solid #b9814a;margin-bottom:22px">');
+    for (var fi = 0; fi < doc.fields.length; fi += 2) {
+      var f1 = doc.fields[fi], f2 = doc.fields[fi + 1];
+      out.push('<tr><th style="' + th + '">' + h(f1[0]) + '</th><td style="' + td + '">' + h(f1[1]) + '</td>' + (f2 ? '<th style="' + th + '">' + h(f2[0]) + '</th><td style="' + td + '">' + h(f2[1]) + '</td>' : '<td colspan="2" style="' + td + '"></td>') + '</tr>');
+    }
+    out.push('</table>');
+  }
   // 품목
   var items = doc.items || [];
   if (items.length) {
@@ -193,7 +211,7 @@ function renderDoc_(doc, cfg, no, imgKeys, forCustomer, ackHead) {
   if (doc.message) out.push('<h3 style="margin:0 0 8px;font-size:15px;color:#8b5a2b">' + (kind === 'contact' ? '문의 내용' : '요청 사항') + '</h3><div style="background:#fbf8f3;border:1px solid #e4dacb;border-radius:8px;padding:12px 14px;font-size:14px;white-space:pre-wrap;margin-bottom:22px">' + h(doc.message) + '</div>');
   // 도면 · 사진
   if (imgKeys && imgKeys.length) {
-    out.push('<h3 style="margin:0 0 8px;font-size:15px;color:#8b5a2b">' + (kind === 'contact' ? '현장 사진' : '주문 도면') + '</h3>');
+    out.push('<h3 style="margin:0 0 8px;font-size:15px;color:#8b5a2b">' + (kind === 'contact' || kind === 'sample' ? '현장 사진' : '주문 도면') + '</h3>');
     imgKeys.forEach(function (k, i) { out.push('<div style="margin-bottom:12px;border:1px solid #e4dacb;border-radius:8px;overflow:hidden"><img src="cid:' + k + '" style="display:block;width:100%;max-width:640px" alt="도면 ' + (i + 1) + '"></div>'); });
     out.push('<div style="margin-bottom:22px"></div>');
   }
@@ -238,10 +256,13 @@ function adminList_() {
   var pays = sheetPay_().getDataRange().getValues().slice(1).filter(function (r) { return r[0]; }).map(function (r) {
     var o = {}; H_PAY.forEach(function (h, i) { o[KEY_PAY[i]] = r[i] instanceof Date ? Utilities.formatDate(r[i], TZ, 'yyyy-MM-dd') : r[i]; }); return o;
   });
+  var samples = sheetSample_().getDataRange().getValues().slice(1).filter(function (r) { return r[0]; }).map(function (r) {
+    var o = {}; KEY_SAMPLE.forEach(function (k, i) { o[k] = r[i] instanceof Date ? stamp_(r[i]) : r[i]; }); o.tel = String(o.tel || '').replace(/^'/, ''); o.bizno = String(o.bizno || '').replace(/^'/, ''); return o;
+  });
   var cancels = sheetCancel_().getDataRange().getValues().slice(1).filter(function (r) { return r[0]; }).map(function (r) {
     var o = {}; KEY_CANCEL.forEach(function (k, i) { o[k] = r[i] instanceof Date ? stamp_(r[i]) : r[i]; }); o.tel = String(o.tel || '').replace(/^'/, ''); return o;
   });
-  return { ok: true, rows: rows.reverse(), payments: pays.reverse(), cancels: cancels.reverse(), sales: salesData_(rows, pays), statuses: STATUSES, sheetUrl: ss_().getUrl(), folderUrl: folder_().getUrl(), config: getConfig_() };
+  return { ok: true, rows: rows.reverse(), payments: pays.reverse(), cancels: cancels.reverse(), samples: samples.reverse(), sales: salesData_(rows, pays), statuses: STATUSES, sheetUrl: ss_().getUrl(), folderUrl: folder_().getUrl(), config: getConfig_() };
 }
 var KEY_IN = ['no', 'at', 'type', 'name', 'tel', 'email', 'addr', 'subject', 'text', 'qty', 'area', 'supply', 'vat', 'total', 'cost', 'paid', 'status', 'method', 'memo', 'files', 'updated'];
 var KEY_PAY = ['id', 'date', 'no', 'name', 'amount', 'method', 'memo', 'created'];
@@ -391,6 +412,16 @@ function sheetPay_() { return tab_('입금', H_PAY); }
 function sheetSales_() { return tab_('매출', H_SALES); }
 function sheetCfg_() { return tab_('설정', ['키', '값(JSON)', '설명']); }
 function sheetCancel_() { return tab_('취소', H_CANCEL); }
+function sheetSample_() { return tab_('샘플', H_SAMPLE); }
+function sampleRow_(no) { var sh = sheetSample_(), col = sh.getRange(1, 1, sh.getLastRow(), 1).getValues(); for (var i = 1; i < col.length; i++) if (String(col[i][0]) === String(no)) return i + 1; return 0; }
+function sampleUpdate_(no, patch) {
+  var r = sampleRow_(no); if (!r) return { ok: false, error: 'not found' };
+  var sh = sheetSample_(), map = { status: 22, tracking: 23, note: 24 };
+  Object.keys(patch).forEach(function (k) { if (map[k]) sh.getRange(r, map[k]).setValue(patch[k]); });
+  sh.getRange(r, 25).setValue(stamp_());
+  return { ok: true };
+}
+function sampleDelete_(no) { var r = sampleRow_(no); if (!r) return { ok: false, error: 'not found' }; sheetSample_().deleteRow(r); return { ok: true }; }
 // 관리자 이미지 업로드 → 드라이브 '나무의공간 이미지' 폴더, 링크 있는 모든 사용자 보기 → 홈페이지에서 바로 표시되는 주소 반환
 function uploadImage_(b) {
   var data = String(b.data || '').replace(/^data:[^,]+,/, ''); if (!data) return { ok: false, error: 'no data' };
@@ -420,7 +451,7 @@ function deepMerge_(a, b) {
 
 /** 설치: 편집기에서 한 번 실행해 드라이브 폴더·시트 탭을 만들고 권한을 승인합니다. */
 function setup() {
-  sheetIn_(); sheetPay_(); sheetSales_(); sheetCfg_(); sheetCancel_();
+  sheetIn_(); sheetPay_(); sheetSales_(); sheetCfg_(); sheetCancel_(); sheetSample_();
   Logger.log('시트: ' + ss_().getUrl() + '\n폴더: ' + folder_().getUrl());
 }
 

@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>무료 샘플 신청 | 나무의공간</title>
+<meta name="description" content="나왕 템바보드 샘플(30×50cm)을 무료로 보내드립니다. 인테리어·건축·가구·상업공간 사업자와 개인 모두 신청 가능.">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Nanum+Myeongjo:wght@700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css?v=20261001w">
+<style>
+  .sp-hero { display: grid; grid-template-columns: 1.1fr 1fr; gap: 34px; align-items: center; padding: 40px 0 10px; }
+  .sp-hero img { border-radius: var(--radius); box-shadow: 0 20px 50px rgba(60,40,20,.18); }
+  .sp-points { display: grid; gap: 10px; margin: 18px 0 0; padding: 0; list-style: none; }
+  .sp-points li { display: flex; gap: 10px; align-items: flex-start; font-size: 15px; color: var(--ink-2); }
+  .sp-points li b { color: var(--wood-dark); }
+  .sp-wrap { display: grid; grid-template-columns: 1fr 340px; gap: 26px; align-items: start; padding: 30px 0 80px; }
+  .sp-form { display: grid; gap: 22px; }
+  .sp-card { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 26px; display: grid; gap: 14px; }
+  .sp-card h3 { font-size: 17px; display: flex; align-items: center; gap: 8px; }
+  .sp-card h3 .n { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: var(--wood); color: #fff; font-size: 13px; }
+  .sp-card label { display: grid; gap: 6px; font-size: 14px; font-weight: 600; color: var(--ink-2); }
+  .sp-card input, .sp-card select, .sp-card textarea { font-family: var(--font); font-size: 15px; padding: 11px 13px; border: 1px solid var(--line); border-radius: 10px; background: #fff; width: 100%; }
+  .sp-card textarea { min-height: 80px; resize: vertical; }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .three { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+  .chips { display: flex; gap: 8px; flex-wrap: wrap; }
+  .chips label { cursor: pointer; font-weight: 500; }
+  .chips input { display: none; }
+  .chips span { display: inline-block; padding: 9px 14px; border: 1px solid var(--line); border-radius: 999px; font-size: 14px; color: var(--ink); background: #fff; }
+  .chips input:checked + span { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .agree { display: grid; gap: 10px; font-size: 14px; }
+  .agree label { display: flex; gap: 8px; align-items: flex-start; font-weight: 500; color: var(--ink); }
+  .agree input { margin-top: 4px; width: 18px; height: 18px; }
+  .agree .box { background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; font-size: 13px; color: var(--ink-2); line-height: 1.6; max-height: 150px; overflow: auto; }
+  .sp-side { position: sticky; top: 90px; display: grid; gap: 14px; }
+  .sp-side .sumbox { position: static; }
+  .sp-side .sumbox .btn { width: 100%; justify-content: center; }
+  .req { color: #b91c1c; }
+  #spDone { display: none; }
+  @media (max-width: 900px) { .sp-hero, .sp-wrap { grid-template-columns: 1fr; } .sp-side { position: static; } .three { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 560px) { .two, .three { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<header class="site">
+  <div class="wrap">
+    <a href="index.html" class="logo" data-logo aria-label="나무의공간"></a>
+    <nav class="main"><a href="index.html#products">제품</a><a href="index.html#spec">규격·단면</a><a href="index.html#interior">연출 갤러리</a><a href="order.html">도면 주문</a><a href="catalog.html">카탈로그</a><a href="sample.html" class="active">무료 샘플</a><a href="index.html#contact">문의</a></nav>
+    <a class="tel-btn" data-tel href="#">📞 <span data-site="tel"></span></a>
+    <button class="menu-btn" aria-label="메뉴">☰</button>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="sp-hero">
+    <div>
+      <div class="eyebrow">Free Sample</div>
+      <h1 class="sec-title">템바보드 샘플을<br>무료로 보내드립니다</h1>
+      <p class="sec-lead">가로 30 × 세로 50 cm 실제 제품 샘플입니다. 색감과 결, 두께감을 직접 확인해 보시고 현장에 맞는 구성을 상담받으세요. 배송비도 받지 않습니다.</p>
+      <ul class="sp-points">
+        <li><b>규격</b> 나왕 30×30 각재 · 간격 30 · 합판 8t (실제 제품과 동일 사양)</li>
+        <li><b>마감</b> 오일 스테인 기본 · 신청서에서 무도장·흑도장 선택 가능</li>
+        <li><b>발송</b> 신청 확인 후 2~3일 내 택배 발송 · 1업체(1인) 1회</li>
+        <li><b>대상</b> 인테리어·건축·가구·상업공간 사업자와 시공을 검토 중인 개인</li>
+      </ul>
+    </div>
+    <img src="img/popup/sample.jpg" alt="무료 샘플 안내" loading="lazy">
+  </div>
+
+  <div class="sp-wrap">
+    <form class="sp-form" id="spForm" novalidate>
+      <div class="sp-card">
+        <h3><span class="n">1</span> 신청자 · 업체 정보</h3>
+        <div class="two">
+          <label>상호 (회사명) <span class="req">*</span><input name="company" required placeholder="예: 둥지인테리어 · 개인은 이름"></label>
+          <label>사업자등록번호 <span class="hint" style="font-weight:400">(사업자만)</span><input name="bizno" placeholder="000-00-00000" inputmode="numeric"></label>
+        </div>
+        <div class="two">
+          <label>대표자 (담당자) <span class="req">*</span><input name="ceo" required placeholder="홍길동"></label>
+          <label>휴대폰 <span class="req">*</span><input name="tel" type="tel" required placeholder="010-0000-0000" inputmode="tel"></label>
+        </div>
+        <label>이메일 <span class="req">*</span><input name="email" type="email" required placeholder="신청 확인 메일을 받을 주소"></label>
+        <label>샘플 받으실 주소 <span class="req">*</span><div data-addr="addr" id="spAddr"></div></label>
+        <div class="two">
+          <label>웹사이트 <input name="web" placeholder="https://"></label>
+          <label>SNS (인스타그램·블로그 등) <input name="sns" placeholder="@계정 또는 주소"></label>
+        </div>
+        <label>업종 <span class="req">*</span>
+          <div class="chips">
+            <label><input type="radio" name="biz" value="인테리어 시공" required><span>인테리어 시공</span></label>
+            <label><input type="radio" name="biz" value="건축·설계"><span>건축·설계</span></label>
+            <label><input type="radio" name="biz" value="가구·목공"><span>가구·목공</span></label>
+            <label><input type="radio" name="biz" value="카페·상점 운영"><span>카페·상점 운영</span></label>
+            <label><input type="radio" name="biz" value="자재 유통"><span>자재 유통</span></label>
+            <label><input type="radio" name="biz" value="개인 (주택·아파트)"><span>개인 (주택·아파트)</span></label>
+            <label><input type="radio" name="biz" value="기타"><span>기타</span></label>
+          </div>
+        </label>
+      </div>
+
+      <div class="sp-card">
+        <h3><span class="n">2</span> 시공 계획</h3>
+        <label>템바보드 시공 의사가 있으신가요? <span class="req">*</span>
+          <div class="chips">
+            <label><input type="radio" name="intent" value="있음 (진행 예정)" required><span>있음 (진행 예정)</span></label>
+            <label><input type="radio" name="intent" value="검토 중"><span>검토 중</span></label>
+            <label><input type="radio" name="intent" value="샘플만 먼저 확인"><span>샘플만 먼저 확인</span></label>
+            <label><input type="radio" name="intent" value="없음"><span>없음</span></label>
+          </div>
+        </label>
+        <div class="three">
+          <label>예상 시공 시기 <select name="when"><option>미정</option><option>1개월 이내</option><option>1~3개월</option><option>3~6개월</option><option>6개월 이후</option></select></label>
+          <label>예상 규모 <select name="size"><option>미정</option><option>5㎡ 이하 (포인트 벽)</option><option>5~20㎡</option><option>20~50㎡</option><option>50㎡ 이상 (대량)</option></select></label>
+          <label>시공 장소 <select name="place"><option>미정</option><option>주택·아파트</option><option>카페·식당</option><option>상점·매장</option><option>사무실·상담실</option><option>숙박·기타</option></select></label>
+        </div>
+        <div class="two">
+          <label>관심 마감 <select name="finish"><option>오일 스테인</option><option>무도장</option><option>합판 흑도장</option><option>도색 (색상 지정)</option><option>미정</option></select></label>
+          <label>샘플 종류 <select name="kind"><option>세로 배열 (기본)</option><option>가로 배열</option><option>둘 다 (검토 후 결정)</option></select></label>
+        </div>
+        <label>나무의공간을 알게 된 경로 <select name="source"><option>검색 (네이버·구글)</option><option>인스타그램·SNS</option><option>지인 소개</option><option>현장에서 보고</option><option>기타</option></select></label>
+        <label>요청 사항 <span class="hint" style="font-weight:400">(원하는 색상, 현장 조건, 궁금한 점)</span><textarea name="memo" placeholder="예: 카페 카운터 전면에 검정 합판으로 시공 예정입니다. 흑도장 샘플로 부탁드립니다."></textarea></label>
+      </div>
+
+      <div class="sp-card">
+        <h3><span class="n">3</span> 개인정보 및 안내 수신 동의</h3>
+        <div class="agree">
+          <div class="box"><b>개인정보 수집·이용 동의 (필수)</b><br>· 수집 항목: 상호, 사업자등록번호, 대표자(담당자), 휴대폰, 이메일, 주소, 웹사이트·SNS, 업종, 시공 계획<br>· 이용 목적: 무료 샘플 발송, 샘플 관련 안내·상담, 견적 문의 응대<br>· 보유 기간: 샘플 발송 후 1년 (관련 법령에 따른 보관 의무가 있는 경우 그 기간)<br>· 동의를 거부할 수 있으나, 거부 시 샘플 신청이 어렵습니다.</div>
+          <label><input type="checkbox" name="agree" required> [필수] 위 개인정보 수집·이용에 동의합니다.</label>
+          <div class="box"><b>안내 정보 수신 동의 (선택)</b><br>신제품·시공 사례·이벤트·견적 안내를 아래 방법으로 받으실 수 있습니다. 언제든지 수신 거부(회신 또는 전화)로 철회할 수 있으며, 동의하지 않아도 샘플은 보내드립니다.</div>
+          <div class="chips">
+            <label><input type="checkbox" name="mk" value="이메일"><span>이메일 수신 동의</span></label>
+            <label><input type="checkbox" name="mk" value="문자"><span>문자(카카오톡) 수신 동의</span></label>
+            <label><input type="checkbox" name="mk" value="전화"><span>전화 상담 동의</span></label>
+          </div>
+        </div>
+      </div>
+    </form>
+
+    <aside class="sp-side">
+      <div class="sumbox">
+        <div style="font-weight:800;font-size:16px">무료 샘플 신청</div>
+        <div class="row"><span>샘플 규격</span><b>30 × 50 cm</b></div>
+        <div class="row"><span>샘플 비용</span><b>0원</b></div>
+        <div class="row"><span>배송비</span><b>무료</b></div>
+        <p class="note" style="margin:6px 0 0">1업체(1인) 1회 · 신청 확인 후 2~3일 내 택배 발송 · 재고 상황에 따라 발송이 늦어질 수 있습니다.</p>
+        <button type="button" class="btn wood" id="spSubmit">무료 샘플 신청하기</button>
+        <p class="note" id="spNote" style="margin:0"></p>
+      </div>
+      <div class="sumbox" id="spDone"><b style="font-size:16px">신청이 접수되었습니다.</b><p class="note" style="margin:8px 0 0" id="spDoneText"></p><a class="btn ghost" href="order.html" style="margin-top:10px">도면으로 견적 보기</a></div>
+      <div class="sumbox" style="font-size:14px;gap:6px"><b>문의</b><span data-site="tel"></span><span data-site="email"></span></div>
+    </aside>
+  </div>
+</div>
+
+<footer class="site"><div class="wrap"><a class="logo" data-logo href="index.html"></a><div><b data-site="name"></b> · 대표 <span data-site="ceo"></span> · <span data-site="tel"></span> · <span data-site="email"></span><br><span style="opacity:.7">사업자등록번호 <span data-site="bizno"></span> (<span data-site="bizname"></span>) · <span data-site="address"></span> <a href="admin.html" class="gear" title="관리자" aria-label="관리자">⚙</a></span></div></div></footer>
+
+<script src="js/logos.js?v=20260928h"></script>
+<script src="js/main.js?v=20261001w"></script>
+<script src="js/cart.js?v=20261001w"></script>
+<script>
+(function () {
+  const form = document.getElementById('spForm'), btn = document.getElementById('spSubmit'), note = document.getElementById('spNote');
+  const F = ['company', 'bizno', 'ceo', 'tel', 'email', 'addr', 'web', 'sns', 'biz', 'intent', 'when', 'size', 'place', 'finish', 'kind', 'source', 'memo'];
+  const LABEL = { company: '상호', bizno: '사업자등록번호', ceo: '대표자(담당자)', tel: '휴대폰', email: '이메일', addr: '받으실 주소', web: '웹사이트', sns: 'SNS', biz: '업종', intent: '시공 의사', when: '예상 시공 시기', size: '예상 규모', place: '시공 장소', finish: '관심 마감', kind: '샘플 종류', source: '알게 된 경로', memo: '요청 사항' };
+  // 사업자번호 자동 하이픈
+  form.bizno.addEventListener('input', e => { const v = e.target.value.replace(/\D/g, '').slice(0, 10); e.target.value = v.length > 5 ? `${v.slice(0, 3)}-${v.slice(3, 5)}-${v.slice(5)}` : v.length > 3 ? `${v.slice(0, 3)}-${v.slice(3)}` : v; });
+  btn.addEventListener('click', async () => {
+    const d = Object.fromEntries(new FormData(form).entries());
+    const mk = [...form.querySelectorAll('input[name=mk]:checked')].map(i => i.value);
+    const miss = [];
+    if (!d.company) miss.push('상호'); if (!d.ceo) miss.push('대표자'); if (!d.tel) miss.push('휴대폰');
+    if (!d.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(d.email)) miss.push('이메일');
+    if (!NW_ADDR.valid('#spAddr')) miss.push('주소'); if (!d.biz) miss.push('업종'); if (!d.intent) miss.push('시공 의사');
+    if (miss.length) { note.textContent = '입력해 주세요: ' + miss.join(', '); note.style.color = '#b91c1c'; return; }
+    if (!form.agree.checked) { note.textContent = '개인정보 수집·이용 동의(필수)에 체크해 주세요.'; note.style.color = '#b91c1c'; return; }
+    if (d.bizno && !/^\d{3}-\d{2}-\d{5}$/.test(d.bizno)) { note.textContent = '사업자등록번호는 000-00-00000 형식으로 적어 주세요 (개인은 비워 두셔도 됩니다).'; note.style.color = '#b91c1c'; return; }
+    btn.disabled = true; btn.textContent = '신청 중…'; note.textContent = ''; note.style.color = '';
+    const sample = {}; F.forEach(k => sample[k] = d[k] || ''); sample.marketing = mk.join('·') || '동의 안 함'; sample.agree = '동의';
+    const fields = F.map(k => [LABEL[k], sample[k] || '-']).concat([['개인정보 동의', '동의 (필수)'], ['안내 수신 동의', sample.marketing]]);
+    const text = `[나무의공간 무료 샘플 신청]\n` + fields.map(([k, v]) => `${k}: ${v}`).join('\n');
+    const subject = `[샘플 신청] ${d.company} · ${d.ceo} 님 (${d.biz})`;
+    const doc = { kind: 'sample', title: '무료 샘플 신청서', customer: { name: `${d.company} · ${d.ceo}`, tel: d.tel, email: d.email, addr: d.addr }, fields: fields.slice(6), message: d.memo || '', notes: ['샘플 규격 30 × 50 cm · 배송비 무료 · 1업체(1인) 1회', '신청 확인 후 2~3일 내 택배로 발송됩니다. 재고 상황에 따라 늦어질 수 있습니다.'] };
+    const ok = await NW_SEND({ type: 'sample', subject, text, customer: { name: `${d.company} · ${d.ceo}`, tel: d.tel, email: d.email, addr: d.addr }, meta: { sample }, doc, files: [] });
+    if (ok) { document.getElementById('spDoneText').textContent = `${d.email} 로 신청 확인 메일을 보내 드렸습니다. 담당자가 확인 후 ${d.tel} 로 발송 안내를 드립니다.`; document.getElementById('spDone').style.display = ''; btn.textContent = '신청 완료'; form.querySelectorAll('input,select,textarea').forEach(el => el.disabled = true); document.getElementById('spDone').scrollIntoView({ behavior: 'smooth', block: 'center' }); return; }
+    btn.disabled = false; btn.textContent = '무료 샘플 신청하기';
+    location.href = `mailto:${SITE.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(text)}`;
+    note.textContent = `자동 접수가 되지 않아 메일 앱을 열었습니다. 열리지 않으면 ${SITE.email} 로 보내 주세요.`;
+  });
+})();
+</script>
+</body>
+</html>
