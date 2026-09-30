@@ -8,19 +8,28 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Nanum+Myeongjo:wght@700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css?v=20261001k">
 <style>
-  .order { display: grid; grid-template-columns: 400px 1fr; gap: 28px; align-items: start; padding: 30px 0 60px; }
-  .panel { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 22px; position: sticky; top: 90px; max-height: calc(100vh - 110px); overflow: auto; }
-  .panel h3 { font-size: 15px; letter-spacing: .1em; color: var(--wood-dark); margin: 18px 0 10px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  .order { display: grid; grid-template-columns: 540px 1fr; gap: 24px; align-items: start; padding: 30px 0 60px; }
+  .panel { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 16px 18px 18px; position: sticky; top: 84px; max-height: calc(100vh - 100px); overflow: auto; }
+  .panel h3 { font-size: 14px; letter-spacing: .08em; color: var(--wood-dark); margin: 14px 0 8px; padding-bottom: 5px; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+  .panel h3 .hint { letter-spacing: 0; }
+  .row-dim { display: grid; grid-template-columns: 150px 1fr 1fr; gap: 10px; align-items: end; }
+  .row-corner { display: grid; grid-template-columns: 1fr 150px; gap: 10px; align-items: end; }
+  .row-finish { display: grid; grid-template-columns: 1fr 96px 150px; gap: 10px; align-items: end; }
+  .g.g3 { grid-template-columns: 1fr 1fr 1.3fr; }
+  .seg-sm span { padding: 8px 4px; font-size: 13px; }
+  @media (max-width: 1200px) { .order { grid-template-columns: 470px 1fr; } .row-finish { grid-template-columns: 1fr 1fr; } .row-finish .seg { grid-column: 1/-1; } }
+  @media (max-width: 600px) { .row-dim, .row-corner, .g.g3 { grid-template-columns: 1fr 1fr; } .row-dim .seg { grid-column: 1/-1; } }
   .panel h3:first-child { margin-top: 0; }
   .g { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .g.one { grid-template-columns: 1fr; }
   .panel label { display: grid; gap: 4px; font-size: 13px; font-weight: 600; color: var(--ink-2); }
-  .panel input[type=number], .panel input[type=text], .panel input[type=tel], .panel input[type=email], .panel textarea, .panel select { font-family: var(--font); font-size: 15px; padding: 9px 11px; border: 1px solid var(--line); border-radius: 9px; width: 100%; }
-  .panel textarea { min-height: 64px; resize: vertical; }
+  .panel input[type=number], .panel input[type=text], .panel input[type=tel], .panel input[type=email], .panel textarea, .panel select { font-family: var(--font); font-size: 14px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 9px; width: 100%; }
+  .panel textarea { min-height: 40px; height: 40px; resize: vertical; }
+  .panel .addr-box { gap: 6px; } .panel .addr-row { grid-template-columns: 120px auto; } .panel .addr-row .btn { padding: 0 14px; font-size: 13px; }
   .seg { display: flex; gap: 6px; flex-wrap: wrap; }
   .seg label { flex: 1; cursor: pointer; }
   .seg input { display: none; }
-  .seg span { display: block; text-align: center; padding: 9px 6px; border: 1px solid var(--line); border-radius: 9px; font-weight: 600; font-size: 14px; color: var(--ink); }
+  .seg span { display: block; text-align: center; padding: 8px 6px; border: 1px solid var(--line); border-radius: 9px; font-weight: 600; font-size: 13.5px; color: var(--ink); }
   .seg input:checked + span { background: var(--ink); color: #fff; border-color: var(--ink); }
   .hint { font-size: 12px; color: var(--ink-3); font-weight: 400; }
   .preview { display: grid; gap: 16px; }
@@ -117,18 +126,14 @@
 
   <div class="order">
     <aside class="panel">
-      <h3>1. 각재 배열</h3>
-      <div class="seg">
-        <label><input type="radio" name="dir" data-k="dir" value="v" checked><span>세로 배열</span></label>
-        <label><input type="radio" name="dir" data-k="dir" value="h"><span>가로 배열</span></label>
-      </div>
-      <p class="hint" id="dirNote" style="margin:6px 0 0"></p>
-
-      <h3>2. 치수 (mm)</h3>
-      <p class="hint" style="margin:0 0 8px"><b style="color:var(--wood-dark)">A 폭과 B 높이만 입력하시면 됩니다.</b> 나머지 치수는 자동으로 계산됩니다.</p>
-      <div class="g">
-        <label>A 폭 * <input type="number" data-k="A" min="100" max="12000" step="10" style="border-color:var(--wood-dark);font-size:17px;font-weight:700"></label>
-        <label>B 높이 * <input type="number" data-k="B" min="100" max="12000" step="10" style="border-color:var(--wood-dark);font-size:17px;font-weight:700"></label>
+      <h3>1. 배열 · 치수 (mm) <span class="hint">위 도면에서 고른 값과 같습니다</span></h3>
+      <div class="row-dim">
+        <div class="seg seg-sm">
+          <label><input type="radio" name="dir" data-k="dir" value="v" checked><span>세로</span></label>
+          <label><input type="radio" name="dir" data-k="dir" value="h"><span>가로</span></label>
+        </div>
+        <label>A 폭 <input type="number" data-k="A" min="100" max="12000" step="10" style="border-color:var(--wood-dark);font-weight:700"></label>
+        <label>B 높이 <input type="number" data-k="B" min="100" max="12000" step="10" style="border-color:var(--wood-dark);font-weight:700"></label>
       </div>
       <details class="opt-dims">
         <summary>세부 치수 직접 조정 (선택)</summary>
@@ -139,25 +144,32 @@
           <label>G 끝 여백 <span class="hint">(남는 치수 자동 반영)</span><input type="number" data-k="G" min="0" max="5000" step="5"></label>
           <label class="one" style="grid-column:1/-1">E 각재 구간 <span class="hint">(첫 각재 왼쪽 끝~마지막 각재 오른쪽 끝 · 직접 고치면 폭이 바뀝니다)</span><input type="number" data-k="E" min="0" max="12000" step="60"></label>
         </div>
+        <p class="hint" style="margin:8px 0 0">각재 30×30 · 간격 30 · 합판 8 은 고정입니다. 합판 원장은 1220×2440이며 가로·세로 모두 이어 붙여 제작하므로 크기 제한이 없습니다.</p>
       </details>
-      <p class="hint" style="margin:8px 0 0">각재 30×30 · 간격 30 · 합판 8 은 고정입니다. 합판 원장은 1220×2440이며 가로·세로 모두 계속 이어 붙여 제작하므로 크기 제한이 없습니다.</p>
+      <p class="hint" id="dirNote" style="display:none"></p>
 
-      <h3>3. 코너형 옵션</h3>
-      <div class="seg">
-        <label><input type="radio" name="corner" data-k="corner" value="none" checked><span>없음</span></label>
-        <label><input type="radio" name="corner" data-k="corner" value="left"><span>좌측</span></label>
-        <label><input type="radio" name="corner" data-k="corner" value="right"><span>우측</span></label>
-        <label><input type="radio" name="corner" data-k="corner" value="both"><span>양쪽</span></label>
-      </div>
-      <div id="cornerK" style="margin-top:10px">
-        <label>K 코너 돌림 길이 (mm) <span class="hint">ㄱ자로 꺾여 돌아가는 면의 폭</span><input type="number" data-k="K" min="30" max="12000" step="10"></label>
+      <h3>2. 코너형 옵션</h3>
+      <div class="row-corner">
+        <div class="seg">
+          <label><input type="radio" name="corner" data-k="corner" value="none" checked><span>없음</span></label>
+          <label><input type="radio" name="corner" data-k="corner" value="left"><span>좌측</span></label>
+          <label><input type="radio" name="corner" data-k="corner" value="right"><span>우측</span></label>
+          <label><input type="radio" name="corner" data-k="corner" value="both"><span>양쪽</span></label>
+        </div>
+        <div id="cornerK">
+          <label>K 돌림 길이 <span class="hint">(꺾이는 면 폭)</span><input type="number" data-k="K" min="30" max="12000" step="10"></label>
+        </div>
       </div>
 
-      <h3>4. 마감 · 수량 · 시공</h3>
-      <div class="seg">
-        <label><input type="radio" name="finish" data-k="finish" value="오일 스테인" checked><span>오일 스테인</span></label>
-        <label><input type="radio" name="finish" data-k="finish" value="무도장"><span>무도장</span></label>
-        <label><input type="radio" name="finish" data-k="finish" value="추가옵션"><span>추가옵션</span></label>
+      <h3>3. 마감 · 수량 · 시공</h3>
+      <div class="row-finish">
+        <div class="seg">
+          <label><input type="radio" name="finish" data-k="finish" value="오일 스테인" checked><span>오일 스테인</span></label>
+          <label><input type="radio" name="finish" data-k="finish" value="무도장"><span>무도장</span></label>
+          <label><input type="radio" name="finish" data-k="finish" value="추가옵션"><span>추가옵션</span></label>
+        </div>
+        <label>수량 (장) <input type="number" data-k="qty" min="1" max="9999" step="1"></label>
+        <label>시공 <select data-k="install"><option>자재 납품</option><option>현장 시공 포함</option></select></label>
       </div>
       <div id="extraOpts" style="display:none;margin-top:10px;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--bg)">
         <div class="seg" style="flex-direction:column;gap:6px">
@@ -169,21 +181,17 @@
         <div id="paintRow" style="display:none;margin-top:10px;align-items:center;gap:10px;font-size:13px;font-weight:600;color:var(--ink-2)"><span id="paintLabel" style="min-width:96px">각재 도색 색상</span> <input type="color" data-k="paint" value="#2a2724" style="width:48px;height:32px;padding:0;border:1px solid var(--line);border-radius:6px;background:#fff"> <span class="hint">원하는 색을 고르면 도면과 3D에 반영됩니다</span></div>
         <div id="paintRow2" style="display:none;margin-top:8px;align-items:center;gap:10px;font-size:13px;font-weight:600;color:var(--ink-2)"><span style="min-width:96px">합판 도색 색상</span> <input type="color" data-k="paint2" value="#2a2724" style="width:48px;height:32px;padding:0;border:1px solid var(--line);border-radius:6px;background:#fff"></div>
       </div>
-      <div class="g" style="margin-top:10px">
-        <label>수량 (장) <input type="number" data-k="qty" min="1" max="9999" step="1"></label>
-        <label>시공
-          <select data-k="install"><option>자재 납품</option><option>현장 시공 포함</option></select>
-        </label>
-      </div>
 
-      <h3>5. 주문자 정보</h3>
-      <div class="g">
+      <h3>4. 주문자 정보</h3>
+      <div class="g g3">
         <label>이름 * <input type="text" data-k="name" placeholder="홍길동"></label>
         <label>연락처 * <input type="tel" data-k="tel" placeholder="010-0000-0000"></label>
-        <label style="grid-column:1/-1">이메일 * <input type="email" data-k="email" placeholder="답장 받을 이메일 (필수)" required></label>
+        <label>이메일 * <input type="email" data-k="email" placeholder="답장 받을 이메일" required></label>
+      </div>
+      <div class="g" style="margin-top:10px">
         <label style="grid-column:1/-1">배송 주소 <span class="hint" style="font-weight:400">(선택 · 납품·시공 장소)</span><div data-addr="addr" data-k-mode></div></label>
-        <label style="grid-column:1/-1">배송 방법 <select data-k="ship"><option>협의 후 결정</option><option>택배 (소량·소형, 1장 기준 1200 이하)</option><option>화물·용달 (대형·다량, 착불)</option><option>직접 방문 수령 (충남 홍성 공방)</option><option>현장 시공 (시공 포함 주문 · 직접 설치)</option></select></label>
-        <label style="grid-column:1/-1">메모 <textarea data-k="memo" placeholder="희망 일정, 색상, 기타 요청"></textarea></label>
+        <label>배송 방법 <select data-k="ship"><option>협의 후 결정</option><option>택배 (소량·소형, 1장 기준 1200 이하)</option><option>화물·용달 (대형·다량, 착불)</option><option>직접 방문 수령 (충남 홍성 공방)</option><option>현장 시공 (시공 포함 주문 · 직접 설치)</option></select></label>
+        <label>메모 <textarea data-k="memo" placeholder="희망 일정, 색상, 기타 요청"></textarea></label>
       </div>
     </aside>
 
@@ -195,7 +203,7 @@
         <div>각재 총길이<b><span id="sumM">0</span> m</b></div>
         <div>패널 면적<b><span id="sumA">0</span> ㎡</b></div>
       </div>
-      <div class="calcbox" id="calcBox"><div class="calc-title">계산 내용 <small>치수 단위 mm · 각재 30×30 · 간격 30 (피치 60) · 합판 8t</small></div><div id="calcRows"></div></div>
+      <div class="calcbox" id="calcBox"><div class="calc-title">예상 금액 계산 <small>예상 금액이며 실제 견적은 접수 후 담당자가 확정합니다 · 부가세 별도 표시</small></div><div id="calcRows"></div></div>
       <div class="warnbox" style="display:none"><ul id="warn"></ul></div>
       <div class="sheet-wrap"><canvas id="sheet"></canvas></div>
       <div class="actions">
@@ -227,7 +235,7 @@
 <script src="js/cart.js?v=20261001m"></script>
 <!-- 이메일 자동 발송(EmailJS)을 쓰려면 아래 주석을 풀고 main.js 의 SITE.emailjs 값을 채우세요.
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script> -->
-<script src="js/order.js?v=20261001m"></script>
+<script src="js/order.js?v=20261001n"></script>
 <script type="importmap">{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/" } }</script>
 <script type="module" src="js/view3d.js?v=20260930p"></script>
 <script>

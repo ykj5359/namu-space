@@ -313,21 +313,32 @@
     $('#sumSticks').textContent = st.sticks; $('#sumSticksNote').textContent = `1본당 ${st.per}개 (${r.C} mm 기준)`;
     $('#sumSheets').textContent = r.sheets; $('#sumSeg').textContent = r.sheets > 1 ? `${r.nx}×${r.ny} 이어 붙임` : '이음 없음';
     $('#sumM').textContent = r.meters; $('#sumA').textContent = r.area;
-    // 계산 내용
-    const v = s.dir === 'v', acrossName = v ? '폭 A' : '높이 B', alongName = v ? '높이 B' : '폭 A', G0 = s.G, extraG = Math.round(r.Gadj - G0), qtyTxt = s.qty > 1 ? ` × 수량 ${s.qty}장` : '';
-    const cornerTxt = r.cornerN ? (v ? ` + 코너 ${r.cornerN}면 × ${r.cornerBattens}개 (K ${s.K}: (${s.K}+30)÷60 버림)` : ` (코너 ${r.cornerN}면은 각재가 K ${s.K}만큼 길어짐)`) : '';
+    // 예상 금액 계산 (cart.js 의 price/cost 와 같은 규칙)
+    const won = NW_CART.won, P = SITE.price || {}, CO = SITE.cost || {};
+    const it = {}; DIM_KEYS.forEach(k => it[k] = s[k]); it.calc = { area: r.totW * r.totH / 1e6, C: r.C, totalBattens: r.totalBattens, sheets: r.sheets }; it.qty = Math.max(1, +s.qty || 1); it.finish = s.finish; it.extra = s.extra; it.corner = s.corner; it.install = s.install;
+    const a = it.calc.area, pr = NW_CART.price(it), tt = NW_CART.totals([it]);
+    const rate = s.finish === '무도장' ? (P.natural || 0) : (P.stain || 0), base = rate * a;
+    const cornerN = s.corner === 'none' ? 0 : (s.corner === 'both' ? 2 : 1), cornerAmt = cornerN * (P.corner || 0);
+    const installAmt = s.install === '현장 시공 포함' ? (P.install || 0) * a : 0;
+    const exRate = s.finish === '추가옵션' ? (s.extra === '합판 흑도장' ? (P.plyBlack || 0) : (P.paint || 0)) : 0, exAmt = exRate * a;
+    const raw = base + cornerAmt + installAmt + exAmt;
     const rows = [
-      ['각재 구간 E', `${acrossName} ${r.across} − 시작 여백 F ${s.F} − 끝 여백 G ${G0} = <em>${r.E}</em>`],
-      ['각재 개수', `(E ${r.E} + 간격 30) ÷ 피치 60 = ${((r.E + GAP) / PITCH).toFixed(2)} → 버림 <em>${r.n}개</em>${cornerTxt}${r.cornerN && v ? ` = 총 <em>${r.totalBattens}개</em>` : ''}`],
-      ['실제 E · 조정 G', `각재 ${r.n}개 × 60 − 30 = 실제 E <em>${r.Ereal}</em>` + (extraG ? ` · 남는 ${extraG} mm는 끝 여백 G에 더해 G = <em>${Math.round(r.Gadj)}</em>` : ' · 남는 치수 없음 (G 그대로)')],
-      ['각재 길이 C', `${alongName} ${r.along} − 끝 여백 D ${r.D} = <em>${r.C}</em>${r.battenLen !== r.C ? ` (코너 포함 ${r.battenLen})` : ''}`],
-      ['원본 각재 3600', `3600 ÷ ${r.C} = ${(3600 / Math.max(1, r.C)).toFixed(2)} → 1본당 ${st.per}개 · ${r.totalBattens}개 ÷ ${st.per} = ${(r.totalBattens / st.per).toFixed(2)} → 올림 <em>${st.sticks}본</em>`],
-      ['합판 원장', `패널 ${r.totW} × ${r.totH} 에 원장 ${r.sheetX}×${r.sheetY} 배치: 가로 ${r.nx}장 × 세로 ${r.ny}장 = <em>${r.sheets}장</em>${r.sheets > 1 ? ' (도면의 회색 점선이 이음 위치)' : ''}`],
-      ['각재 총길이', `${r.totalBattens}개 × ${r.battenLen} mm${qtyTxt} = <em>${r.meters} m</em>`],
-      ['패널 면적', `${r.totW} × ${r.totH} ÷ 1,000,000${qtyTxt} = <em>${r.area} ㎡</em>${r.left || r.right ? ' (코너 돌림 K 포함 폭)' : ''}`],
+      ['패널 면적', `${r.totW} × ${r.totH} ÷ 1,000,000 = <em>${a.toFixed(2)} ㎡</em>${r.left || r.right ? ' (코너 돌림 K 포함)' : ''}`],
+      ['기본 금액', `${a.toFixed(2)} ㎡ × ${won(rate)}/㎡ (${s.finish === '무도장' ? '무도장' : '오일 스테인'}) = <em>${won(base)}</em>`],
+      ['코너 추가', cornerN ? `${cornerN}면 × ${won(P.corner || 0)} = <em>${won(cornerAmt)}</em>` : '없음'],
+      ['현장 시공', installAmt ? `${a.toFixed(2)} ㎡ × ${won(P.install || 0)}/㎡ = <em>${won(installAmt)}</em>` : '없음 (자재 납품)'],
+      ['추가옵션', s.finish === '추가옵션' ? (exRate ? `${s.extra} · ${a.toFixed(2)} ㎡ × ${won(exRate)}/㎡ = <em>${won(exAmt)}</em>` : `${s.extra} · 추가금 없음 (접수 후 안내)`) : '없음'],
+      ['1장 단가', `${won(raw)} → 100원 단위 반올림${pr.unit > Math.round(raw / 100) * 100 ? ` · 최소 ${won(P.min || 0)} 적용` : ''} = <em>${won(pr.unit)}</em>`],
+      ['공급가', `${won(pr.unit)} × ${it.qty}장 = <em>${won(tt.supply)}</em>`],
+      ['부가세', tt.vat ? `${won(tt.supply)} × 10% = <em>${won(tt.vat)}</em>` : '없음'],
+      ['예상 합계', `${won(tt.supply)} + ${won(tt.vat)} = <em>${won(tt.total)}</em>`],
     ];
+    let adm = false; try { adm = !!sessionStorage.getItem('nw_admin_token'); } catch (e) {}
+    if (adm) { const c = NW_CART.cost(it), st2 = NW_CART.sticks(r.totalBattens, r.C);
+      rows.push(['원가 (관리자)', `각재 ${st2.sticks}본 × ${won(CO.batten || 0)} = ${won(c.battens)} + 합판 ${r.sheets}장 × ${won(CO.plywood || 0)} = ${won(c.ply)} + 인건비 ${a.toFixed(2)} ㎡ × ${won(CO.labor || 0)} = ${won(c.labor)}${c.stain ? ` + 스테인 ${won(c.stain)}` : ''} → <em>${won(c.unit)}/장</em> × ${it.qty}장 = <em>${won(c.sub)}</em>`]);
+      rows.push(['예상 마진 (관리자)', `공급가 ${won(tt.supply)} − 원가 ${won(c.sub)} = <em>${won(tt.supply - c.sub)}</em> (${tt.supply ? Math.round((tt.supply - c.sub) / tt.supply * 100) : 0}%)`]); }
     $('#calcRows').innerHTML = rows.map(x => `<div class="calc-row"><b>${x[0]}</b><span>${x[1]}</span></div>`).join('');
-    $('#dirNote').textContent = s.dir === 'v' ? '세로 배열: 각재 길이 C는 높이(B) 방향, F·E·G는 폭(A) 방향' : '가로 배열: 각재 길이 C는 폭(A) 방향, F·E·G는 높이(B) 방향';
+    const dn = $('#dirNote'); if (dn) dn.textContent = s.dir === 'v' ? '세로 배열: 각재 길이 C는 높이(B) 방향, F·E·G는 폭(A) 방향' : '가로 배열: 각재 길이 C는 폭(A) 방향, F·E·G는 높이(B) 방향';
     const warn = [];
     if (r.n === 0) warn.push('각재 구간(E)이 60mm보다 작아 각재가 들어가지 않습니다. F·G 여백을 줄이거나 크기를 키우세요.');
     $('#warn').innerHTML = warn.map(w => `<li>${w}</li>`).join('');
