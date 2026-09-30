@@ -129,22 +129,29 @@ window.NW_ADDR = (function () {
     document.querySelectorAll('[data-text]').forEach(el => { const v = T[el.getAttribute('data-text')]; if (v) el.innerHTML = escH(v).replace(/\n/g, '<br>'); });
     document.querySelectorAll('[data-kakao-row]').forEach(el => { el.style.display = SITE.kakao ? '' : 'none'; const a = el.querySelector('a[data-kakao]'); if (a) a.href = SITE.kakao || '#'; });
     document.querySelectorAll('[data-hours]').forEach(el => { el.style.display = SITE.hours ? '' : 'none'; });
-    // 이미지 팝업창 (홈 첫 방문 · 하루 동안 닫기 가능)
-    const P = T.popup || {}, isHome = /(^|\/)(index\.html)?$/.test(location.pathname);
-    const hideUntil = (() => { try { return localStorage.getItem('nw_popup_hide') || ''; } catch (e) { return ''; } })();
+    // 이미지 팝업창 (홈 첫 방문 · 하루 동안 닫기 가능 · 관리자가 팝업을 바꾸면 다시 표시 · 좌측 하단 이벤트 버튼으로 언제든 다시 열기)
+    const P = T.popup || {}, isHome = /(^|\/)(index\.html)?$/.test(location.pathname), qs = new URLSearchParams(location.search);
     const d1 = new Date(), todayS = `${d1.getFullYear()}-${String(d1.getMonth() + 1).padStart(2, '0')}-${String(d1.getDate()).padStart(2, '0')}`;
-    const showPop = P.on && P.image && (P.pages === 'all' || isHome) && (!P.from || P.from <= todayS) && (!P.to || P.to >= todayS) && hideUntil !== todayS && !document.body.classList.contains('admin') && !new URLSearchParams(location.search).get('only');
-    let pop = document.getElementById('nwPopup');
-    if (showPop && !pop && !fill.popShown) {
-      fill.popShown = true;
-      pop = document.createElement('div'); pop.id = 'nwPopup'; pop.className = 'nw-popup';
+    const sig = todayS + '|' + [P.image, P.title, P.from, P.to].join('|');
+    const hidden = (() => { try { return localStorage.getItem('nw_popup_hide') === sig; } catch (e) { return false; } })();
+    const active = !!(P.on && P.image && (!P.from || P.from <= todayS) && (!P.to || P.to >= todayS)) && !document.body.classList.contains('admin') && !qs.get('only');
+    const onPage = P.pages === 'all' || isHome || qs.get('popup');
+    const openPopup = () => {
+      if (document.getElementById('nwPopup')) return;
+      const pop = document.createElement('div'); pop.id = 'nwPopup'; pop.className = 'nw-popup';
       pop.innerHTML = `<div class="nw-popup-box"><button type="button" class="nw-popup-x" aria-label="닫기">×</button>${P.link ? `<a href="${escH(P.link)}" class="nw-popup-img">` : '<div class="nw-popup-img">'}<img src="${escH(P.image)}" alt="${escH(P.title || '이벤트')}">${P.link ? '</a>' : '</div>'}<div class="nw-popup-bar"><label><input type="checkbox" id="nwPopupToday"> 오늘 하루 보지 않기</label><button type="button" class="nw-popup-close">닫기</button></div></div>`;
       document.body.appendChild(pop);
-      const close = () => { try { if (document.getElementById('nwPopupToday').checked) localStorage.setItem('nw_popup_hide', todayS); } catch (e) {} pop.remove(); };
+      const close = () => { try { if (document.getElementById('nwPopupToday').checked) localStorage.setItem('nw_popup_hide', sig); } catch (e) {} pop.remove(); };
       pop.querySelector('.nw-popup-x').addEventListener('click', close); pop.querySelector('.nw-popup-close').addEventListener('click', close);
       pop.addEventListener('click', e => { if (e.target === pop) close(); });
-      const lk = pop.querySelector('a.nw-popup-img'); if (lk) lk.addEventListener('click', () => { try { localStorage.setItem('nw_popup_hide', todayS); } catch (e) {} pop.remove(); });
-    } else if (!showPop && pop && !fill.popShown) pop.remove();
+      const lk = pop.querySelector('a.nw-popup-img'); if (lk) lk.addEventListener('click', () => { try { localStorage.setItem('nw_popup_hide', sig); } catch (e) {} pop.remove(); });
+    };
+    window.NW_POPUP_OPEN = openPopup;
+    if (active && onPage && !hidden && !fill.popShown) { fill.popShown = true; openPopup(); }
+    // 좌측 하단 이벤트 버튼 (팝업이 켜져 있는 동안 항상)
+    let fab = document.getElementById('nwPopupFab');
+    if (active && onPage) { if (!fab) { fab = document.createElement('button'); fab.id = 'nwPopupFab'; fab.type = 'button'; fab.className = 'nw-popup-fab'; document.body.appendChild(fab); fab.addEventListener('click', openPopup); } fab.textContent = '🎁 ' + (P.title || '이벤트 보기'); }
+    else if (fab) fab.remove();
     // 공지 배너 (기간 안에서만)
     const d0 = new Date(), n = T.notice || {}, today = `${d0.getFullYear()}-${String(d0.getMonth() + 1).padStart(2, '0')}-${String(d0.getDate()).padStart(2, '0')}`;
     const show = n.on && n.text && (!n.from || n.from <= today) && (!n.to || n.to >= today);
