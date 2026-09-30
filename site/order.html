@@ -8,8 +8,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Nanum+Myeongjo:wght@700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css?v=20261001k">
 <style>
-  .order { display: grid; grid-template-columns: 540px 1fr; gap: 24px; align-items: start; padding: 30px 0 60px; }
-  .panel { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 16px 18px 18px; position: sticky; top: 84px; max-height: calc(100vh - 100px); overflow: auto; }
+  .order { display: grid; grid-template-columns: 520px 1fr; gap: 24px; align-items: start; padding: 30px 0 10px; }
+  .panel { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 16px 20px 20px; }
   .panel h3 { font-size: 14px; letter-spacing: .08em; color: var(--wood-dark); margin: 14px 0 8px; padding-bottom: 5px; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
   .panel h3 .hint { letter-spacing: 0; }
   .row-dim { display: grid; grid-template-columns: 150px 1fr 1fr; gap: 10px; align-items: end; }
@@ -17,7 +17,7 @@
   .row-finish { display: grid; grid-template-columns: 1fr 96px 150px; gap: 10px; align-items: end; }
   .g.g3 { grid-template-columns: 1fr 1fr 1.3fr; }
   .seg-sm span { padding: 8px 4px; font-size: 13px; }
-  @media (max-width: 1200px) { .order { grid-template-columns: 470px 1fr; } .row-finish { grid-template-columns: 1fr 1fr; } .row-finish .seg { grid-column: 1/-1; } }
+  @media (max-width: 1200px) { .order { grid-template-columns: 460px 1fr; } }
   @media (max-width: 600px) { .row-dim, .row-corner, .g.g3 { grid-template-columns: 1fr 1fr; } .row-dim .seg { grid-column: 1/-1; } }
   .panel h3:first-child { margin-top: 0; }
   .g { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -29,7 +29,7 @@
   .seg { display: flex; gap: 6px; flex-wrap: wrap; }
   .seg label { flex: 1; cursor: pointer; }
   .seg input { display: none; }
-  .seg span { display: block; text-align: center; padding: 8px 6px; border: 1px solid var(--line); border-radius: 9px; font-weight: 600; font-size: 13.5px; color: var(--ink); }
+  .seg span { display: block; text-align: center; padding: 9px 6px; border: 1px solid var(--line); border-radius: 9px; font-weight: 600; font-size: 14px; color: var(--ink); white-space: nowrap; }
   .seg input:checked + span { background: var(--ink); color: #fff; border-color: var(--ink); }
   .hint { font-size: 12px; color: var(--ink-3); font-weight: 400; }
   .preview { display: grid; gap: 16px; }
@@ -52,6 +52,18 @@
   .calc-row em { font-style: normal; color: var(--wood-dark); font-weight: 700; }
   @media (max-width: 600px) { .calc-row { grid-template-columns: 1fr; gap: 2px; } }
   .actions { display: flex; gap: 10px; flex-wrap: wrap; }
+  .actions-main { background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; }
+  .actions-main .btn { flex: 1 1 auto; justify-content: center; }
+  .sheet-sec { padding: 14px 0 60px; display: grid; gap: 14px; }
+  .sec-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; }
+  .cart-sheets { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; }
+  .cart-sheets figure { margin: 0; background: #fff; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+  .cart-sheets img { width: 100%; display: block; border-bottom: 1px solid var(--line); }
+  .cart-sheets figcaption { padding: 12px 14px; font-size: 13.5px; display: grid; gap: 6px; }
+  .cart-sheets figcaption b { font-size: 14px; }
+  .cart-sheets .cs-btns { display: flex; gap: 8px; margin-top: 4px; }
+  .cart-sheets .cs-btns .btn { padding: 7px 14px; font-size: 13px; }
+  .cart-sheets .cs-btns .del { color: #b91c1c; border-color: #b91c1c; }
   .warnbox { background: #FFF4E5; border-left: 4px solid #F59E0B; border-radius: 8px; padding: 10px 16px; font-size: 14px; }
   .warnbox ul { margin: 0; padding-left: 18px; }
   #done { background: #ECFDF5; border-left: 4px solid #10B981; padding: 12px 16px; border-radius: 8px; font-size: 14.5px; }
@@ -67,7 +79,7 @@
   .sim-photo img { width: 100%; flex: 1; object-fit: cover; min-height: 0; }
   .sim-photo figcaption { padding: 10px 14px; font-size: 14px; line-height: 1.5; }
   @media (max-width: 960px) { .sim-grid { grid-template-columns: 1fr; } .sim-photo img { height: 260px; flex: none; } }
-  @media (max-width: 960px) { .order { grid-template-columns: 1fr; } .panel { position: static; max-height: none; } .summary { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 960px) { .order { grid-template-columns: 1fr; } .summary { grid-template-columns: repeat(2, 1fr); } }
 </style>
 </head>
 <body>
@@ -149,25 +161,23 @@
       <p class="hint" id="dirNote" style="display:none"></p>
 
       <h3>2. 코너형 옵션</h3>
-      <div class="row-corner">
-        <div class="seg">
-          <label><input type="radio" name="corner" data-k="corner" value="none" checked><span>없음</span></label>
-          <label><input type="radio" name="corner" data-k="corner" value="left"><span>좌측</span></label>
-          <label><input type="radio" name="corner" data-k="corner" value="right"><span>우측</span></label>
-          <label><input type="radio" name="corner" data-k="corner" value="both"><span>양쪽</span></label>
-        </div>
-        <div id="cornerK">
-          <label>K 돌림 길이 <span class="hint">(꺾이는 면 폭)</span><input type="number" data-k="K" min="30" max="12000" step="10"></label>
-        </div>
+      <div class="seg">
+        <label><input type="radio" name="corner" data-k="corner" value="none" checked><span>없음</span></label>
+        <label><input type="radio" name="corner" data-k="corner" value="left"><span>좌측</span></label>
+        <label><input type="radio" name="corner" data-k="corner" value="right"><span>우측</span></label>
+        <label><input type="radio" name="corner" data-k="corner" value="both"><span>양쪽</span></label>
+      </div>
+      <div id="cornerK" class="g" style="margin-top:10px">
+        <label>K 코너 돌림 길이 (mm) <span class="hint">ㄱ자로 꺾여 돌아가는 면의 폭</span><input type="number" data-k="K" min="30" max="12000" step="10"></label>
       </div>
 
       <h3>3. 마감 · 수량 · 시공</h3>
-      <div class="row-finish">
-        <div class="seg">
-          <label><input type="radio" name="finish" data-k="finish" value="오일 스테인" checked><span>오일 스테인</span></label>
-          <label><input type="radio" name="finish" data-k="finish" value="무도장"><span>무도장</span></label>
-          <label><input type="radio" name="finish" data-k="finish" value="추가옵션"><span>추가옵션</span></label>
-        </div>
+      <div class="seg">
+        <label><input type="radio" name="finish" data-k="finish" value="오일 스테인" checked><span>오일 스테인</span></label>
+        <label><input type="radio" name="finish" data-k="finish" value="무도장"><span>무도장</span></label>
+        <label><input type="radio" name="finish" data-k="finish" value="추가옵션"><span>추가옵션</span></label>
+      </div>
+      <div class="g" style="margin-top:10px">
         <label>수량 (장) <input type="number" data-k="qty" min="1" max="9999" step="1"></label>
         <label>시공 <select data-k="install"><option>자재 납품</option><option>현장 시공 포함</option></select></label>
       </div>
@@ -205,21 +215,28 @@
       </div>
       <div class="calcbox" id="calcBox"><div class="calc-title">예상 금액 계산 <small>예상 금액이며 실제 견적은 접수 후 담당자가 확정합니다 · 부가세 별도 표시</small></div><div id="calcRows"></div></div>
       <div class="warnbox" style="display:none"><ul id="warn"></ul></div>
-      <div class="sheet-wrap"><canvas id="sheet"></canvas></div>
-      <div class="actions">
+      <div class="actions actions-main">
         <button class="btn wood" id="btnSend">주문서 이메일로 접수</button>
+        <button class="btn" id="btnPay" style="background:var(--green)">결제하기</button>
         <button class="btn ghost" id="btnDown">도면 이미지 저장 (PNG)</button>
         <button class="btn ghost" id="btnPrint">인쇄</button>
-        <button class="btn" id="btnPay" style="background:var(--green)">결제하기</button>
       </div>
       <div id="done" style="display:none"></div>
-      <div class="legend">
-        <span><b>A</b> 패널 폭 · <b>B</b> 패널 높이 · <b>C</b> 각재 길이 · <b>D</b> 각재 끝 여백 · <b>F</b> 시작 여백 · <b>E</b> 각재 구간 · <b>G</b> 끝 여백 · <b>K</b> 코너 돌림 길이</span>
-        <span>파란 치수선은 mm 단위, 주황 점선은 코너 접힘선, 회색 점선은 합판 원장(1220×2440) 이음선입니다.</span>
-        <span>도면을 스케치한 손도면(노트)과 같은 방식으로 그려지며, 접수 후 담당자가 확인 전화를 드립니다.</span>
-      </div>
     </div>
   </div>
+
+  <section class="sheet-sec">
+    <div class="sec-head"><div><div class="eyebrow">Order Sheet</div><h2 class="sec-title" style="font-size:24px;margin-bottom:4px">주문 도면</h2><p class="hint" style="margin:0">입력한 치수로 자동 작성된 주문서입니다. 접수·결제 시 이 도면이 그대로 첨부됩니다.</p></div></div>
+    <div class="sheet-wrap"><canvas id="sheet"></canvas></div>
+    <div class="legend">
+      <span><b>A</b> 패널 폭 · <b>B</b> 패널 높이 · <b>C</b> 각재 길이 · <b>D</b> 각재 끝 여백 · <b>F</b> 시작 여백 · <b>E</b> 각재 구간 · <b>G</b> 끝 여백 · <b>K</b> 코너 돌림 길이</span>
+      <span>파란 치수선은 mm 단위, 주황 점선은 코너 접힘선, 회색 점선은 합판 원장(1220×2440) 이음선입니다.</span>
+    </div>
+    <div id="cartSheetsWrap" style="display:none">
+      <div class="sec-head" style="margin-top:34px"><div><div class="eyebrow">In Cart</div><h2 class="sec-title" style="font-size:22px;margin-bottom:4px">장바구니에 담긴 도면 <span id="cartSheetsN" class="tag"></span></h2><p class="hint" style="margin:0">담아 둔 도면들입니다. 수정을 누르면 위 입력칸에 불러옵니다.</p></div><a class="btn wood sm" href="checkout.html">전체 결제하기</a></div>
+      <div id="cartSheets" class="cart-sheets"></div>
+    </div>
+  </section>
 </div>
 
 <footer class="site">
@@ -235,7 +252,7 @@
 <script src="js/cart.js?v=20261001m"></script>
 <!-- 이메일 자동 발송(EmailJS)을 쓰려면 아래 주석을 풀고 main.js 의 SITE.emailjs 값을 채우세요.
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script> -->
-<script src="js/order.js?v=20261001n"></script>
+<script src="js/order.js?v=20261001o"></script>
 <script type="importmap">{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/" } }</script>
 <script type="module" src="js/view3d.js?v=20260930p"></script>
 <script>

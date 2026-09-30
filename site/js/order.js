@@ -465,6 +465,15 @@
   (document.fonts ? document.fonts.ready : Promise.resolve()).then(draw); draw();
 
   // ---- 장바구니 담기 툴바 ----
+  // 하단: 장바구니에 담긴 도면 나열
+  function renderCartSheets() {
+    const wrap = $('#cartSheetsWrap'), grid = $('#cartSheets'); if (!wrap || !grid || !window.NW_CART) return;
+    const items = NW_CART.items(); wrap.style.display = items.length ? '' : 'none'; if (!items.length) { grid.innerHTML = ''; return; }
+    $('#cartSheetsN').textContent = `${items.length}건 · ${items.reduce((a, it) => a + it.qty, 0)}장`;
+    grid.innerHTML = items.map((it, i) => { const p = NW_CART.price(it); return `<figure><img src="${it.sheet || it.thumb}" alt="도면 ${i + 1}" loading="lazy"><figcaption><b>도면 ${i + 1} · ${NW_CART.label(it)}</b><span>${it.qty}장 × ${NW_CART.won(p.unit)} = <b>${NW_CART.won(p.sub)}</b> <span class="hint">(부가세 별도)</span></span><div class="cs-btns"><a class="btn ghost" href="order.html?item=${it.id}">수정</a><button type="button" class="btn ghost del" data-del="${it.id}">삭제</button></div></figcaption></figure>`; }).join('');
+    grid.querySelectorAll('[data-del]').forEach(b => b.addEventListener('click', () => { NW_CART.remove(b.dataset.del); }));
+  }
+  document.addEventListener('cart:change', renderCartSheets); document.addEventListener('DOMContentLoaded', renderCartSheets); renderCartSheets();
   const editId = qp.get('item');                                  // cart.html 에서 '수정' 으로 들어온 경우
   if (editId && window.NW_CART) { const it = NW_CART.find(editId); if (it) { loadItem(it); const q = $('#addQty'); if (q) q.value = it.qty; } }
   const est = () => { if (!window.NW_CART || !$('#addEst')) return; const it = {}; DIM_KEYS.forEach(k => it[k] = state[k]); const r = calc(); it.calc = { area: r.totW * r.totH / 1e6 }; it.qty = Math.max(1, +($('#addQty').value || 1)); const p = NW_CART.price(it); $('#addEst').innerHTML = `예상 <b>${NW_CART.won(p.unit)}</b>/장 · ${it.qty}장 ${NW_CART.won(p.sub)} <span class="hint">(부가세 별도)</span>`; };
