@@ -143,7 +143,16 @@
     $('#detailBox [data-x]').addEventListener('click', closeDetail);
     const stSel = $('#dForm [name=status]'), cancelRow = $('#cancelRow');
     stSel.addEventListener('change', () => { cancelRow.style.display = stSel.value === '취소' && r.status !== '취소' ? '' : 'none'; });
-    const dc = $('#dCancel'); if (dc) dc.addEventListener('click', () => { stSel.value = '취소'; stSel.dispatchEvent(new Event('change')); const inp = $('#dForm [name=cancelReason]'); inp.scrollIntoView({ block: 'center' }); inp.focus(); toast('취소 사유를 적고 저장을 누르면 취소 처리됩니다'); });
+    // 취소 버튼: 1) 사유 입력칸 열기 → 2) 사유를 적고 다시 누르면 바로 취소 저장
+    const dc = $('#dCancel'); if (dc) dc.addEventListener('click', async () => {
+      const inp = $('#dForm [name=cancelReason]');
+      if (cancelRow.style.display === 'none') { stSel.value = '취소'; stSel.dispatchEvent(new Event('change')); dc.textContent = '✕ 취소 저장'; dc.classList.add('armed'); inp.scrollIntoView({ block: 'center' }); inp.focus(); toast('취소 사유를 적고 다시 취소를 누르세요'); return; }
+      const reason = inp.value.trim(); if (!reason) { toast('취소 사유를 입력해 주세요', true); inp.focus(); return; }
+      dc.disabled = true; dc.textContent = '처리 중…';
+      try { await api('admin.update', { no, patch: { status: '취소', cancelReason: reason, memo: $('#dForm [name=memo]').value } }); toast('취소 처리했습니다'); await load(); openDetail(no); }
+      catch (err) { toast(err.message, true); dc.disabled = false; dc.textContent = '✕ 취소 저장'; }
+    });
+    const inpEnter = $('#dForm [name=cancelReason]'); if (inpEnter) inpEnter.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); dc && dc.click(); } });
     $('#dForm').addEventListener('submit', async e => {
       e.preventDefault(); const f = e.target, patch = {};
       ['name', 'tel', 'email', 'addr', 'status', 'method', 'memo', 'supply', 'vat', 'total', 'cost'].forEach(k => { if (f[k]) patch[k] = f[k].type === 'number' ? +f[k].value : f[k].value; });
