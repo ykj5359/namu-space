@@ -13,7 +13,7 @@ window.NW_LOGOS = (function () {
       <rect x="98" y="22" width="12" height="76" rx="2"/>
     </g>
     <text x="130" y="68" font-family="${F}" font-weight="700" font-size="40" fill="${dark}">나무의공간</text>
-    <text x="132" y="96" font-family="${F}" font-weight="400" font-size="15" letter-spacing="6" fill="${wood}">NAMU SPACE</text>
+    <text x="130" y="100" font-family="${F}" font-weight="600" font-size="21" textLength="184" lengthAdjust="spacing" fill="${wood}">NAMU SPACE</text>
   </svg>`;
 
   // 2. 나이테 원형 아이콘 + 명조 워드마크
@@ -58,7 +58,7 @@ window.NW_LOGOS = (function () {
   const l6 = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 120">
     <text x="210" y="62" text-anchor="middle" font-family="${S}" font-weight="700" font-size="50" letter-spacing="6" fill="${dark}">나무의공간</text>
     <g fill="${wood}">${[0,1,2,3,4,5,6,7,8,9,10,11].map(i => `<rect x="${70 + i*24}" y="78" width="14" height="6" rx="1"/>`).join('')}</g>
-    <text x="210" y="106" text-anchor="middle" font-family="${F}" font-size="13" letter-spacing="8" fill="#888">NAMU SPACE</text>
+    <text x="210" y="108" text-anchor="middle" font-family="${F}" font-weight="500" font-size="18" textLength="268" lengthAdjust="spacing" fill="#888">NAMU SPACE</text>
   </svg>`;
 
   // 7. 집 실루엣 + 슬랫 (인테리어·시공 강조)
@@ -84,7 +84,7 @@ window.NW_LOGOS = (function () {
     <g fill="${dark}"><rect x="18" y="20" width="16" height="80"/><rect x="82" y="20" width="16" height="80"/></g>
     <polygon points="18,20 34,20 98,100 82,100" fill="${wood}"/>
     <text x="126" y="60" font-family="${F}" font-weight="900" font-size="36" letter-spacing="1" fill="${dark}">나무의공간</text>
-    <text x="128" y="90" font-family="${F}" font-weight="500" font-size="15" letter-spacing="7" fill="${wood}">NAMU SPACE</text>
+    <text x="126" y="92" font-family="${F}" font-weight="600" font-size="19" textLength="171" lengthAdjust="spacing" fill="${wood}">NAMU SPACE</text>
   </svg>`;
 
   // 10. 원형 스탬프·배지 스타일
