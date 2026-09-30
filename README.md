@@ -104,7 +104,21 @@ python tools/build_catalog.py 1           # 카탈로그 PDF (로고 1번)
 ## 배포
 
 GitHub 저장소 `ykj5359/namu-space` 의 `main` 에 푸시하면 Actions 워크플로(`.github/workflows/pages.yml`)가 `site/` 폴더를 GitHub Pages 로 배포합니다.
-주소: https://ykj5359.github.io/namu-space/
+주소: https://namuspace.kr (기본 주소 https://ykj5359.github.io/namu-space/ 도 계속 동작)
+
+### 도메인 (namuspace.kr · 호스팅kr)
+
+`site/CNAME` 에 `namuspace.kr` 이 들어 있어 배포 때마다 GitHub Pages 에 도메인이 연결됩니다. 호스팅kr DNS 관리에서 아래 레코드를 넣어야 합니다.
+
+| 종류 | 호스트 | 값 |
+|---|---|---|
+| A | @ | 185.199.108.153 |
+| A | @ | 185.199.109.153 |
+| A | @ | 185.199.110.153 |
+| A | @ | 185.199.111.153 |
+| CNAME | www | ykj5359.github.io |
+
+DNS 반영(보통 10분~1시간) 후 GitHub 저장소 Settings → Pages 에서 "Enforce HTTPS" 를 켜면 https://namuspace.kr 로 접속됩니다.
 
 ```bash
 git add -A
