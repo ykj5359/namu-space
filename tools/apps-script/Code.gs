@@ -64,6 +64,7 @@ function doPost(e) {
       case 'admin.pay': return json_(addPayment_(body.pay || {}));
       case 'admin.delPay': return json_(delPayment_(body.id));
       case 'admin.delete': return json_(deleteRow_(body.no));
+      case 'admin.restore': return json_(restoreRow_(body.no));
       case 'admin.changePw': return json_(changePw_(body.pw));
       case 'admin.rebuild': rebuildSales_(); return json_({ ok: true });
       default: return json_({ ok: false, error: 'unknown action' });
@@ -176,6 +177,21 @@ function updateRow_(no, patch) {
   sh.getRange(r, 21).setValue(stamp_());
   rebuildSales_();
   return { ok: true };
+}
+// 취소 복원: 취소 직전 상태로 되돌리고 취소 탭에 복원 기록을 남김
+function restoreRow_(no) {
+  var r = findRow_(no); if (!r) return { ok: false, error: 'not found' };
+  var sh = sheetIn_(), prev = sh.getRange(r, 1, 1, 21).getValues()[0];
+  if (String(prev[16]) !== '취소') return { ok: false, error: '취소 상태가 아닙니다' };
+  var back = '접수', cs = sheetCancel_().getDataRange().getValues();
+  for (var i = cs.length - 1; i >= 1; i--) if (String(cs[i][1]) === String(no) && String(cs[i][7]) !== '취소') { back = String(cs[i][7]) || '접수'; break; }
+  if (STATUSES.indexOf(back) < 0 || back === '취소') back = '접수';
+  sheetCancel_().appendRow([stamp_(), no, prev[2], prev[3], "'" + String(prev[4] || '').replace(/^'/, ''), num_(prev[13]), num_(prev[15]), '취소', '[복원] → ' + back]);
+  sh.getRange(r, 17).setValue(back);
+  sh.getRange(r, 19).setValue((prev[18] ? prev[18] + '\n' : '') + '[취소 복원] ' + stamp_() + ' → ' + back);
+  sh.getRange(r, 21).setValue(stamp_());
+  rebuildSales_();
+  return { ok: true, status: back };
 }
 // 접수 행 삭제 (해당 입금 기록도 함께 삭제)
 function deleteRow_(no) {

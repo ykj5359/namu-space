@@ -11,7 +11,7 @@
   // 삭제 확인: 브라우저 확인창 대신 같은 버튼을 5초 안에 한 번 더 누르면 실행
   function armed(btn, fn) {
     if (btn.dataset.armed) { clearTimeout(+btn.dataset.t); delete btn.dataset.armed; btn.textContent = btn.dataset.label; btn.classList.remove('armed'); fn(); return; }
-    btn.dataset.label = btn.textContent; btn.dataset.armed = '1'; btn.classList.add('armed'); btn.textContent = '정말 삭제? 한 번 더 클릭';
+    btn.dataset.label = btn.textContent; btn.dataset.armed = '1'; btn.classList.add('armed'); btn.textContent = (btn.dataset.armText || '정말 삭제?') + ' 한 번 더 클릭';
     btn.dataset.t = setTimeout(() => { delete btn.dataset.armed; btn.textContent = btn.dataset.label; btn.classList.remove('armed'); }, 5000);
   }
   const toast = (m, bad) => { const t = $('#toast'); t.textContent = m; t.style.background = bad ? '#b91c1c' : ''; t.classList.add('on'); clearTimeout(toast.h); toast.h = setTimeout(() => t.classList.remove('on'), 2200); };
@@ -126,7 +126,7 @@
         </div>` : ''}
         <label id="cancelRow" style="display:none">취소 사유 <input name="cancelReason" placeholder="예: 고객 요청 / 견적 불일치 / 연락 두절"></label>
         <label>메모 (관리자) <textarea name="memo">${esc(r.memo)}</textarea></label>
-        <div class="ad-actions"><button type="submit" class="btn wood sm">저장</button><a class="btn light sm" href="tel:${esc(String(r.tel).replace(/-/g, ''))}">📞 전화</a><a class="btn light sm" href="sms:${esc(String(r.tel).replace(/-/g, ''))}">💬 문자</a>${r.email ? `<a class="btn light sm" href="mailto:${esc(r.email)}">✉ 메일</a>` : ''}${r.status !== '취소' ? `<button type="button" class="btn light sm" id="dCancel" style="color:#b91c1c">✕ 취소</button>` : ''}<button type="button" class="btn ghost sm" id="dDel" style="margin-left:auto;color:#b91c1c;border-color:#b91c1c">접수 삭제</button></div>
+        <div class="ad-actions"><button type="submit" class="btn wood sm">저장</button><a class="btn light sm" href="tel:${esc(String(r.tel).replace(/-/g, ''))}">📞 전화</a><a class="btn light sm" href="sms:${esc(String(r.tel).replace(/-/g, ''))}">💬 문자</a>${r.email ? `<a class="btn light sm" href="mailto:${esc(r.email)}">✉ 메일</a>` : ''}${r.status !== '취소' ? `<button type="button" class="btn light sm" id="dCancel" style="color:#b91c1c">✕ 취소</button>` : `<button type="button" class="btn light sm" id="dRestore" data-arm-text="정말 복원?" style="color:var(--green)">↺ 취소 복원</button>`}<button type="button" class="btn ghost sm" id="dDel" style="margin-left:auto;color:#b91c1c;border-color:#b91c1c">접수 삭제</button></div>
       </form>
       <div><b style="font-size:14px">접수 내용</b><pre class="ad-pre">${esc(r.text)}</pre></div>
       ${files.length ? `<div class="ad-files"><b style="font-size:14px">도면·사진</b><br>${files.map((u, i) => `<a href="${esc(u)}" target="_blank" rel="noopener">파일 ${i + 1} 열기</a>`).join('')}</div>` : ''}
@@ -152,6 +152,11 @@
       try { await api('admin.update', { no, patch: { status: '취소', cancelReason: reason, memo: $('#dForm [name=memo]').value } }); toast('취소 처리했습니다'); await load(); openDetail(no); }
       catch (err) { toast(err.message, true); dc.disabled = false; dc.textContent = '✕ 취소 저장'; }
     });
+    const dr = $('#dRestore'); if (dr) dr.addEventListener('click', e => armed(e.currentTarget, async () => {
+      dr.disabled = true; dr.textContent = '복원 중…';
+      try { const j = await api('admin.restore', { no }); toast(`취소를 복원했습니다 (${j.status})`); await load(); openDetail(no); }
+      catch (err) { toast(err.message, true); dr.disabled = false; dr.textContent = '↺ 취소 복원'; }
+    }));
     const inpEnter = $('#dForm [name=cancelReason]'); if (inpEnter) inpEnter.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); dc && dc.click(); } });
     $('#dForm').addEventListener('submit', async e => {
       e.preventDefault(); const f = e.target, patch = {};
