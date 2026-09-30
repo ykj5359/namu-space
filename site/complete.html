@@ -25,8 +25,8 @@
 <footer class="site"><div class="wrap"><a class="logo" data-logo href="index.html"></a><div><b data-site="name"></b> · 대표 <span data-site="ceo"></span> · <span data-site="tel"></span> · <span data-site="email"></span> <a href="admin.html" class="gear" title="관리자" aria-label="관리자">⚙</a></div></div></footer>
 
 <script src="js/logos.js?v=20260928h"></script>
-<script src="js/main.js?v=20261001i"></script>
-<script src="js/cart.js?v=20261001c"></script>
+<script src="js/main.js?v=20261001j"></script>
+<script src="js/cart.js?v=20261001j"></script>
 <script src="js/payments.js?v=20260929e"></script>
 <script>
 (function () {
@@ -59,7 +59,7 @@
   sheets.innerHTML = order.items.map((it, i) => `<figure style="margin:0"><img src="${it.sheet}" alt="도면 ${i + 1}"><figcaption style="font-size:14px;color:var(--ink-2);margin-top:6px">도면 ${i + 1} · ${NW_CART.label(it)} · ${it.qty}장 · ${won(NW_CART.price(it).sub)}</figcaption></figure>`).join('');
   // 주문서 텍스트
   const text = () => `[나무의공간 템바보드 주문] ${order.no}\n주문자: ${c.name} / ${c.tel} / ${c.email}\n주소: ${c.addr}\n결제: ${methodName} · 합계(예상) ${won(t.total)} (공급가 ${won(t.supply)} + 부가세 ${won(t.vat)})\n요청: ${c.memo || '-'}\n\n` +
-    order.items.map((it, i) => { const k = it.calc; return `${i + 1}. ${it.dir === 'v' ? '세로' : '가로'} A${it.A}×B${it.B} · C${k.C}/D${k.D} · F${it.F}/E${k.Ereal}/G${k.Gadj} · 코너 ${it.corner === 'none' ? '없음' : it.corner + ' K' + it.K} · ${it.finishText || it.finish} · ${it.install} · 각재 ${k.totalBattens}개 · 원장 ${k.sheets}장 · ${it.qty}장 · ${won(NW_CART.price(it).sub)}`; }).join('\n') +
+    order.items.map((it, i) => { const k = it.calc; return `${i + 1}. ${it.dir === 'v' ? '세로' : '가로'} A${it.A}×B${it.B} · C${k.C}/D${k.D} · F${it.F}/E${k.Ereal}/G${k.Gadj} · 코너 ${it.corner === 'none' ? '없음' : it.corner + ' K' + it.K} · ${it.finishText || it.finish} · ${it.install} · 각재 ${k.totalBattens}개(원본 ${NW_CART.sticks(k.totalBattens, k.C).sticks}본) · 원장 ${k.sheets}장 · ${it.qty}장 · ${won(NW_CART.price(it).sub)}`; }).join('\n') +
     `\n\n[원가 참고] ` + order.items.map((it, i) => { const c = NW_CART.cost(it); return `${i + 1}: 각재 30×30-3600 ${c.sticks}본(${it.calc.totalBattens}개) ${won(c.battens)} + 합판 2400×1200×8t ${it.calc.sheets}장 ${won(c.ply)} + 인건비 ${won(c.labor)} = ${won(c.unit)}/장 ×${it.qty}`; }).join(' / ') +
     `\n\n※ 도면 이미지 ${order.items.length}장을 첨부해 주세요.`;
   const dataFiles = () => order.items.map((it, i) => { const b = atob(it.sheet.split(',')[1]); const u = new Uint8Array(b.length); for (let j = 0; j < b.length; j++) u[j] = b.charCodeAt(j); return new File([u], `${order.no}_도면${i + 1}.jpg`, { type: 'image/jpeg' }); });
@@ -72,7 +72,7 @@
     sending = (async () => {
     const meta = { no: order.no, qty: t.count, area: +order.items.reduce((s, it) => s + it.calc.area * it.qty, 0).toFixed(3), supply: t.supply, vat: t.vat, total: t.total, cost: order.items.reduce((s, it) => s + NW_CART.cost(it).sub, 0), method: methodName };
     const doc = { kind: 'order', title: '주문내역서', estimated: true, no: order.no, customer: { name: c.name, tel: c.tel, email: c.email, addr: c.addr },
-      items: order.items.map(it => { const k = it.calc, p = NW_CART.price(it); return { name: `고운결 ${it.dir === 'v' ? '세로' : '가로'} 템바보드 (나왕 30×30 · 간격 30 · 합판 8t)`, spec: [`A 폭 ${it.A} × B 높이 ${it.B} mm`, `C ${k.C} / D ${k.D} · F ${it.F} / E ${k.Ereal} / G ${k.Gadj}`, `코너 돌림 ${it.corner === 'none' ? '없음' : it.corner + ' K=' + it.K}`, `마감 ${it.finishText || it.finish} · ${it.install}`, `각재 ${k.totalBattens}개 · 합판 원장 ${k.sheets}장 · 면적 ${(k.area || 0).toFixed(2)}㎡`], qty: it.qty, unit: p.unit, sub: p.sub }; }),
+      items: order.items.map(it => { const k = it.calc, p = NW_CART.price(it); return { name: `고운결 ${it.dir === 'v' ? '세로' : '가로'} 템바보드 (나왕 30×30 · 간격 30 · 합판 8t)`, spec: [`A 폭 ${it.A} × B 높이 ${it.B} mm`, `C ${k.C} / D ${k.D} · F ${it.F} / E ${k.Ereal} / G ${k.Gadj}`, `코너 돌림 ${it.corner === 'none' ? '없음' : it.corner + ' K=' + it.K}`, `마감 ${it.finishText || it.finish} · ${it.install}`, `각재 ${k.totalBattens}개 (원본 3600 ${NW_CART.sticks(k.totalBattens, k.C).sticks}본) · 합판 원장 ${k.sheets}장 · 면적 ${(k.area || 0).toFixed(2)}㎡`], qty: it.qty, unit: p.unit, sub: p.sub }; }),
       totals: { supply: t.supply, vat: t.vat, total: t.total }, payment: { method: methodName, bank: (order.method === 'bank' || order.status === 'awaiting_deposit') && SITE.payment.bank ? SITE.payment.bank + (SITE.payment.holder ? ' (예금주 ' + SITE.payment.holder + ')' : '') : '' },
       message: c.memo || '', notes: ['예상 금액이며 실제 견적은 담당자 확인 후 확정됩니다.', '치수 단위 mm · 각재 30×30, 간격 30, 합판 8t 고정 · 합판 원장 1220×2440 을 이어 붙여 제작'],
       adminNote: order.items.map((it, i) => { const cc = NW_CART.cost(it); return `${i + 1}: 각재 30×30-3600 ${cc.sticks}본 ${won(cc.battens)} + 합판 ${it.calc.sheets}장 ${won(cc.ply)} + 인건비 ${won(cc.labor)} = ${won(cc.unit)}/장 × ${it.qty}장`; }).join('\n') };

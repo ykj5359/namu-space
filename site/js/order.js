@@ -270,7 +270,7 @@
     const el = { x: 50, y: 120, w: 1120, h: 790 };
     ctx.strokeStyle = '#ddd'; ctx.lineWidth = 1; ctx.strokeRect(el.x, el.y, el.w, el.h);
     text('입면도  (30각 템바보드 · 단위 mm)', el.x + 14, el.y + 34, { w: 700 });
-    text(`각재 ${r.totalBattens}개 × ${s.dir === 'h' ? '가로' : '세로'} 배열 · 30×30 · 간격 30 · 합판 8`, el.x + el.w - 14, el.y + 34, { c: '#555', a: 'right' });
+    text(`각재 ${r.totalBattens}개 (원본 3600 ${NW_CART.sticks(r.totalBattens, r.C).sticks}본) × ${s.dir === 'h' ? '가로' : '세로'} 배열 · 30×30 · 간격 30 · 합판 8`, el.x + el.w - 14, el.y + 34, { c: '#555', a: 'right' });
     drawScene({ x: el.x + 10, y: el.y + 50, w: el.w - 20, h: el.h - 60 });
     const rx = 1195, rw = W - 30 - rx - 20;
     ctx.strokeStyle = '#ddd'; ctx.strokeRect(rx - 10, el.y, rw + 20, 1030);
@@ -282,7 +282,7 @@
       ['C 각재 길이 / D', `${r.C} / ${r.D}`],
       ['F / E / G', `${s.F} / ${r.Ereal} / ${Math.round(r.Gadj)}`],
       ['코너', s.corner === 'none' ? '없음' : ({ left: '좌측', right: '우측', both: '양쪽' })[s.corner] + ` (돌림 K=${s.K})`],
-      ['각재 개수', `${r.totalBattens}개 / 장 (본면 ${r.n})`],
+      ['각재 개수', `${r.totalBattens}개 / 장 (본면 ${r.n}) · 원본 3600 ${NW_CART.sticks(r.totalBattens, r.C).sticks}본`],
       ['합판 원장', r.sheets > 1 ? `1220×2440 × ${r.sheets}장 (${r.nx}×${r.ny})` : '1220×2440 1장'],
       ['마감', finishInfo(s).text], ['수량', `${s.qty}장`], ['시공', s.install],
       ['각재 총길이', `약 ${r.meters} m`], ['패널 면적', `약 ${r.area} ㎡`],
@@ -308,6 +308,7 @@
   function updateSummary(r) {
     const s = state; if (!$('#sumN')) return;
     $('#sumN').textContent = r.totalBattens; $('#sumE').textContent = r.Ereal; $('#sumG').textContent = Math.round(r.Gadj);
+    const st = NW_CART.sticks(r.totalBattens, r.C); const stEl = $('#sumSticks'); if (stEl) stEl.textContent = `${st.sticks}본 (1본당 ${st.per}개)`;
     $('#sumSeg').textContent = r.sheets > 1 ? `원장 ${r.sheets}장 (${r.nx}×${r.ny}) 이어 붙임` : '없음 (원장 1장)';
     $('#sumM').textContent = r.meters; $('#sumA').textContent = r.area;
     $('#dirNote').textContent = s.dir === 'v' ? '세로 배열: 각재 길이 C는 높이(B) 방향, F·E·G는 폭(A) 방향' : '가로 배열: 각재 길이 C는 폭(A) 방향, F·E·G는 높이(B) 방향';
@@ -362,7 +363,7 @@
       `주문자: ${s.name}\n연락처: ${s.tel}\n이메일: ${s.email || '-'}\n현장 주소: ${s.addr || '-'}\n\n` +
       `제품: 30각 템바보드 (나왕 30×30, 간격 30, 합판 8)\n각재 방향: ${s.dir === 'h' ? '가로' : '세로'}\n` +
       `A 폭 ${s.A} × B 높이 ${s.B}\nC 각재 길이 ${r.C} / D 끝 여백 ${r.D}\nF ${s.F} / E ${r.Ereal} / G ${Math.round(r.Gadj)}\n` +
-      `코너: ${s.corner === 'none' ? '없음' : s.corner + ' K=' + s.K}\n각재 개수: ${r.totalBattens}개/장\n합판 원장: ${r.sheets}장 (1220×2440)\n` +
+      `코너: ${s.corner === 'none' ? '없음' : s.corner + ' K=' + s.K}\n각재 개수: ${r.totalBattens}개/장 (원본 3600 ${NW_CART.sticks(r.totalBattens, r.C).sticks}본)\n합판 원장: ${r.sheets}장 (1220×2440)\n` +
       `마감: ${finishInfo(s).text}\n수량: ${s.qty}장\n시공: ${s.install}\n메모: ${s.memo || '-'}\n\n※ 도면 이미지(${fileName()})를 첨부해 주세요.`;
   }
   function validate() {
@@ -382,7 +383,7 @@
     const estText = meta.total ? `\n\n예상 금액: ${NW_CART.won(meta.total)} (공급가 ${NW_CART.won(meta.supply)} + 부가세 ${NW_CART.won(meta.vat)})` : '';
     const doc = (() => { const r = calc(), s = state, fi = finishInfo(s); const unit = meta.qty ? Math.round(meta.supply / meta.qty) : 0;
       return { kind: 'drawing', title: '주문내역서', estimated: true, customer: { name: s.name, tel: s.tel, email: s.email, addr: s.addr },
-        items: [{ name: `고운결 ${s.dir === 'h' ? '가로' : '세로'} 템바보드 (나왕 30×30 · 간격 30 · 합판 8t)`, spec: [`A 폭 ${s.A} × B 높이 ${s.B} mm`, `C 각재 길이 ${r.C} / D 끝 여백 ${r.D} · F ${s.F} / E ${r.Ereal} / G ${Math.round(r.Gadj)}`, `코너 돌림 ${s.corner === 'none' ? '없음' : s.corner + ' K=' + s.K}`, `마감 ${fi.text} · 시공 ${s.install}`, `각재 ${r.totalBattens}개 · 합판 원장 ${r.sheets}장 (1220×2440) · 면적 ${(r.totW * r.totH / 1e6).toFixed(2)}㎡`], qty: meta.qty || s.qty, unit, sub: meta.supply || 0 }],
+        items: [{ name: `고운결 ${s.dir === 'h' ? '가로' : '세로'} 템바보드 (나왕 30×30 · 간격 30 · 합판 8t)`, spec: [`A 폭 ${s.A} × B 높이 ${s.B} mm`, `C 각재 길이 ${r.C} / D 끝 여백 ${r.D} · F ${s.F} / E ${r.Ereal} / G ${Math.round(r.Gadj)}`, `코너 돌림 ${s.corner === 'none' ? '없음' : s.corner + ' K=' + s.K}`, `마감 ${fi.text} · 시공 ${s.install}`, `각재 ${r.totalBattens}개 (원본 3600 ${NW_CART.sticks(r.totalBattens, r.C).sticks}본) · 합판 원장 ${r.sheets}장 (1220×2440) · 면적 ${(r.totW * r.totH / 1e6).toFixed(2)}㎡`], qty: meta.qty || s.qty, unit, sub: meta.supply || 0 }],
         totals: { supply: meta.supply || 0, vat: meta.vat || 0, total: meta.total || 0 }, payment: { method: '접수 후 안내', bank: SITE.payment.bank ? SITE.payment.bank + (SITE.payment.holder ? ' (예금주 ' + SITE.payment.holder + ')' : '') : '' },
         message: s.memo || '', notes: ['예상 금액이며 실제 견적은 담당자 확인 후 확정됩니다.', '치수 단위 mm · 각재 30×30, 간격 30, 합판 8t 고정 · 합판 원장 1220×2440 을 이어 붙여 제작'], adminNote: (() => { try { const it = {}; DIM_KEYS.forEach(k => it[k] = s[k]); it.calc = { area: r.totW * r.totH / 1e6, C: r.C, totalBattens: r.totalBattens, sheets: r.sheets }; it.qty = meta.qty || 1; it.finish = s.finish; const c = NW_CART.cost(it); return `각재 30×30-3600 ${c.sticks}본 ${NW_CART.won(c.battens)} + 합판 ${r.sheets}장 ${NW_CART.won(c.ply)} + 인건비 ${NW_CART.won(c.labor)} = ${NW_CART.won(c.unit)}/장 × ${it.qty}장 = ${NW_CART.won(c.sub)}`; } catch (e) { return ''; } })() }; })();
     const sentAuto = await NW_SEND({ type: 'drawing', subject, text: orderText() + estText, customer: { name: state.name, tel: state.tel, email: state.email, addr: state.addr }, meta, doc, files: [file] });

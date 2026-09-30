@@ -28,6 +28,8 @@
     const unit = Math.round(battens + ply + labor + stain);
     return { sticks, perStick, battens, ply, labor, stain, unit, sub: unit * item.qty };
   }
+  // 원본(3600) 사용 본 수: 각재 개수 ÷ (3600 ÷ C, 버림) 올림
+  function sticks(totalBattens, C) { const len = (SITE.cost && SITE.cost.battenLen) || 3600; const per = Math.max(1, Math.floor(len / Math.max(1, C || len))); return { per, sticks: Math.ceil((totalBattens || 0) / per) }; }
   function totals(items) {
     const supply = items.reduce((s, it) => s + price(it).sub, 0);
     const vat = SITE.price && SITE.price.vat === false ? 0 : Math.round(supply * 0.1);
@@ -36,7 +38,7 @@
   const label = it => `${it.dir === 'v' ? '세로' : '가로'} ${it.A}×${it.B}${it.corner !== 'none' ? ' · 코너 ' + ({ left: '좌', right: '우', both: '양쪽' })[it.corner] + ' K' + it.K : ''} · ${it.finishText || it.finish}${it.install === '현장 시공 포함' ? ' · 시공' : ''}`;
 
   const api = {
-    get: load, save, price, cost, totals, won, label,
+    get: load, save, price, cost, totals, sticks, won, label,
     items: () => load().items,
     add(item) { const c = load(); item.id = 'i' + Date.now().toString(36); item.addedAt = Date.now(); c.items.push(item); save(c); return item.id; },
     update(id, patch) { const c = load(); const it = c.items.find(x => x.id === id); if (it) Object.assign(it, patch); save(c); },
