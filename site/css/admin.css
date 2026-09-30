@@ -106,3 +106,6 @@ body.admin { background: #F4F1EB; }
   .ad-modal { padding: 0; align-items: end; }
   .ad-modal-box { border-radius: 14px 14px 0 0; max-height: 92vh; padding: 18px 16px; }
 }
+
+/* 두 번 클릭 삭제 확인 */
+.armed, .btn.armed, .ad-ic.armed { background: #b91c1c !important; color: #fff !important; border-color: #b91c1c !important; width: auto; padding: 0 10px; font-size: 12px; }

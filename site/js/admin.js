@@ -8,6 +8,12 @@
   let D = { rows: [], payments: [], sales: [], config: null, statuses: [] };
   let cfgDraft = null;
 
+  // 삭제 확인: 브라우저 확인창 대신 같은 버튼을 5초 안에 한 번 더 누르면 실행
+  function armed(btn, fn) {
+    if (btn.dataset.armed) { clearTimeout(+btn.dataset.t); delete btn.dataset.armed; btn.textContent = btn.dataset.label; btn.classList.remove('armed'); fn(); return; }
+    btn.dataset.label = btn.textContent; btn.dataset.armed = '1'; btn.classList.add('armed'); btn.textContent = '정말 삭제? 한 번 더 클릭';
+    btn.dataset.t = setTimeout(() => { delete btn.dataset.armed; btn.textContent = btn.dataset.label; btn.classList.remove('armed'); }, 5000);
+  }
   const toast = (m, bad) => { const t = $('#toast'); t.textContent = m; t.style.background = bad ? '#b91c1c' : ''; t.classList.add('on'); clearTimeout(toast.h); toast.h = setTimeout(() => t.classList.remove('on'), 2200); };
   async function api(action, data) {
     if (!SITE.orderEndpoint) throw new Error('접수 주소(SITE.orderEndpoint)가 비어 있습니다');
@@ -139,13 +145,13 @@
       ['name', 'tel', 'email', 'addr', 'status', 'method', 'memo', 'supply', 'vat', 'total', 'cost'].forEach(k => { if (f[k]) patch[k] = f[k].type === 'number' ? +f[k].value : f[k].value; });
       try { await api('admin.update', { no, patch }); toast('저장했습니다'); await load(); openDetail(no); } catch (err) { toast(err.message, true); }
     });
-    $('#dDel').addEventListener('click', async () => { if (!confirm(`${r.no} 접수를 삭제할까요? 입금 기록도 함께 지워지며 되돌릴 수 없습니다.`)) return; try { await api('admin.delete', { no }); toast('삭제했습니다'); closeDetail(); await load(); } catch (err) { toast(err.message, true); } });
+    $('#dDel').addEventListener('click', e => armed(e.currentTarget, async () => { const b = $('#dDel'); b.disabled = true; b.textContent = '삭제 중…'; try { await api('admin.delete', { no }); toast('접수를 삭제했습니다'); closeDetail(); await load(); } catch (err) { toast(err.message, true); b.disabled = false; b.textContent = '접수 삭제'; } }));
     const pf = $('#payForm');
     if (pf) pf.addEventListener('submit', async e => {
       e.preventDefault(); const f = e.target;
       try { await api('admin.pay', { pay: { no, name: r.name, date: f.date.value, amount: +f.amount.value, method: f.method.value, memo: f.memo.value } }); toast('입금을 등록했습니다'); await load(); openDetail(no); } catch (err) { toast(err.message, true); }
     });
-    $$('#detailBox [data-del]').forEach(b => b.addEventListener('click', async () => { if (!confirm('이 입금 기록을 삭제할까요?')) return; try { await api('admin.delPay', { id: b.dataset.del }); toast('삭제했습니다'); await load(); openDetail(no); } catch (err) { toast(err.message, true); } }));
+    $$('#detailBox [data-del]').forEach(b => b.addEventListener('click', e => armed(e.currentTarget, async () => { try { await api('admin.delPay', { id: b.dataset.del }); toast('입금 기록을 삭제했습니다'); await load(); openDetail(no); } catch (err) { toast(err.message, true); } })));
   }
   function closeDetail() { $('#detail').style.display = 'none'; }
   $('#detail').addEventListener('click', e => { if (e.target.id === 'detail') closeDetail(); });
@@ -159,7 +165,7 @@
     const tb = $('#payTable tbody');
     tb.innerHTML = pays.length ? pays.map(p => `<tr data-no="${esc(p.no)}"><td>${esc(p.date)}</td><td class="mono">${esc(p.no)}</td><td><b>${esc(p.name)}</b></td><td class="r">${won(p.amount)}</td><td>${esc(p.method)}</td><td class="wrap">${esc(p.memo)}</td><td><button type="button" class="ad-ic" data-del="${esc(p.id)}" title="삭제" style="width:30px;height:30px;font-size:13px">✕</button></td></tr>`).join('') : '<tr><td colspan="7" class="ad-empty">입금 내역이 없습니다.</td></tr>';
     bindRows(tb);
-    tb.querySelectorAll('[data-del]').forEach(b => b.addEventListener('click', async e => { e.stopPropagation(); if (!confirm('이 입금 기록을 삭제할까요?')) return; try { await api('admin.delPay', { id: b.dataset.del }); toast('삭제했습니다'); await load(); } catch (err) { toast(err.message, true); } }));
+    tb.querySelectorAll('[data-del]').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); armed(b, async () => { try { await api('admin.delPay', { id: b.dataset.del }); toast('입금 기록을 삭제했습니다'); await load(); } catch (err) { toast(err.message, true); } }); }));
   }
 
   // ---------------- 매출 ----------------
