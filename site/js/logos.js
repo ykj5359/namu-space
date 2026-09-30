@@ -13,7 +13,7 @@ window.NW_LOGOS = (function () {
       <rect x="98" y="22" width="12" height="76" rx="2"/>
     </g>
     <text x="130" y="68" font-family="${F}" font-weight="700" font-size="40" fill="${dark}">나무의공간</text>
-    <text x="132" y="96" font-family="${F}" font-weight="400" font-size="15" letter-spacing="6" fill="${wood}">WOOD SPACE</text>
+    <text x="132" y="96" font-family="${F}" font-weight="400" font-size="15" letter-spacing="6" fill="${wood}">NAMU SPACE</text>
   </svg>`;
 
   // 2. 나이테 원형 아이콘 + 명조 워드마크
@@ -58,7 +58,7 @@ window.NW_LOGOS = (function () {
   const l6 = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 120">
     <text x="210" y="62" text-anchor="middle" font-family="${S}" font-weight="700" font-size="50" letter-spacing="6" fill="${dark}">나무의공간</text>
     <g fill="${wood}">${[0,1,2,3,4,5,6,7,8,9,10,11].map(i => `<rect x="${70 + i*24}" y="78" width="14" height="6" rx="1"/>`).join('')}</g>
-    <text x="210" y="106" text-anchor="middle" font-family="${F}" font-size="13" letter-spacing="8" fill="#888">WOOD SPACE</text>
+    <text x="210" y="106" text-anchor="middle" font-family="${F}" font-size="13" letter-spacing="8" fill="#888">NAMU SPACE</text>
   </svg>`;
 
   // 7. 집 실루엣 + 슬랫 (인테리어·시공 강조)
@@ -76,7 +76,7 @@ window.NW_LOGOS = (function () {
     <circle cx="60" cy="60" r="46" fill="${cream}"/>
     <g clip-path="url(#c8)" fill="url(#g8)">${[0,1,2,3,4,5,6].map(i => `<rect x="${18 + i*13}" y="10" width="8" height="100"/>`).join('')}</g>
     <text x="126" y="66" font-family="${F}" font-weight="700" font-size="40" fill="${dark}">나무의공간</text>
-    <text x="128" y="94" font-family="${F}" font-size="14" letter-spacing="5" fill="#8B5A2B">WOOD SPACE STUDIO</text>
+    <text x="128" y="94" font-family="${F}" font-size="14" letter-spacing="5" fill="#8B5A2B">NAMU SPACE STUDIO</text>
   </svg>`;
 
   // 9. 모노그램 'N' 슬랫 구성 (모던)
@@ -93,7 +93,7 @@ window.NW_LOGOS = (function () {
     <circle cx="60" cy="60" r="52" fill="none" stroke="${green}" stroke-width="3"/>
     <circle cx="60" cy="60" r="30" fill="${green}"/>
     <text x="60" y="71" text-anchor="middle" font-family="${S}" font-weight="700" font-size="30" fill="${cream}">木</text>
-    <text font-family="${F}" font-size="9.5" letter-spacing="2.2" fill="${green}" font-weight="700"><textPath href="#p10" startOffset="3%">WOOD SPACE · LAUAN TEMBA BOARD · SINCE 2026 ·</textPath></text>
+    <text font-family="${F}" font-size="9.5" letter-spacing="2.2" fill="${green}" font-weight="700"><textPath href="#p10" startOffset="3%">NAMU SPACE · LAUAN TEMBA BOARD · SINCE 2026 ·</textPath></text>
     <text x="126" y="66" font-family="${S}" font-weight="700" font-size="40" fill="${green}">나무의공간</text>
     <text x="129" y="94" font-family="${F}" font-size="13" letter-spacing="4" fill="#777">나왕 각재 · 합판 바탕 · 주문 제작</text>
   </svg>`;

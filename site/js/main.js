@@ -130,7 +130,8 @@ window.NW_ADDR = (function () {
     document.querySelectorAll('[data-kakao-row]').forEach(el => { el.style.display = SITE.kakao ? '' : 'none'; const a = el.querySelector('a[data-kakao]'); if (a) a.href = SITE.kakao || '#'; });
     document.querySelectorAll('[data-hours]').forEach(el => { el.style.display = SITE.hours ? '' : 'none'; });
     // 이미지 팝업창 (홈 첫 방문 · 하루 동안 닫기 가능 · 관리자가 팝업을 바꾸면 다시 표시 · 좌측 하단 이벤트 버튼으로 언제든 다시 열기)
-    const P = T.popup || {}, isHome = /(^|\/)(index\.html)?$/.test(location.pathname), qs = new URLSearchParams(location.search);
+    const P = Object.assign({}, T.popup || {}); if (P.link === 'index.html?sample=1#contact') P.link = 'sample.html';   // 예전 설정값 → 신청 페이지
+    const isHome = /(^|\/)(index\.html)?$/.test(location.pathname), qs = new URLSearchParams(location.search);
     const d1 = new Date(), todayS = `${d1.getFullYear()}-${String(d1.getMonth() + 1).padStart(2, '0')}-${String(d1.getDate()).padStart(2, '0')}`;
     const sig = todayS + '|' + [P.image, P.title, P.from, P.to].join('|');
     const hidden = (() => { try { return localStorage.getItem('nw_popup_hide') === sig; } catch (e) { return false; } })();
