@@ -31,7 +31,7 @@ var DEFAULT_CONFIG = {
   payment: { bank: '농협 000-0000-0000-00', holder: '이영석', clientKey: '', methods: { card: true, transfer: true, vbank: true, bank: true } },
   texts: { heroTitle: '나무가 만드는\n공간의 결', hero: '서두르는 손이 아니라 준비된 나무가 벽을 완성합니다. 현장은 고요하고, 마감은 고릅니다.',
     notice: { on: false, text: '', from: '', to: '' },
-    popup: { on: true, image: 'img/popup/sample.jpg', link: 'index.html?sample=1#contact', title: '템바보드 샘플 무료 배송 이벤트', from: '', to: '', pages: 'home' } },
+    popup: { on: true, image: 'img/popup/sample.jpg', link: 'sample.html', title: '템바보드 샘플 무료 배송 이벤트', from: '', to: '', pages: 'home', pos: 'center', size: 'm' } },
   ship: { later: { label: '협의 후 결정', mode: 'separate', amount: 0 }, parcel: { label: '택배 (소량·소형, 1장 기준 1200 이하)', mode: 'amount', amount: 6000 }, freight: { label: '화물·용달 (대형·다량)', mode: 'cod', amount: 0 }, pickup: { label: '직접 방문 수령 (충남 홍성 공방)', mode: 'amount', amount: 0 }, site: { label: '현장 시공 (시공 포함 주문 · 직접 설치)', mode: 'separate', amount: 0 } },
   logo: 1,
 };
