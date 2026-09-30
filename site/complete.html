@@ -25,7 +25,7 @@
 <footer class="site"><div class="wrap"><a class="logo" data-logo href="index.html"></a><div><b data-site="name"></b> · 대표 <span data-site="ceo"></span> · <span data-site="tel"></span> · <span data-site="email"></span> <a href="admin.html" class="gear" title="관리자" aria-label="관리자">⚙</a></div></div></footer>
 
 <script src="js/logos.js?v=20260928h"></script>
-<script src="js/main.js?v=20261001d"></script>
+<script src="js/main.js?v=20261001i"></script>
 <script src="js/cart.js?v=20261001c"></script>
 <script src="js/payments.js?v=20260929e"></script>
 <script>
@@ -71,7 +71,12 @@
     if (sending) return sending;   // 자동 전송과 버튼 클릭이 겹쳐도 한 번만 보냄
     sending = (async () => {
     const meta = { no: order.no, qty: t.count, area: +order.items.reduce((s, it) => s + it.calc.area * it.qty, 0).toFixed(3), supply: t.supply, vat: t.vat, total: t.total, cost: order.items.reduce((s, it) => s + NW_CART.cost(it).sub, 0), method: methodName };
-    const ok = await NW_SEND({ type: 'order', subject: subjectAll, text: text(), customer: { name: c.name, tel: c.tel, email: c.email, addr: c.addr }, meta, files: dataFiles() });
+    const doc = { kind: 'order', title: '주문내역서', estimated: true, no: order.no, customer: { name: c.name, tel: c.tel, email: c.email, addr: c.addr },
+      items: order.items.map(it => { const k = it.calc, p = NW_CART.price(it); return { name: `고운결 ${it.dir === 'v' ? '세로' : '가로'} 템바보드 (나왕 30×30 · 간격 30 · 합판 8t)`, spec: [`A 폭 ${it.A} × B 높이 ${it.B} mm`, `C ${k.C} / D ${k.D} · F ${it.F} / E ${k.Ereal} / G ${k.Gadj}`, `코너 돌림 ${it.corner === 'none' ? '없음' : it.corner + ' K=' + it.K}`, `마감 ${it.finishText || it.finish} · ${it.install}`, `각재 ${k.totalBattens}개 · 합판 원장 ${k.sheets}장 · 면적 ${(k.area || 0).toFixed(2)}㎡`], qty: it.qty, unit: p.unit, sub: p.sub }; }),
+      totals: { supply: t.supply, vat: t.vat, total: t.total }, payment: { method: methodName, bank: (order.method === 'bank' || order.status === 'awaiting_deposit') && SITE.payment.bank ? SITE.payment.bank + (SITE.payment.holder ? ' (예금주 ' + SITE.payment.holder + ')' : '') : '' },
+      message: c.memo || '', notes: ['예상 금액이며 실제 견적은 담당자 확인 후 확정됩니다.', '치수 단위 mm · 각재 30×30, 간격 30, 합판 8t 고정 · 합판 원장 1220×2440 을 이어 붙여 제작'],
+      adminNote: order.items.map((it, i) => { const cc = NW_CART.cost(it); return `${i + 1}: 각재 30×30-3600 ${cc.sticks}본 ${won(cc.battens)} + 합판 ${it.calc.sheets}장 ${won(cc.ply)} + 인건비 ${won(cc.labor)} = ${won(cc.unit)}/장 × ${it.qty}장`; }).join('\n') };
+    const ok = await NW_SEND({ type: 'order', subject: subjectAll, text: text(), customer: { name: c.name, tel: c.tel, email: c.email, addr: c.addr }, meta, doc, files: dataFiles() });
     if (ok) { order = NW_PAY.setStatus(no, order.status, { sent: true }); const b = document.getElementById('btnMail'); b.textContent = '접수 완료 (메일 발송됨)'; b.disabled = true; const h = document.querySelector('#done .hint'); if (h) h.innerHTML = `주문서가 <b>${SITE.email}</b> 로 자동 접수되었고, <b>${c.email}</b> 로 접수 확인 메일을 보내 드렸습니다.`; }
     return ok;
     })();

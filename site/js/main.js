@@ -53,7 +53,7 @@ window.NW_SEND = async function (payload) {
   const toB64 = f => new Promise(res => { const r = new FileReader(); r.onload = () => res(r.result.split(',')[1]); r.onerror = () => res(null); r.readAsDataURL(f); });
   const attachments = [];
   for (const f of files) { const d = await toB64(f); if (d) attachments.push({ name: f.name, mime: f.type || 'image/jpeg', data: d }); }
-  const body = JSON.stringify({ secret: SITE.orderSecret || '', type: payload.type || 'contact', subject: payload.subject, text: payload.text, customer: payload.customer || {}, meta: payload.meta || {}, attachments });
+  const body = JSON.stringify({ secret: SITE.orderSecret || '', type: payload.type || 'contact', subject: payload.subject, text: payload.text, customer: payload.customer || {}, meta: payload.meta || {}, doc: payload.doc || null, attachments });
   try {
     const r = await fetch(url, { method: 'POST', body, headers: { 'Content-Type': 'text/plain;charset=utf-8' } }); // text/plain → CORS 사전요청 없이 전송
     const j = await r.json().catch(() => ({ ok: r.ok }));
@@ -135,7 +135,8 @@ window.NW_SEND = async function (payload) {
         const body = `[나무의공간 홈페이지 문의]\n이름: ${d.name}\n연락처: ${d.tel}\n관심 제품: ${d.product}\n내용:\n${d.msg}${list}`;
         const subject = `[문의] ${d.name} 님 · ${d.product}`;
         const btn = cf.querySelector('button[type=submit]'); if (btn) { btn.disabled = true; btn.textContent = '보내는 중…'; }
-        const sent = await NW_SEND({ type: 'contact', subject, text: body, customer: { name: d.name, tel: d.tel, email: d.email || '' }, files: photos });
+        const doc = { kind: 'contact', title: '문의 접수서', customer: { name: d.name, tel: d.tel, email: d.email || '', addr: d.product }, message: d.msg, notes: ['담당자가 내용을 확인한 뒤 연락드립니다. 현장 사진이 있으면 상담이 빨라집니다.'] };
+        const sent = await NW_SEND({ type: 'contact', subject, text: body, customer: { name: d.name, tel: d.tel, email: d.email || '' }, doc, files: photos });
         if (btn) { btn.disabled = false; btn.textContent = '이메일로 문의 보내기'; }
         if (sent) { const note = cf.querySelector('#cfNote'); if (note) note.innerHTML = `<b>문의가 접수되었습니다.</b> 담당자가 확인 후 연락드리겠습니다.`; cf.reset(); photos = []; render(); return; }
         if (photos.length && navigator.canShare && navigator.canShare({ files: photos })) { // 휴대폰: 사진 첨부 공유

@@ -83,6 +83,7 @@ function submit_(body) {
   var text = String(body.text || '');
   var customer = body.customer || {};
   var meta = body.meta || {};
+  var doc = body.doc || null;
   var atts = (body.attachments || []).slice(0, 12).map(function (a) {
     var bytes = Utilities.base64Decode(String(a.data || '').replace(/^data:[^,]+,/, ''));
     return Utilities.newBlob(bytes, a.mime || 'image/jpeg', a.name || 'file.jpg');
@@ -99,18 +100,22 @@ function submit_(body) {
     }
   } catch (x) { links.push('보관 실패: ' + x); }
 
-  // 2) 회사 수신 (여러 주소)
-  var html = '<pre style="font-family:Malgun Gothic,Apple SD Gothic Neo,sans-serif;font-size:14px;white-space:pre-wrap">' + esc_(text) + '</pre>' +
-    (links.length ? '<p>도면·사진 보관: ' + links.map(function (u) { return '<a href="' + u + '">' + u + '</a>'; }).join('<br>') + '</p>' : '');
+  // 2) 회사 수신 (여러 주소) — 문서형 HTML (doc 가 있으면) + 첨부
+  var inline = {}, imgKeys = [];
+  atts.forEach(function (b, i) { if (i < 8 && /^image\//.test(b.getContentType() || '')) { var k = 'img' + i; inline[k] = b; imgKeys.push(k); } });
+  var linkHtml = links.length ? '<p style="font-size:12px;color:#888;margin:8px 0 0">보관: ' + links.map(function (u) { return '<a href="' + u + '" style="color:#8b5a2b">' + u + '</a>'; }).join(' · ') + '</p>' : '';
+  var html = doc ? renderDoc_(doc, cfg, no, imgKeys, false, '') + linkHtml
+    : '<pre style="font-family:Malgun Gothic,Apple SD Gothic Neo,sans-serif;font-size:14px;white-space:pre-wrap">' + esc_(text) + '</pre>' + linkHtml;
   var to = (M.to || []).filter(String).join(',');
-  if (to) GmailApp.sendEmail(to, subject, text, { name: M.fromName, cc: (M.cc || []).filter(String).join(',') || undefined, replyTo: customer.email || undefined, htmlBody: html, attachments: atts });
+  if (to) GmailApp.sendEmail(to, subject, text, { name: M.fromName, cc: (M.cc || []).filter(String).join(',') || undefined, replyTo: customer.email || undefined, htmlBody: html, inlineImages: doc ? inline : undefined, attachments: atts });
 
   // 3) 고객 접수 확인
   if (M.ackEnabled !== false && customer.email && /@/.test(customer.email)) {
     var ack = '[' + cfg.company.name + '] 접수 확인 — ' + subject.replace(/^\[[^\]]*\]\s*/, '');
     var head = String(M.ackText || '').replace('{name}', customer.name || '고객').replace('{tel}', customer.tel || '연락처');
     var ackText = head + '\n\n──────────────\n' + text + '\n──────────────\n\n' + cfg.company.name + ' · 대표 ' + cfg.company.ceo + ' · ' + cfg.company.tel + ' · ' + cfg.company.email;
-    GmailApp.sendEmail(customer.email, ack, ackText, { name: M.fromName, replyTo: cfg.company.email || to, attachments: atts });
+    var ackHtml = doc ? renderDoc_(doc, cfg, no, imgKeys, true, head) : '<pre style="font-family:Malgun Gothic,Apple SD Gothic Neo,sans-serif;font-size:14px;white-space:pre-wrap">' + esc_(ackText) + '</pre>';
+    GmailApp.sendEmail(customer.email, ack, ackText, { name: M.fromName, replyTo: cfg.company.email || to, htmlBody: ackHtml, inlineImages: doc ? inline : undefined, attachments: atts });
   }
 
   // 4) 접수 탭 기록
@@ -121,6 +126,82 @@ function submit_(body) {
     meta.method || '', '', links.join('\n'), now]);
   rebuildSales_();
   return { ok: true, no: no };
+}
+
+
+// =============================== 문서형 메일 (주문내역서 · 문의 접수서) ===============================
+// doc: { kind: 'order'|'drawing'|'contact', title, no, date, customer{name,tel,email,addr}, items[{name, spec[], qty, unit, sub}],
+//        totals{supply,vat,total}, payment{method,bank}, memo, notes[], adminNote }
+function renderDoc_(doc, cfg, no, imgKeys, forCustomer, ackHead) {
+  var co = cfg.company || {}, h = esc_;
+  var wonf = function (n) { return Math.round(num_(n)).toLocaleString('ko-KR') + '원'; };
+  var kind = doc.kind || 'contact';
+  var title = doc.title || (kind === 'contact' ? '문의 접수서' : '주문내역서');
+  var c = doc.customer || {};
+  var td = 'padding:9px 12px;border-bottom:1px solid #e9e2d6;font-size:14px;vertical-align:top;';
+  var th = td + 'background:#f7f2ea;color:#6b4a2b;font-weight:700;width:120px;white-space:nowrap;';
+  var out = [];
+  out.push('<div style="background:#f4f1eb;padding:24px 12px;font-family:\'Malgun Gothic\',\'Apple SD Gothic Neo\',\'Noto Sans KR\',sans-serif;color:#2b2b2b;line-height:1.6">');
+  out.push('<div style="max-width:680px;margin:0 auto;background:#fff;border:1px solid #e4dacb;border-radius:12px;overflow:hidden">');
+  // 머리글
+  out.push('<div style="background:#2b2b2b;color:#fff;padding:22px 28px">' +
+    '<div style="font-size:12px;letter-spacing:.25em;color:#d9b27f;font-weight:700">' + h(co.name || '나무의공간') + '</div>' +
+    '<div style="font-size:24px;font-weight:900;margin-top:4px">' + h(title) + '</div>' +
+    '<div style="font-size:13px;color:#cfc6b8;margin-top:6px">접수번호 <b style="color:#fff">' + h(no) + '</b> &nbsp;·&nbsp; ' + h(doc.date || stamp_()) + '</div></div>');
+  out.push('<div style="padding:24px 28px">');
+  if (forCustomer && ackHead) out.push('<p style="margin:0 0 18px;font-size:15px;white-space:pre-wrap">' + h(ackHead) + '</p>');
+  // 고객 정보
+  out.push('<h3 style="margin:0 0 8px;font-size:15px;color:#8b5a2b">' + (kind === 'contact' ? '문의자 정보' : '주문자 정보') + '</h3>');
+  out.push('<table style="width:100%;border-collapse:collapse;border-top:2px solid #b9814a;margin-bottom:22px">' +
+    '<tr><th style="' + th + '">이름</th><td style="' + td + '">' + h(c.name || '-') + '</td><th style="' + th + '">연락처</th><td style="' + td + '">' + h(c.tel || '-') + '</td></tr>' +
+    '<tr><th style="' + th + '">이메일</th><td style="' + td + '">' + h(c.email || '-') + '</td><th style="' + th + '">' + (kind === 'contact' ? '관심 제품' : '납품·시공 주소') + '</th><td style="' + td + '">' + h(c.addr || '-') + '</td></tr></table>');
+  // 품목
+  var items = doc.items || [];
+  if (items.length) {
+    out.push('<h3 style="margin:0 0 8px;font-size:15px;color:#8b5a2b">주문 품목</h3>');
+    out.push('<table style="width:100%;border-collapse:collapse;border-top:2px solid #b9814a;margin-bottom:10px">' +
+      '<tr><th style="' + th + 'width:34px;text-align:center">No</th><th style="' + th + 'width:auto">품목 · 사양</th><th style="' + th + 'width:50px;text-align:center">수량</th><th style="' + th + 'width:100px;text-align:right">단가</th><th style="' + th + 'width:110px;text-align:right">금액</th></tr>');
+    items.forEach(function (it, i) {
+      var spec = (it.spec || []).map(function (s) { return '<div style="font-size:12.5px;color:#555">' + h(s) + '</div>'; }).join('');
+      out.push('<tr><td style="' + td + 'text-align:center">' + (i + 1) + '</td><td style="' + td + '"><b>' + h(it.name) + '</b>' + spec + '</td>' +
+        '<td style="' + td + 'text-align:center">' + h(it.qty) + '장</td><td style="' + td + 'text-align:right">' + wonf(it.unit) + '</td><td style="' + td + 'text-align:right;font-weight:700">' + wonf(it.sub) + '</td></tr>');
+    });
+    out.push('</table>');
+    var t = doc.totals || {};
+    out.push('<table style="width:100%;border-collapse:collapse;margin-bottom:22px"><tr><td style="width:55%"></td><td>' +
+      '<table style="width:100%;border-collapse:collapse;font-size:14px">' +
+      '<tr><td style="padding:5px 12px;color:#666">공급가</td><td style="padding:5px 12px;text-align:right">' + wonf(t.supply) + '</td></tr>' +
+      '<tr><td style="padding:5px 12px;color:#666">부가세' + (num_(t.vat) ? ' 10%' : '') + '</td><td style="padding:5px 12px;text-align:right">' + wonf(t.vat) + '</td></tr>' +
+      '<tr><td style="padding:9px 12px;border-top:2px solid #2b2b2b;font-weight:900;font-size:15px">합계' + (doc.estimated ? ' (예상)' : '') + '</td><td style="padding:9px 12px;border-top:2px solid #2b2b2b;text-align:right;font-weight:900;font-size:18px;color:#8b5a2b">' + wonf(t.total) + '</td></tr>' +
+      '</table></td></tr></table>');
+  }
+  // 결제 안내
+  var p = doc.payment;
+  if (p && (p.method || p.bank)) {
+    out.push('<h3 style="margin:0 0 8px;font-size:15px;color:#8b5a2b">결제 · 입금 안내</h3>');
+    out.push('<table style="width:100%;border-collapse:collapse;border-top:2px solid #b9814a;margin-bottom:22px">' +
+      (p.method ? '<tr><th style="' + th + '">결제 방법</th><td style="' + td + '">' + h(p.method) + '</td></tr>' : '') +
+      (p.bank ? '<tr><th style="' + th + '">입금 계좌</th><td style="' + td + '"><b>' + h(p.bank) + '</b></td></tr>' : '') + '</table>');
+  }
+  // 문의 내용 / 요청 사항
+  if (doc.message) out.push('<h3 style="margin:0 0 8px;font-size:15px;color:#8b5a2b">' + (kind === 'contact' ? '문의 내용' : '요청 사항') + '</h3><div style="background:#fbf8f3;border:1px solid #e4dacb;border-radius:8px;padding:12px 14px;font-size:14px;white-space:pre-wrap;margin-bottom:22px">' + h(doc.message) + '</div>');
+  // 도면 · 사진
+  if (imgKeys && imgKeys.length) {
+    out.push('<h3 style="margin:0 0 8px;font-size:15px;color:#8b5a2b">' + (kind === 'contact' ? '현장 사진' : '주문 도면') + '</h3>');
+    imgKeys.forEach(function (k, i) { out.push('<div style="margin-bottom:12px;border:1px solid #e4dacb;border-radius:8px;overflow:hidden"><img src="cid:' + k + '" style="display:block;width:100%;max-width:640px" alt="도면 ' + (i + 1) + '"></div>'); });
+    out.push('<div style="margin-bottom:22px"></div>');
+  }
+  // 안내 문구
+  var notes = doc.notes || [];
+  if (notes.length) out.push('<ul style="margin:0 0 18px;padding-left:18px;font-size:12.5px;color:#666">' + notes.map(function (n) { return '<li>' + h(n) + '</li>'; }).join('') + '</ul>');
+  if (!forCustomer && doc.adminNote) out.push('<div style="background:#fff7ed;border:1px dashed #d9b27f;border-radius:8px;padding:10px 14px;font-size:12.5px;color:#9a3412;white-space:pre-wrap;margin-bottom:10px"><b>[관리자 참고 · 원가]</b>\n' + h(doc.adminNote) + '</div>');
+  out.push('</div>');
+  // 바닥글
+  out.push('<div style="background:#f7f2ea;border-top:1px solid #e4dacb;padding:16px 28px;font-size:12.5px;color:#666;line-height:1.7">' +
+    '<b style="color:#2b2b2b">' + h(co.name || '') + '</b> · 대표 ' + h(co.ceo || '') + ' · ' + h(co.tel || '') + ' · ' + h(co.email || '') + '<br>' +
+    '사업자등록번호 ' + h(co.bizno || '') + (co.bizname ? ' (' + h(co.bizname) + ')' : '') + ' · ' + h(co.address || '') + '</div>');
+  out.push('</div></div>');
+  return out.join('');
 }
 
 // =============================== 설정 ===============================
