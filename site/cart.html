@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>장바구니 | 나무의공간</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Nanum+Myeongjo:wght@700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=20260929e">
+<link rel="stylesheet" href="css/style.css?v=20260930h">
 </head>
 <body>
 <header class="site">
@@ -34,11 +34,11 @@
 <div class="lb"><button class="x">×</button><img alt=""></div>
 
 <script src="js/logos.js?v=20260928h"></script>
-<script src="js/main.js?v=20260929f"></script>
-<script src="js/cart.js?v=20260929f"></script>
+<script src="js/main.js?v=20260930i"></script>
+<script src="js/cart.js?v=20260930i"></script>
 <script>
 (function () {
-  const list = document.getElementById('cartList'), sum = document.getElementById('cartSum');
+  const list = document.getElementById('cartList'), sum = document.getElementById('cartSum'), ADMIN = new URLSearchParams(location.search).get('admin') === '1';
   function render() {
     const items = NW_CART.items(), t = NW_CART.totals(items), won = NW_CART.won;
     if (!items.length) {
@@ -57,12 +57,12 @@
         </div>
         <div class="right">
           <span class="qty"><button type="button" data-act="minus">−</button><input type="number" min="1" max="999" value="${it.qty}" data-act="qty"><button type="button" data-act="plus">+</button></span>
-          <small>${won(p.unit)} / 장</small><b>${won(p.sub)}</b>
+          <small>${won(p.unit)} / 장</small><b>${won(p.sub)}</b>${ADMIN ? `<small style="color:#b45309">원가 ${won(NW_CART.cost(it).unit)}/장 (각재 30×30-3600 ${NW_CART.cost(it).sticks}본 · 합판 ${it.calc.sheets}장 · 인건비 ${won(NW_CART.cost(it).labor)}) · 마진 ${won(p.unit - NW_CART.cost(it).unit)}</small>` : ''}
         </div>
       </div>`; }).join('');
     sum.innerHTML = `<div class="row"><span>도면 ${items.length}건 · 총 ${t.count}장</span></div>
       <div class="row"><span>공급가</span><b>${won(t.supply)}</b></div><div class="row"><span>부가세 10%</span><b>${won(t.vat)}</b></div>
-      <div class="row tot"><span>예상 합계</span><b>${won(t.total)}</b></div>
+      <div class="row tot"><span>예상 합계</span><b>${won(t.total)}</b></div>${ADMIN ? `<div class="row" style="color:#b45309"><span>원가 합계(참고)</span><b>${won(items.reduce((s2, it) => s2 + NW_CART.cost(it).sub, 0))}</b></div>` : ''}
       <p class="note">예상 금액입니다. 실제 견적은 접수 후 확인해 드리며, 시공 여부·현장 조건에 따라 달라질 수 있습니다.</p>
       <a class="btn wood" href="checkout.html">결제하기</a><a class="btn ghost" href="order.html">도면 더 담기</a>
       <button type="button" class="btn ghost" id="cartClear" style="border-color:var(--line);color:var(--ink-3)">전체 비우기</button>`;

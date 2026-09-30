@@ -152,7 +152,10 @@ const auto = { on: true, base: null, t0: performance.now(), resumeAt: 0 };
 function placeCam(target, dist, elev, azim) { camera.position.set(target.x + dist * Math.sin(azim) * Math.cos(elev), target.y + dist * Math.sin(elev), target.z + dist * Math.cos(azim) * Math.cos(elev)); }
 function lookAt(target, dist, elev = 0.3, azim = 0.55) { controls.target.copy(target); placeCam(target, dist, elev, azim); auto.base = { target: target.clone(), dist, elev, azim }; auto.t0 = performance.now(); controls.update(); }
 // 사용자가 조작하면 자동 움직임을 멈추고, 손을 떼고 5초 뒤 현재 시점을 기준으로 다시 천천히 움직임
-controls.addEventListener('start', () => { auto.on = false; });
+const hint = document.getElementById('view3dHint');
+const hideHint = () => { if (hint && !hint.classList.contains('off')) { hint.classList.add('off'); setTimeout(() => hint.remove(), 500); } };
+controls.addEventListener('start', () => { auto.on = false; hideHint(); });
+renderer.domElement.addEventListener('wheel', hideHint, { passive: true });
 controls.addEventListener('end', () => { auto.resumeAt = performance.now() + 5000; });
 function autoMove(now) {
   if (!auto.on && auto.resumeAt && now > auto.resumeAt) { // 재개: 현재 카메라를 새 기준으로
@@ -209,7 +212,7 @@ function build() {
     const left = buildPanel({ ...o, width: depth / MM }).g; left.rotation.y = -Math.PI / 2; left.position.set(-A / 2 - 0.001, 0, -depth); world.add(left);  // 좌측면 (−x)
     // 모서리 각재: 다른 각재와 같은 길이(C)·같은 높이
     const matB = s.finish === '무도장' ? matBattenNatural : matBattenStain;
-    [[A / 2 + ply, ply], [-A / 2 - skin, ply], [A / 2 + ply, -depth - skin], [-A / 2 - skin, -depth - skin]].forEach(([x, z]) => world.add(box(bat, Cm, bat, matB, x, y0, z, 0.002)));
+    if (s.dir === 'v') [[A / 2 + ply, ply], [-A / 2 - skin, ply], [A / 2 + ply, -depth - skin], [-A / 2 - skin, -depth - skin]].forEach(([x, z]) => world.add(box(bat, Cm, bat, matB, x, y0, z, 0.002))); // 세로 배열만 모서리 각재 (가로 배열은 각재가 모서리를 돌아감)
     // 상단 쫄대 마감: 각재 윗면을 덮는 띠 (사방)
     const tH = 0.045, tD = 0.014, ox = A / 2 + skin, oz = depth + skin;
     world.add(box(2 * ox + 2 * tD, tH, tD, matTrim, -ox - tD, B - tH, skin));               // 정면 (흰색 쫄대)

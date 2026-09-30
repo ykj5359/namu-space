@@ -12,7 +12,7 @@
   cv.width = W; cv.height = H;
 
   // 세로 배열 기본: A=1200·B=2400, 가로 배열로 바꾸면 A=2400·B=1200
-  const state = { dir: 'v', A: 1200, B: 2400, D: 100, F: 60, G: 60, corner: 'none', K: 300, finish: '오일 스테인', qty: 1, install: '자재 납품', name: '', tel: '', email: '', addr: '', memo: '' };
+  const state = { dir: 'v', A: 1200, B: 2400, D: 100, F: 60, G: 60, corner: 'none', K: 0, finish: '오일 스테인', qty: 1, install: '자재 납품', name: '', tel: '', email: '', addr: '', memo: '' };
 
   // ---- 계산 ----
   function calc() {
@@ -40,17 +40,18 @@
   // ---- 장면(공통 배치) ----
   // 좌표계 1420×820. 패널 상자는 최대 870×412, 치수에 따라 늘고 줄어듦(기준 2400mm, 제곱근 비례, 최소 30%).
   const CHAIN = [30, 8, 5, 8, 5, 8]; // 2점쇄선 (긴 선 · 점 · 점)
-  const SC = { W: 1420, H: 820, PX: 380, PY: 200, MAXW: 870, MAXH: 412, UW: 153, UH: 42 }; // UW/UH = "K = [값]" 단위 크기
-  function panelBox(totalW, totalH) {
-    const lin = v => Math.min(1, Math.max(0.25, v / 2400));                 // 쌓임 방향: 실제 비례
+  const SC = { W: 1420, H: 950, PX: 380, PY: 200, MAXW: 875, MAXH: 540, UW: 153, UH: 42, BOXH: 42, M: 1 };            // 데스크톱 · UW/UH = "K = [값]" 단위 크기, M = 라벨 배율
+  const SCM = { W: 1300, H: 1080, PX: 560, PY: 300, MAXW: 440, MAXH: 480, UW: 153 * 1.5, UH: 52 * 1.5, BOXH: 52, M: 1.5 }; // 모바일 · 패널은 조금 작게, 글자·입력칸은 1.5배(칸 높이 52)
+  function panelBox(totalW, totalH, LY = SC) {
+    const lin = v => Math.min(1, Math.max(0.3, v / 1600));                 // 쌓임 방향: 실제 비례
     const cmp = v => Math.min(1, Math.max(0.3, Math.sqrt(v / 2400)));      // 각재 길이 방향: 압축 (파단선으로 생략)
-    return state.dir === 'v' ? { BW: SC.MAXW * lin(totalW), BH: SC.MAXH * cmp(totalH) } : { BW: SC.MAXW * cmp(totalW), BH: SC.MAXH * lin(totalH) };
+    return state.dir === 'v' ? { BW: LY.MAXW * lin(totalW), BH: LY.MAXH * cmp(totalH) } : { BW: LY.MAXW * cmp(totalW), BH: LY.MAXH * lin(totalH) };
   }
-  function buildScene() {
-    const s = state, r = calc(), it = [];
-    const { BW, BH } = panelBox(r.totW, r.totH);
+  function buildScene(LY = SC) {
+    const s = state, r = calc(), it = [], M = LY.M;
+    const { BW, BH } = panelBox(r.totW, r.totH, LY);
     const kx = BW / r.totW, ky = BH / r.totH;
-    const L = SC.PX, T = SC.PY, R = L + BW, Bm = T + BH;
+    const L = LY.PX, T = LY.PY, R = L + BW, Bm = T + BH;
     const X = mm => L + mm * kx, Y = mm => T + mm * ky;
     const stain = s.finish !== '무도장';
     it.push({ t: 'rect', x: L, y: T, w: BW, h: BH, fill: '#E8D7B5', stroke: '#8B5A2B' });
@@ -78,9 +79,9 @@
     }
     // ---- 치수 (규칙: 세로 치수는 왼쪽, 가로 치수는 위·아래) ----
     // 왼쪽 바깥: B / 왼쪽 안: 세로 방향 구간 / 위: 가로 방향 구간 (가까운 줄=짧은 여백, 먼 줄=긴 구간) / 아래: A · 코너 · 전체
-    const xB = L - 205, xIn = L - 30, yNear = T - 50, yFar = T - 105, yA = Bm + 60, yTot = Bm + 125;
-    const unitL = (x, cy) => ({ x: x - SC.UW - 8, y: cy - SC.UH / 2 });       // 세로 치수선 왼쪽에 단위 배치
-    const unitC = (cx, y) => ({ x: cx - SC.UW / 2 + 29, y });                 // 가로 치수선 중앙 위/아래 (29 = 라벨 폭 보정)
+    const xB = L - 205 * M, xIn = L - 30 * M, yNear = T - 50 * M, yFar = yNear - LY.UH - 16 * M, yA = Bm + 60 * M, yTot = yA + LY.UH + 16 * M;
+    const unitL = (x, cy) => ({ x: x - LY.UW - 8, y: cy - LY.UH / 2 });       // 세로 치수선 왼쪽에 단위 배치
+    const unitC = (cx, y) => ({ x: cx - LY.UW / 2 + 29 * M, y });                 // 가로 치수선 중앙 위/아래 (29 = 라벨 폭 보정)
     const dimV = (x, y1, y2, key, val, unit) => it.push({ t: 'dim', side: 'v', x, y1, y2, ext: [L, x - 12], key, val, unit });
     const dimH = (y, x1, x2, key, val, unit, extFrom) => it.push({ t: 'dim', side: 'h', y, x1, x2, ext: [extFrom, y + (y < T ? -12 : 12)], key, val, unit });
     dimV(xB, T, Bm, 'B', s.B, unitL(xB, (T + Bm) / 2));
@@ -88,34 +89,35 @@
       // 왼쪽 안: C(각재 길이) 위, D(끝 여백) 아래
       const yC = Y(r.C);
       dimV(xIn, T, yC, 'C', r.C, unitL(xIn, (T + yC) / 2));
-      if (r.D > 0) dimV(xIn, yC, Bm, 'D', r.D, unitL(xIn, Math.max((yC + Bm) / 2, (T + yC) / 2 + 52)));
-      else dimV(xIn, Bm, Bm, 'D', 0, unitL(xIn, Bm + 30));
+      if (r.D > 0) dimV(xIn, yC, Bm, 'D', r.D, unitL(xIn, Math.max((yC + Bm) / 2, (T + yC) / 2 + LY.UH + 10 * M)));
+      else dimV(xIn, Bm, Bm, 'D', 0, unitL(xIn, Bm + 30 * M));
       // 위: 가까운 줄 F(왼쪽 여백)·G(오른쪽 여백), 먼 줄 E(각재 구간)
       const x0 = X(r.left), xF = X(r.left + s.F), xE = X(r.left + s.F + r.Ereal), x1 = X(r.left + s.A);
-      dimH(yNear, x0, xF, 'F', s.F, { x: xF - SC.UW - 6, y: yNear - SC.UH - 8 }, T);
-      dimH(yNear, xE, x1, 'G', Math.round(r.Gadj), { x: xE + 6, y: yNear - SC.UH - 8 }, T);
-      dimH(yFar, xF, xE, 'E', r.Ereal, unitC((xF + xE) / 2, yFar - SC.UH - 8), T);
+      dimH(yNear, x0, xF, 'F', s.F, { x: xF - LY.UW - 6, y: yNear - LY.UH - 8 * M }, T);
+      dimH(yNear, xE, x1, 'G', Math.round(r.Gadj), { x: xE + 6, y: yNear - LY.UH - 8 * M }, T);
+      dimH(yFar, xF, xE, 'E', r.Ereal, unitC((xF + xE) / 2, yFar - LY.UH - 8 * M), T);
     } else {
       // 왼쪽 안: F(위 여백)·E(각재 구간)·G(아래 여백)
       const yF = Y(s.F), yE = Y(s.F + r.Ereal);
-      const uF = unitL(xIn, (T + yF) / 2), uE = unitL(xIn, Math.max((yF + yE) / 2, uF.y + SC.UH / 2 + 52)), uG = unitL(xIn, Math.max((yE + Bm) / 2, uE.y + SC.UH / 2 + 52));
+      const uF = unitL(xIn, (T + yF) / 2), uE = unitL(xIn, Math.max((yF + yE) / 2, uF.y + LY.UH + 10 * M)), uG = unitL(xIn, Math.max((yE + Bm) / 2, uE.y + LY.UH + 10 * M));
       dimV(xIn, T, yF, 'F', s.F, uF); dimV(xIn, yF, yE, 'E', r.Ereal, uE); dimV(xIn, yE, Bm, 'G', Math.round(r.Gadj), uG);
       // 위: 먼 줄 C(각재 길이), 가까운 줄 D(끝 여백, 오른쪽)
       const x0 = X(r.left), xC = X(r.left + r.C), x1 = X(r.left + s.A);
-      dimH(yFar, x0, xC, 'C', r.C, unitC((x0 + xC) / 2, yFar - SC.UH - 8), T);
-      if (r.D > 0) dimH(yNear, xC, x1, 'D', r.D, { x: xC + 6, y: yNear - SC.UH - 8 }, T);
-      else dimH(yNear, x1, x1, 'D', 0, { x: x1 + 6, y: yNear - SC.UH - 8 }, T);
+      dimH(yFar, x0, xC, 'C', r.C, unitC((x0 + xC) / 2, yFar - LY.UH - 8 * M), T);
+      if (r.D > 0) dimH(yNear, xC, x1, 'D', r.D, { x: xC + 6, y: yNear - LY.UH - 8 * M }, T);
+      else dimH(yNear, x1, x1, 'D', 0, { x: x1 + 6, y: yNear - LY.UH - 8 * M }, T);
     }
     // 아래: A · 코너 K · 전체
     dimH(yA, X(r.left), X(r.left + s.A), 'A', s.A, unitC((X(r.left) + X(r.left + s.A)) / 2, yA + 14), Bm);
-    if (r.left) dimH(yA, L, X(r.left), 'K', s.K, { x: L - SC.UW - 6, y: yA + 14 }, Bm);
-    if (r.right) dimH(yA, X(r.left + s.A), R, 'K', s.K, { x: R + 6, y: yA + 14 }, Bm);
-    if (r.cornerN) dimH(yTot, L, R, '전체', r.totW, unitC((L + R) / 2, yTot + 14), Bm);
+    if (r.left) dimH(yA, L, X(r.left), 'K', s.K, { x: L - LY.UW - 6, y: yA + 14 * M }, Bm);
+    if (r.right) dimH(yA, X(r.left + s.A), R, 'K', s.K, { x: R + 6, y: yA + 14 * M }, Bm);
     return { it, r };
   }
 
   // ---- 렌더러 1: SVG (화면 다이어그램, 입력칸 포함) ----
   const KEYS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'K'];
+  const IS_MOBILE = () => matchMedia('(max-width: 760px)').matches;
+  matchMedia('(max-width: 760px)').addEventListener('change', () => updateDiagram());
   function initDiagram() {
     const host = $('#diagram'); if (!host) return;
     host.innerHTML = '<div id="diagramSvg"></div>' + KEYS.map(k => `<input type="number" data-k="${k}" step="10" min="0" class="dbox" aria-label="${k}">`).join('');
@@ -124,14 +126,15 @@
   }
   function updateDiagram() {
     const host = $('#diagramSvg'); if (!host) return;
-    const { it } = buildScene(); const BL = '#1d4ed8', pos = {};
+    const LY = IS_MOBILE() ? SCM : SC, M = LY.M;
+    const { it } = buildScene(LY); const BL = '#1d4ed8', pos = {};
     let g = '';
     const line = (x1, y1, x2, y2, st, w, dash) => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${st}" stroke-width="${w}"${dash ? ` stroke-dasharray="${dash.join(' ')}"` : ''}/>`;
     for (const o of it) {
       if (o.t === 'rect') g += `<rect x="${o.x}" y="${o.y}" width="${o.w}" height="${o.h}" fill="${o.fill}" stroke="${o.stroke}" stroke-width="2"/>`;
       else if (o.t === 'batten') g += `<rect x="${o.x}" y="${o.y}" width="${o.w}" height="${o.h}" fill="url(#${o.stain ? 'wgs' : 'wg'})" stroke="#6B3F1D" stroke-width="0.8"/>`;
       else if (o.t === 'line') g += line(o.x1, o.y1, o.x2, o.y2, o.stroke, o.w, o.dash);
-      else if (o.t === 'text') g += `<text x="${o.x}" y="${o.y}" font-family="Noto Sans KR, sans-serif" font-size="22" fill="${o.color}">${o.str}</text>`;
+      else if (o.t === 'text') g += `<text x="${o.x}" y="${o.y}" font-family="Noto Sans KR, sans-serif" font-size="${22 * M}" fill="${o.color}">${o.str}</text>`;
       else if (o.t === 'break') {
         if (o.axis === 'h') g += `<rect x="${o.from}" y="${o.a}" width="${o.to - o.from}" height="${o.b - o.a}" fill="#fff"/>` + line(o.from, o.a, o.to, o.a, '#333', 2, CHAIN) + line(o.from, o.b, o.to, o.b, '#333', 2, CHAIN);
         else g += `<rect x="${o.a}" y="${o.from}" width="${o.b - o.a}" height="${o.to - o.from}" fill="#fff"/>` + line(o.a, o.from, o.a, o.to, '#333', 2, CHAIN) + line(o.b, o.from, o.b, o.to, '#333', 2, CHAIN);
@@ -139,15 +142,15 @@
       else if (o.t === 'dim') {
         if (o.side === 'v') { g += line(o.ext[0], o.y1, o.ext[1], o.y1, BL, 1.5) + line(o.ext[0], o.y2, o.ext[1], o.y2, BL, 1.5); if (o.y2 - o.y1 > 14) g += line(o.x, o.y1 + 6, o.x, o.y2 - 6, BL, 2) + `<polygon points="${o.x},${o.y1} ${o.x - 5},${o.y1 + 12} ${o.x + 5},${o.y1 + 12}" fill="${BL}"/><polygon points="${o.x},${o.y2} ${o.x - 5},${o.y2 - 12} ${o.x + 5},${o.y2 - 12}" fill="${BL}"/>`; else g += line(o.x - 8, (o.y1 + o.y2) / 2, o.x + 8, (o.y1 + o.y2) / 2, BL, 2); }
         else { g += line(o.x1, o.ext[0], o.x1, o.ext[1], BL, 1.5) + line(o.x2, o.ext[0], o.x2, o.ext[1], BL, 1.5); if (o.x2 - o.x1 > 14) g += line(o.x1 + 6, o.y, o.x2 - 6, o.y, BL, 2) + `<polygon points="${o.x1},${o.y} ${o.x1 + 12},${o.y - 5} ${o.x1 + 12},${o.y + 5}" fill="${BL}"/><polygon points="${o.x2},${o.y} ${o.x2 - 12},${o.y - 5} ${o.x2 - 12},${o.y + 5}" fill="${BL}"/>`; else g += line((o.x1 + o.x2) / 2, o.y - 8, (o.x1 + o.x2) / 2, o.y + 8, BL, 2); }
-        const u = o.unit; g += `<text x="${u.x}" y="${u.y + 32}" font-family="Noto Sans KR, sans-serif" font-weight="800" font-size="30" fill="#111">${o.key} =</text>`;
-        if (o.key === '전체') g += `<rect x="${u.x + 92}" y="${u.y}" width="95" height="42" fill="#fff" stroke="#222" stroke-width="2"/><text x="${u.x + 139}" y="${u.y + 31}" text-anchor="middle" font-family="Noto Sans KR, sans-serif" font-weight="700" font-size="28" fill="#111">${o.val}</text>`;
-        else pos[o.key] = [u.x + 58, u.y];
+        const u = o.unit; g += `<text x="${u.x}" y="${u.y + (LY.BOXH * 0.76) * M}" font-family="Noto Sans KR, sans-serif" font-weight="800" font-size="${30 * M}" fill="#111">${o.key} =</text>`;
+        if (o.key === '전체') { const bx = 92 * M; g += `<rect x="${u.x + bx}" y="${u.y}" width="${95 * M}" height="${LY.BOXH * M}" fill="#fff" stroke="#222" stroke-width="2"/><text x="${u.x + bx + 47 * M}" y="${u.y + (LY.BOXH * 0.74) * M}" text-anchor="middle" font-family="Noto Sans KR, sans-serif" font-weight="700" font-size="${28 * M}" fill="#111">${o.val}</text>`; }
+        else pos[o.key] = [u.x + 58 * M, u.y];
       }
     }
-    host.innerHTML = `<svg viewBox="0 0 ${SC.W} ${SC.H}" width="100%" style="display:block">
+    host.innerHTML = `<svg viewBox="0 0 ${LY.W} ${LY.H}" width="100%" style="display:block">
       <defs><linearGradient id="wg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#D9B27F"/><stop offset=".5" stop-color="#C8955C"/><stop offset="1" stop-color="#B9814A"/></linearGradient>
       <linearGradient id="wgs" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8B5A2B"/><stop offset=".5" stop-color="#A86F3C"/><stop offset="1" stop-color="#7A4A22"/></linearGradient></defs>${g}</svg>`;
-    $('#diagram').querySelectorAll('.dbox').forEach(el => { const p = pos[el.dataset.k]; if (!p) { el.style.display = 'none'; return; } el.style.display = ''; el.style.left = p[0] / SC.W * 100 + '%'; el.style.top = p[1] / SC.H * 100 + '%'; el.style.width = 95 / SC.W * 100 + '%'; el.style.height = 42 / SC.H * 100 + '%'; });
+    $('#diagram').querySelectorAll('.dbox').forEach(el => { const p = pos[el.dataset.k]; if (!p) { el.style.display = 'none'; return; } el.style.display = ''; el.classList.toggle('main', el.dataset.k === 'A' || el.dataset.k === 'B'); el.classList.toggle('opt', !(el.dataset.k === 'A' || el.dataset.k === 'B')); el.style.left = p[0] / LY.W * 100 + '%'; el.style.top = p[1] / LY.H * 100 + '%'; el.style.width = 95 * M / LY.W * 100 + '%'; el.style.height = LY.BOXH * M / LY.H * 100 + '%'; el.style.fontSize = (2.4 * M * (LY.W / 1420)) + 'cqw'; });
   }
 
   // ---- 렌더러 2: 캔버스 (주문 도면 시트) ----
@@ -159,7 +162,7 @@
     ctx.fillStyle = g; ctx.fillRect(x, y, w, h); ctx.strokeStyle = '#5b3a1a'; ctx.lineWidth = .8; ctx.strokeRect(x, y, w, h);
   }
   function drawScene(box) {
-    const { it } = buildScene(); const BL = '#1d4ed8';
+    const { it } = buildScene(SC); const BL = '#1d4ed8';
     const sc = Math.min(box.w / SC.W, box.h / SC.H), ox = box.x + (box.w - SC.W * sc) / 2, oy = box.y + (box.h - SC.H * sc) / 2;
     const P = (x, y) => [ox + x * sc, oy + y * sc];
     const line = (x1, y1, x2, y2, st, w, dash) => { ctx.save(); ctx.strokeStyle = st; ctx.lineWidth = w; if (dash) ctx.setLineDash(dash); ctx.beginPath(); ctx.moveTo(...P(x1, y1)); ctx.lineTo(...P(x2, y2)); ctx.stroke(); ctx.restore(); };
@@ -179,7 +182,7 @@
         else { line(o.x1, o.ext[0], o.x1, o.ext[1], BL, 1.5); line(o.x2, o.ext[0], o.x2, o.ext[1], BL, 1.5); if (o.x2 - o.x1 > 14) { line(o.x1 + 6, o.y, o.x2 - 6, o.y, BL, 2); tri([[o.x1, o.y], [o.x1 + 12, o.y - 5], [o.x1 + 12, o.y + 5]]); tri([[o.x2, o.y], [o.x2 - 12, o.y - 5], [o.x2 - 12, o.y + 5]]); } else line((o.x1 + o.x2) / 2, o.y - 8, (o.x1 + o.x2) / 2, o.y + 8, BL, 2); }
         const [ux, uy] = P(o.unit.x, o.unit.y); const uw = 95 * sc, uh = 42 * sc; ctx.font = `700 ${FS}px "Noto Sans KR", sans-serif`; const lw = ctx.measureText(`${o.key} =`).width + 8;
         text(`${o.key} =`, ux, uy + uh * 0.76, { c: BL, w: 700 });
-        ctx.fillStyle = '#fff'; ctx.fillRect(ux + lw, uy, uw, uh); ctx.strokeStyle = '#222'; ctx.lineWidth = 2; ctx.strokeRect(ux + lw, uy, uw, uh);
+        ctx.fillStyle = '#fff'; ctx.fillRect(ux + lw, uy, uw, uh); ctx.strokeStyle = '#333'; ctx.lineWidth = 1; ctx.strokeRect(ux + lw, uy, uw, uh);
         text(String(o.val), ux + lw + uw / 2, uy + uh * 0.76, { a: 'center', w: 700, c: '#111' });
       }
     }
@@ -326,7 +329,7 @@
       state[el.dataset.k] = el.value; syncDerived(); draw();
     }));
     $('#cornerK').style.display = state.corner === 'none' ? 'none' : '';
-    document.querySelectorAll('input[name=corner]').forEach(el => el.addEventListener('change', () => { $('#cornerK').style.display = state.corner === 'none' ? 'none' : ''; }));
+    document.querySelectorAll('input[name=corner]').forEach(el => el.addEventListener('change', () => { $('#cornerK').style.display = state.corner === 'none' ? 'none' : ''; if (state.corner !== 'none' && !(state.K > 0)) { state.K = 300; syncInputs('K', null); } if (state.corner === 'none' && state.K) { state.K = 0; syncInputs('K', null); } syncDerived(); draw(); }));
   }
 
   // ---- 저장·전송 ----
@@ -396,7 +399,7 @@
     DIM_KEYS.forEach(k => syncInputs(k, null));
     $('#cornerK').style.display = state.corner === 'none' ? 'none' : ''; syncDerived(); draw();
   }
-  function resetItem() { loadItem({ dir: 'v', A: 1200, B: 2400, D: 100, F: 60, G: 60, corner: 'none', K: 300, finish: '오일 스테인', install: '자재 납품' }); }
+  function resetItem() { loadItem({ dir: 'v', A: 1200, B: 2400, D: 100, F: 60, G: 60, corner: 'none', K: 0, finish: '오일 스테인', install: '자재 납품' }); }
   window.NW_ORDER = { get: () => ({ s: state, r: calc(), BAT, GAP, PITCH, PLY }), snapshot, load: loadItem, reset: resetItem };
   if (qp.get('dir') === 'h' && !qp.has('A') && !qp.has('B')) { state.A = 2400; state.B = 1200; syncInputs('A', null); syncInputs('B', null); } // 가로 배열 링크: 기본 A=2400·B=1200
   bind(); initDiagram(); syncDerived();

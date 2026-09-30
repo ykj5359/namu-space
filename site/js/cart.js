@@ -16,6 +16,16 @@
     const unit = Math.max(P.min, Math.round((base + corner + install) / 100) * 100);
     return { unit, sub: unit * item.qty };
   }
+  // 원가 (관리자 참고): 각재 30×30-3600 본 수×단가 + 합판 원장 수×단가 + 인건비 ㎡ + 스테인 재료비 ㎡
+  //  각재 본 수 = 각재 개수 ÷ (1본 3600에서 나오는 토막 수, 각재 길이 C 기준)
+  function cost(item) {
+    const C = SITE.cost || {}, k = item.calc, a = k.area, len = C.battenLen || 3600;
+    const perStick = Math.max(1, Math.floor(len / Math.max(1, k.C || len)));
+    const sticks = Math.ceil((k.totalBattens || 0) / perStick);
+    const battens = sticks * (C.batten || 0), ply = (k.sheets || 0) * (C.plywood || 0), labor = a * (C.labor || 0), stain = item.finish === '무도장' ? 0 : a * (C.stain || 0);
+    const unit = Math.round(battens + ply + labor + stain);
+    return { sticks, perStick, battens, ply, labor, stain, unit, sub: unit * item.qty };
+  }
   function totals(items) {
     const supply = items.reduce((s, it) => s + price(it).sub, 0);
     const vat = Math.round(supply * 0.1);
@@ -24,7 +34,7 @@
   const label = it => `${it.dir === 'v' ? '세로' : '가로'} ${it.A}×${it.B}${it.corner !== 'none' ? ' · 코너 ' + ({ left: '좌', right: '우', both: '양쪽' })[it.corner] + ' K' + it.K : ''} · ${it.finish}${it.install === '현장 시공 포함' ? ' · 시공' : ''}`;
 
   const api = {
-    get: load, save, price, totals, won, label,
+    get: load, save, price, cost, totals, won, label,
     items: () => load().items,
     add(item) { const c = load(); item.id = 'i' + Date.now().toString(36); item.addedAt = Date.now(); c.items.push(item); save(c); return item.id; },
     update(id, patch) { const c = load(); const it = c.items.find(x => x.id === id); if (it) Object.assign(it, patch); save(c); },

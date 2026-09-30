@@ -13,7 +13,10 @@ window.SITE = {
   // 이메일 자동 전송(EmailJS) — 계정 발급 후 아래 세 값을 채우면 주문서가 자동 발송됩니다.
   emailjs: { publicKey: '', serviceId: '', templateId: '' },
   // 예상 금액 단가 (원) — 실제 단가로 바꿔 주세요. 면적은 코너 돌림을 포함한 패널 면적(㎡) 기준, 부가세 별도.
-  price: { natural: 150000, stain: 150000, corner: 30000, install: 40000, min: 50000 }, // natural/stain: ㎡당, corner: 코너 1면당, install: 현장 시공 ㎡당, min: 1장 최소
+  price: { natural: 140000, stain: 140000, corner: 30000, install: 40000, min: 50000 }, // natural/stain: ㎡당, corner: 코너 1면당, install: 현장 시공 ㎡당, min: 1장 최소
+  // 원가 계산 기준 (관리자 참고용 · cart.html?admin=1 과 주문 메일에 표시)
+  //  batten: 각재 30×30-3600 1본 단가(원) · battenLen: 1본 길이(mm) · plywood: 합판 2400×1200×8t 1장 · labor: 인건비 ㎡당 · stain: 오일 스테인 재료비 ㎡당(미정 시 0)
+  cost: { batten: 3600, battenLen: 3600, plywood: 18000, labor: 30000, stain: 0 },
   // 결제 — provider 'toss' 로 두고 clientKey 를 넣으면 토스페이먼츠 결제창이 열립니다. 비어 있으면 모의 결제(주문 접수만)로 동작합니다.
   payment: { provider: 'toss', clientKey: '', successUrl: 'complete.html', failUrl: 'checkout.html', bank: '농협 000-0000-0000-00 (예금주 이영석)' },
 };

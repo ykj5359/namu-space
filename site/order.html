@@ -6,7 +6,7 @@
 <title>도면 주문 | 나무의공간</title>
 <meta name="description" content="폭·높이·여백·코너를 입력하면 템바보드 도면이 자동으로 그려집니다. 도면 이미지와 함께 주문을 접수하세요.">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Nanum+Myeongjo:wght@700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=20260929e">
+<link rel="stylesheet" href="css/style.css?v=20260930h">
 <style>
   .order { display: grid; grid-template-columns: 400px 1fr; gap: 28px; align-items: start; padding: 30px 0 60px; }
   .panel { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 22px; position: sticky; top: 90px; max-height: calc(100vh - 110px); overflow: auto; }
@@ -37,7 +37,7 @@
   .diagram-card { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 18px 22px 10px; margin-top: 24px; }
   .diagram-card h3 { font-size: 15px; letter-spacing: .1em; color: var(--wood-dark); margin: 0 0 6px; }
   .diagram { position: relative; max-width: 940px; container-type: inline-size; }
-  .diagram .dbox { position: absolute; box-sizing: border-box; border: 2px solid #222; border-radius: 0; background: #fff; font-family: var(--font); font-weight: 700; font-size: 2.4cqw; text-align: center; padding: 0; color: #111; -moz-appearance: textfield; }
+  .diagram .dbox { position: absolute; box-sizing: border-box; border: 1px solid #444; border-radius: 0; background: #fff; font-family: var(--font); font-weight: 700; font-size: 2.4cqw; text-align: center; padding: 0; color: #111; -moz-appearance: textfield; }
   .diagram .dbox::-webkit-outer-spin-button, .diagram .dbox::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
   .diagram .dbox:focus { outline: 3px solid var(--wood); }
   .sim-grid { display: grid; grid-template-columns: 3fr 2fr; gap: 14px; margin-top: 12px; align-items: stretch; }
@@ -70,7 +70,7 @@
   <div class="diagram-card">
     <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:10px">
       <div><h3>도면에 치수 입력 (mm)</h3>
-      <p class="hint" style="margin:0 0 8px">네모칸에 숫자를 넣으면 아래 도면과 주문서가 바로 바뀝니다. 세로 치수는 왼쪽, 가로 치수는 위·아래에 표시됩니다. K는 코너형일 때 꺾여 돌아가는 면의 폭입니다.</p></div>
+      <p class="hint" style="margin:0 0 8px"><b style="color:var(--wood-dark)">A 폭과 B 높이</b>만 넣으면 나머지 치수는 자동으로 계산됩니다. 회색 칸(C·D·E·F·G·K)은 필요할 때만 고치세요. K는 코너형일 때 꺾여 돌아가는 면의 폭입니다.</p></div>
       <div class="seg" style="min-width:260px">
         <label><input type="radio" name="dir2" data-k="dir" value="v" checked><span>세로 배열</span></label>
         <label><input type="radio" name="dir2" data-k="dir" value="h"><span>가로 배열</span></label>
@@ -93,7 +93,11 @@
       </div>
     </div>
     <div class="sim-grid">
-      <div id="view3d" style="position:relative;height:520px;border-radius:12px;overflow:hidden;background:#e9e4dc"><div id="view3dNote" style="position:absolute;left:12px;bottom:10px;font-size:13px;color:#555;background:rgba(255,255,255,.8);padding:4px 10px;border-radius:8px"></div></div>
+      <div id="view3d" style="position:relative;height:520px;border-radius:12px;overflow:hidden;background:#e9e4dc"><div id="view3dNote" style="position:absolute;left:12px;bottom:10px;font-size:13px;color:#555;background:rgba(255,255,255,.8);padding:4px 10px;border-radius:8px"></div>
+        <div id="view3dHint" class="v3-hint" aria-hidden="true">
+          <svg viewBox="0 0 120 120" width="96" height="96"><g fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"><path d="M60 14 v92 M14 60 h92"/><path d="M48 26 l12-12 12 12 M48 94 l12 12 12-12 M26 48 l-12 12 12 12 M94 48 l12 12-12 12"/></g><circle cx="60" cy="60" r="9" fill="#fff"/></svg>
+          <span>드래그해서 돌려 보세요</span>
+        </div></div>
       <figure class="sim-photo" id="simPhoto"><img src="img/interior/sim_wall_stain.jpg" alt="실사 예시"><figcaption><b>실사 예시</b> · <span id="simPhotoCap">벽면 부착 · 오일 스테인</span><br><span class="hint">같은 장면의 대표 사진입니다. 입력한 치수와 정확히 같지는 않습니다.</span></figcaption></figure>
     </div>
   </div>
@@ -108,15 +112,21 @@
       <p class="hint" id="dirNote" style="margin:6px 0 0"></p>
 
       <h3>2. 치수 (mm)</h3>
+      <p class="hint" style="margin:0 0 8px"><b style="color:var(--wood-dark)">A 폭과 B 높이만 입력하시면 됩니다.</b> 나머지 치수는 자동으로 계산됩니다.</p>
       <div class="g">
-        <label>A 폭 <input type="number" data-k="A" min="100" max="12000" step="10"></label>
-        <label>B 높이 <input type="number" data-k="B" min="100" max="12000" step="10"></label>
-        <label>C 각재 길이 <span class="hint">(길이 − D)</span><input type="number" data-k="C" min="0" max="12000" step="10"></label>
-        <label>D 끝 여백 <span class="hint">(각재 끝 뒤 합판 여백)</span><input type="number" data-k="D" min="0" max="5000" step="5"></label>
-        <label>F 시작 여백 <input type="number" data-k="F" min="0" max="5000" step="5"></label>
-        <label>G 끝 여백 <span class="hint">(남는 치수 자동 반영)</span><input type="number" data-k="G" min="0" max="5000" step="5"></label>
-        <label class="one" style="grid-column:1/-1">E 각재 구간 <span class="hint">(첫 각재 왼쪽 끝~마지막 각재 오른쪽 끝 · 직접 고치면 폭이 바뀝니다)</span><input type="number" data-k="E" min="0" max="12000" step="60"></label>
+        <label>A 폭 * <input type="number" data-k="A" min="100" max="12000" step="10" style="border-color:var(--wood-dark);font-size:17px;font-weight:700"></label>
+        <label>B 높이 * <input type="number" data-k="B" min="100" max="12000" step="10" style="border-color:var(--wood-dark);font-size:17px;font-weight:700"></label>
       </div>
+      <details class="opt-dims">
+        <summary>세부 치수 직접 조정 (선택)</summary>
+        <div class="g">
+          <label>C 각재 길이 <span class="hint">(길이 − D)</span><input type="number" data-k="C" min="0" max="12000" step="10"></label>
+          <label>D 끝 여백 <span class="hint">(각재 끝 뒤 합판 여백)</span><input type="number" data-k="D" min="0" max="5000" step="5"></label>
+          <label>F 시작 여백 <input type="number" data-k="F" min="0" max="5000" step="5"></label>
+          <label>G 끝 여백 <span class="hint">(남는 치수 자동 반영)</span><input type="number" data-k="G" min="0" max="5000" step="5"></label>
+          <label class="one" style="grid-column:1/-1">E 각재 구간 <span class="hint">(첫 각재 왼쪽 끝~마지막 각재 오른쪽 끝 · 직접 고치면 폭이 바뀝니다)</span><input type="number" data-k="E" min="0" max="12000" step="60"></label>
+        </div>
+      </details>
       <p class="hint" style="margin:8px 0 0">각재 30×30 · 간격 30 · 합판 8 은 고정입니다. 합판 원장은 1220×2440이며 가로·세로 모두 계속 이어 붙여 제작하므로 크기 제한이 없습니다.</p>
 
       <h3>3. 코너형 옵션</h3>
@@ -187,13 +197,13 @@
 <div class="floating"><a data-tel href="#">전화</a><a class="dark" href="cart.html">장바구니</a></div>
 
 <script src="js/logos.js?v=20260928h"></script>
-<script src="js/main.js?v=20260929f"></script>
-<script src="js/cart.js?v=20260929f"></script>
+<script src="js/main.js?v=20260930i"></script>
+<script src="js/cart.js?v=20260930i"></script>
 <!-- 이메일 자동 발송(EmailJS)을 쓰려면 아래 주석을 풀고 main.js 의 SITE.emailjs 값을 채우세요.
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script> -->
-<script src="js/order.js?v=20260929h"></script>
+<script src="js/order.js?v=20260930g"></script>
 <script type="importmap">{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/" } }</script>
-<script type="module" src="js/view3d.js?v=20260929c"></script>
+<script type="module" src="js/view3d.js?v=20260930b"></script>
 <script>
 // 3D 장면·마감에 맞는 실사 예시 사진
 document.addEventListener('scene3d', e => {

@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>주문 완료 | 나무의공간</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Nanum+Myeongjo:wght@700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=20260929e">
+<link rel="stylesheet" href="css/style.css?v=20260930h">
 </head>
 <body>
 <header class="site">
@@ -25,8 +25,8 @@
 <footer class="site"><div class="wrap"><a class="logo" data-logo href="index.html"></a><div><b data-site="name"></b> · 대표 <span data-site="ceo"></span> · <span data-site="tel"></span> · <span data-site="email"></span></div></div></footer>
 
 <script src="js/logos.js?v=20260928h"></script>
-<script src="js/main.js?v=20260929f"></script>
-<script src="js/cart.js?v=20260929f"></script>
+<script src="js/main.js?v=20260930i"></script>
+<script src="js/cart.js?v=20260930i"></script>
 <script src="js/payments.js?v=20260929e"></script>
 <script>
 (function () {
@@ -60,6 +60,7 @@
   // 주문서 텍스트
   const text = () => `[나무의공간 템바보드 주문] ${order.no}\n주문자: ${c.name} / ${c.tel} / ${c.email}\n주소: ${c.addr}\n결제: ${methodName} · 합계(예상) ${won(t.total)} (공급가 ${won(t.supply)} + 부가세 ${won(t.vat)})\n요청: ${c.memo || '-'}\n\n` +
     order.items.map((it, i) => { const k = it.calc; return `${i + 1}. ${it.dir === 'v' ? '세로' : '가로'} A${it.A}×B${it.B} · C${k.C}/D${k.D} · F${it.F}/E${k.Ereal}/G${k.Gadj} · 코너 ${it.corner === 'none' ? '없음' : it.corner + ' K' + it.K} · ${it.finish} · ${it.install} · 각재 ${k.totalBattens}개 · 원장 ${k.sheets}장 · ${it.qty}장 · ${won(NW_CART.price(it).sub)}`; }).join('\n') +
+    `\n\n[원가 참고] ` + order.items.map((it, i) => { const c = NW_CART.cost(it); return `${i + 1}: 각재 30×30-3600 ${c.sticks}본(${it.calc.totalBattens}개) ${won(c.battens)} + 합판 2400×1200×8t ${it.calc.sheets}장 ${won(c.ply)} + 인건비 ${won(c.labor)} = ${won(c.unit)}/장 ×${it.qty}`; }).join(' / ') +
     `\n\n※ 도면 이미지 ${order.items.length}장을 첨부해 주세요.`;
   const dataFiles = () => order.items.map((it, i) => { const b = atob(it.sheet.split(',')[1]); const u = new Uint8Array(b.length); for (let j = 0; j < b.length; j++) u[j] = b.charCodeAt(j); return new File([u], `${order.no}_도면${i + 1}.jpg`, { type: 'image/jpeg' }); });
   document.getElementById('btnSave').addEventListener('click', () => { dataFiles().forEach((f, i) => setTimeout(() => { const a = document.createElement('a'); a.href = URL.createObjectURL(f); a.download = f.name; a.click(); }, i * 400)); });
