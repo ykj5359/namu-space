@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>무료 샘플 신청 | 나무의공간</title>
-<meta name="description" content="나왕 템바보드 샘플(30×50cm)을 무료로 보내드립니다. 인테리어·건축·가구·상업공간 사업자와 개인 모두 신청 가능.">
+<meta name="description" content="나왕 템바보드 샘플(30×50cm)을 사업자(인테리어·건축·가구·상업공간)에게 무료로 보내드립니다. 사업자등록번호 필수.">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Nanum+Myeongjo:wght@700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css?v=20261001w">
 <style>
@@ -12,7 +12,7 @@
   .sp-hero img { border-radius: var(--radius); box-shadow: 0 20px 50px rgba(60,40,20,.18); }
   .sp-points { display: grid; gap: 10px; margin: 18px 0 0; padding: 0; list-style: none; }
   .sp-points li { display: flex; gap: 10px; align-items: flex-start; font-size: 15px; color: var(--ink-2); }
-  .sp-points li b { color: var(--wood-dark); }
+  .sp-points li b { color: var(--wood-dark); white-space: nowrap; }
   .sp-wrap { display: grid; grid-template-columns: 1fr 340px; gap: 26px; align-items: start; padding: 30px 0 80px; }
   .sp-form { display: grid; gap: 22px; }
   .sp-card { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 26px; display: grid; gap: 14px; }
@@ -57,11 +57,12 @@
       <div class="eyebrow">Free Sample</div>
       <h1 class="sec-title">템바보드 샘플을<br>무료로 보내드립니다</h1>
       <p class="sec-lead">가로 30 × 세로 50 cm 실제 제품 샘플입니다. 색감과 결, 두께감을 직접 확인해 보시고 현장에 맞는 구성을 상담받으세요. 배송비도 받지 않습니다.</p>
+      <p style="display:inline-block;background:#2b2b2b;color:#fff;border-radius:999px;padding:7px 14px;font-size:13.5px;font-weight:700;margin:0">사업자 전용 · 사업자등록번호 필수</p>
       <ul class="sp-points">
         <li><b>규격</b> 나왕 30×30 각재 · 간격 30 · 합판 8t (실제 제품과 동일 사양)</li>
         <li><b>마감</b> 오일 스테인 (실제 제품 기본 마감)</li>
-        <li><b>발송</b> 신청 확인 후 2~3일 내 택배 발송 · 1업체(1인) 1회</li>
-        <li><b>대상</b> 인테리어·건축·가구·상업공간 사업자와 시공을 검토 중인 개인</li>
+        <li><b>발송</b> 신청 확인 후 2~3일 내 택배 발송 · 1업체 1회</li>
+        <li><b>대상</b> 사업자 전용 — 인테리어·건축·가구·상업공간·자재 유통 등 사업자등록이 있는 업체 (개인 신청은 받지 않습니다)</li>
       </ul>
     </div>
     <img src="img/popup/sample.jpg" alt="무료 샘플 안내" loading="lazy">
@@ -72,8 +73,8 @@
       <div class="sp-card">
         <h3><span class="n">1</span> 신청자 · 업체 정보</h3>
         <div class="two">
-          <label>상호 (회사명) <span class="req">*</span><input name="company" required placeholder="예: 둥지인테리어 · 개인은 이름"></label>
-          <label>사업자등록번호 <span class="hint" style="font-weight:400">(사업자만)</span><input name="bizno" placeholder="000-00-00000" inputmode="numeric"></label>
+          <label>상호 (회사명) <span class="req">*</span><input name="company" required placeholder="예: 둥지인테리어"></label>
+          <label>사업자등록번호 <span class="req">*</span><input name="bizno" required placeholder="000-00-00000" inputmode="numeric"></label>
         </div>
         <div class="two">
           <label>대표자 (담당자) <span class="req">*</span><input name="ceo" required placeholder="홍길동"></label>
@@ -92,7 +93,6 @@
             <label><input type="radio" name="biz" value="가구·목공"><span>가구·목공</span></label>
             <label><input type="radio" name="biz" value="카페·상점 운영"><span>카페·상점 운영</span></label>
             <label><input type="radio" name="biz" value="자재 유통"><span>자재 유통</span></label>
-            <label><input type="radio" name="biz" value="개인 (주택·아파트)"><span>개인 (주택·아파트)</span></label>
             <label><input type="radio" name="biz" value="기타"><span>기타</span></label>
           </div>
         </label>
@@ -142,7 +142,7 @@
         <div class="row"><span>샘플 규격</span><b>30 × 50 cm</b></div>
         <div class="row"><span>샘플 비용</span><b>0원</b></div>
         <div class="row"><span>배송비</span><b>무료</b></div>
-        <p class="note" style="margin:6px 0 0">1업체(1인) 1회 · 신청 확인 후 2~3일 내 택배 발송 · 재고 상황에 따라 발송이 늦어질 수 있습니다.</p>
+        <p class="note" style="margin:6px 0 0">사업자 전용 · 1업체 1회 · 신청 확인 후 2~3일 내 택배 발송 · 재고 상황에 따라 발송이 늦어질 수 있습니다.</p>
         <button type="button" class="btn wood" id="spSubmit">무료 샘플 신청하기</button>
         <p class="note" id="spNote" style="margin:0"></p>
       </div>
@@ -155,7 +155,7 @@
 <footer class="site"><div class="wrap"><a class="logo" data-logo href="index.html"></a><div><b data-site="name"></b> · 대표 <span data-site="ceo"></span> · <span data-site="tel"></span> · <span data-site="email"></span><br><span style="opacity:.7">사업자등록번호 <span data-site="bizno"></span> (<span data-site="bizname"></span>) · <span data-site="address"></span> <a href="admin.html" class="gear" title="관리자" aria-label="관리자">⚙</a></span></div></div></footer>
 
 <script src="js/logos.js?v=20261001z"></script>
-<script src="js/main.js?v=20261001y"></script>
+<script src="js/main.js?v=20261002a"></script>
 <script src="js/cart.js?v=20261001w"></script>
 <script>
 (function () {
@@ -168,18 +168,18 @@
     const d = Object.fromEntries(new FormData(form).entries());
     const mk = [...form.querySelectorAll('input[name=mk]:checked')].map(i => i.value);
     const miss = [];
-    if (!d.company) miss.push('상호'); if (!d.ceo) miss.push('대표자'); if (!d.tel) miss.push('휴대폰');
+    if (!d.company) miss.push('상호'); if (!d.bizno) miss.push('사업자등록번호'); if (!d.ceo) miss.push('대표자'); if (!d.tel) miss.push('휴대폰');
     if (!d.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(d.email)) miss.push('이메일');
     if (!NW_ADDR.valid('#spAddr')) miss.push('주소'); if (!d.biz) miss.push('업종'); if (!d.intent) miss.push('시공 의사');
     if (miss.length) { note.textContent = '입력해 주세요: ' + miss.join(', '); note.style.color = '#b91c1c'; return; }
     if (!form.agree.checked) { note.textContent = '개인정보 수집·이용 동의(필수)에 체크해 주세요.'; note.style.color = '#b91c1c'; return; }
-    if (d.bizno && !/^\d{3}-\d{2}-\d{5}$/.test(d.bizno)) { note.textContent = '사업자등록번호는 000-00-00000 형식으로 적어 주세요 (개인은 비워 두셔도 됩니다).'; note.style.color = '#b91c1c'; return; }
+    if (!/^\d{3}-\d{2}-\d{5}$/.test(d.bizno)) { note.textContent = '무료 샘플은 사업자만 신청할 수 있습니다. 사업자등록번호를 000-00-00000 형식으로 적어 주세요.'; note.style.color = '#b91c1c'; return; }
     btn.disabled = true; btn.textContent = '신청 중…'; note.textContent = ''; note.style.color = '';
     const sample = {}; F.forEach(k => sample[k] = d[k] || ''); sample.marketing = mk.join('·') || '동의 안 함'; sample.agree = '동의';
     const fields = F.map(k => [LABEL[k], sample[k] || '-']).concat([['개인정보 동의', '동의 (필수)'], ['안내 수신 동의', sample.marketing]]);
     const text = `[나무의공간 무료 샘플 신청]\n` + fields.map(([k, v]) => `${k}: ${v}`).join('\n');
     const subject = `[샘플 신청] ${d.company} · ${d.ceo} 님 (${d.biz})`;
-    const doc = { kind: 'sample', title: '무료 샘플 신청서', customer: { name: `${d.company} · ${d.ceo}`, tel: d.tel, email: d.email, addr: d.addr }, fields: fields.slice(6), message: d.memo || '', notes: ['샘플 규격 30 × 50 cm · 배송비 무료 · 1업체(1인) 1회', '신청 확인 후 2~3일 내 택배로 발송됩니다. 재고 상황에 따라 늦어질 수 있습니다.'] };
+    const doc = { kind: 'sample', title: '무료 샘플 신청서', customer: { name: `${d.company} · ${d.ceo}`, tel: d.tel, email: d.email, addr: d.addr }, fields: fields.slice(6), message: d.memo || '', notes: ['샘플 규격 30 × 50 cm · 배송비 무료 · 사업자 전용 · 1업체 1회', '신청 확인 후 2~3일 내 택배로 발송됩니다. 재고 상황에 따라 늦어질 수 있습니다.'] };
     const ok = await NW_SEND({ type: 'sample', subject, text, customer: { name: `${d.company} · ${d.ceo}`, tel: d.tel, email: d.email, addr: d.addr }, meta: { sample }, doc, files: [] });
     if (ok) { document.getElementById('spDoneText').textContent = `${d.email} 로 신청 확인 메일을 보내 드렸습니다. 담당자가 확인 후 ${d.tel} 로 발송 안내를 드립니다.`; document.getElementById('spDone').style.display = ''; btn.textContent = '신청 완료'; form.querySelectorAll('input,select,textarea').forEach(el => el.disabled = true); document.getElementById('spDone').scrollIntoView({ behavior: 'smooth', block: 'center' }); return; }
     btn.disabled = false; btn.textContent = '무료 샘플 신청하기';

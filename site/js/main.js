@@ -203,7 +203,7 @@ document.addEventListener('input', e => {
     // 문의 폼 → mailto (이메일 자동전송은 보류 상태)
     const cf = document.querySelector('form.f');
     if (cf) {
-      if (new URLSearchParams(location.search).get('sample')) { const ps = cf.querySelector('select[name=product]'); if (ps) { ps.value = '무료 샘플 신청 (30×50 cm)'; const msg = cf.querySelector('textarea[name=msg]'); if (msg && !msg.value) msg.value = '무료 샘플(가로 30 × 세로 50 cm) 신청합니다.\n받을 주소: '; } setTimeout(() => cf.scrollIntoView({ behavior: 'smooth', block: 'start' }), 300); }
+      if (new URLSearchParams(location.search).get('sample')) { const ps = cf.querySelector('select[name=product]'); if (ps) { ps.value = '무료 샘플 신청 (사업자 · 30×50 cm)'; const msg = cf.querySelector('textarea[name=msg]'); if (msg && !msg.value) msg.value = '무료 샘플(가로 30 × 세로 50 cm, 사업자 전용) 신청합니다.\n상호/사업자등록번호: \n받을 주소: '; } setTimeout(() => cf.scrollIntoView({ behavior: 'smooth', block: 'start' }), 300); }
       // 현장 사진 첨부: 미리보기 + 긴 변 1600px 로 축소 (최대 8장)
       let photos = [];
       const fin = cf.querySelector('#cfPhotos'), pv = cf.querySelector('#cfPreview');
