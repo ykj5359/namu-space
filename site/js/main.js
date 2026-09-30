@@ -102,6 +102,23 @@ window.NW_ADDR = (function () {
   return { mount, parse, set(sel, v) { const b = document.querySelector(sel); if (b && b.NW_set) b.NW_set(v); }, valid(sel) { const b = document.querySelector(sel); return b && b.NW_valid ? b.NW_valid() : true; } };
 })();
 
+// ---- 연락처 자동 하이픈: type=tel · name=tel · data-k=tel 입력칸 모두 (010-0000-0000, 02-000-0000, 1588-0000) ----
+window.NW_FMT_TEL = function (v) {
+  const d = String(v || '').replace(/\D/g, '').slice(0, 11);
+  if (!d) return '';
+  if (/^02/.test(d)) return d.length <= 2 ? d : d.length <= 5 ? d.slice(0, 2) + '-' + d.slice(2) : d.length <= 9 ? d.slice(0, 2) + '-' + d.slice(2, 5) + '-' + d.slice(5) : d.slice(0, 2) + '-' + d.slice(2, 6) + '-' + d.slice(6, 10);
+  if (/^1[5-9]\d{2}/.test(d) && d.length <= 8) return d.length <= 4 ? d : d.slice(0, 4) + '-' + d.slice(4);      // 1588-0000 대표번호
+  if (d.length <= 3) return d;
+  if (d.length <= 7) return d.slice(0, 3) + '-' + d.slice(3);
+  if (d.length <= 10) return d.slice(0, 3) + '-' + d.slice(3, 6) + '-' + d.slice(6);
+  return d.slice(0, 3) + '-' + d.slice(3, 7) + '-' + d.slice(7);
+};
+document.addEventListener('input', e => {
+  const el = e.target; if (!(el instanceof HTMLInputElement)) return;
+  if (el.type !== 'tel' && el.name !== 'tel' && el.dataset.k !== 'tel') return;
+  const f = NW_FMT_TEL(el.value); if (f !== el.value) { el.value = f; }
+}, true);
+
 (function () {
   // 로고 삽입: <a class="logo" data-logo></a> 에 선택된 SVG 를 넣음
   function currentLogoId() {
