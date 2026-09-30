@@ -5,7 +5,7 @@
   const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
   const TOKEN = 'nw_admin_token';
   let token = sessionStorage.getItem(TOKEN) || '';
-  let D = { rows: [], payments: [], sales: [], config: null, statuses: [] };
+  let D = { rows: [], payments: [], cancels: [], sales: [], config: null, statuses: [] };
   let cfgDraft = null;
 
   // 삭제 확인: 브라우저 확인창 대신 같은 버튼을 5초 안에 한 번 더 누르면 실행
@@ -124,6 +124,7 @@
           <label>수량 / 면적 <input value="${esc(r.qty)}장 / ${esc(r.area)}㎡" disabled></label>
           <label>입금액 / 미수 <input value="${won(r.paid)} / ${won(Math.max(0, (+r.total || 0) - (+r.paid || 0)))}" disabled></label>
         </div>` : ''}
+        <label id="cancelRow" style="display:none">취소 사유 <input name="cancelReason" placeholder="예: 고객 요청 / 견적 불일치 / 연락 두절"></label>
         <label>메모 (관리자) <textarea name="memo">${esc(r.memo)}</textarea></label>
         <div class="ad-actions"><button type="submit" class="btn wood sm">저장</button><a class="btn light sm" href="tel:${esc(String(r.tel).replace(/-/g, ''))}">📞 전화</a><a class="btn light sm" href="sms:${esc(String(r.tel).replace(/-/g, ''))}">💬 문자</a>${r.email ? `<a class="btn light sm" href="mailto:${esc(r.email)}">✉ 메일</a>` : ''}<button type="button" class="btn ghost sm" id="dDel" style="margin-left:auto;color:#b91c1c;border-color:#b91c1c">접수 삭제</button></div>
       </form>
@@ -140,9 +141,12 @@
       </div>` : ''}`;
     $('#detail').style.display = '';
     $('#detailBox [data-x]').addEventListener('click', closeDetail);
+    const stSel = $('#dForm [name=status]'), cancelRow = $('#cancelRow');
+    stSel.addEventListener('change', () => { cancelRow.style.display = stSel.value === '취소' && r.status !== '취소' ? '' : 'none'; });
     $('#dForm').addEventListener('submit', async e => {
       e.preventDefault(); const f = e.target, patch = {};
       ['name', 'tel', 'email', 'addr', 'status', 'method', 'memo', 'supply', 'vat', 'total', 'cost'].forEach(k => { if (f[k]) patch[k] = f[k].type === 'number' ? +f[k].value : f[k].value; });
+      if (patch.status === '취소' && r.status !== '취소') { patch.cancelReason = f.cancelReason.value.trim(); if (!patch.cancelReason) { toast('취소 사유를 입력해 주세요', true); f.cancelReason.focus(); return; } }
       try { await api('admin.update', { no, patch }); toast('저장했습니다'); await load(); openDetail(no); } catch (err) { toast(err.message, true); }
     });
     $('#dDel').addEventListener('click', e => armed(e.currentTarget, async () => { const b = $('#dDel'); b.disabled = true; b.textContent = '삭제 중…'; try { await api('admin.delete', { no }); toast('접수를 삭제했습니다'); closeDetail(); await load(); } catch (err) { toast(err.message, true); b.disabled = false; b.textContent = '접수 삭제'; } }));
@@ -164,6 +168,10 @@
     $('#payCount').textContent = `${pays.length}건 · ${won(pays.reduce((a, p) => a + (+p.amount || 0), 0))}`;
     const tb = $('#payTable tbody');
     tb.innerHTML = pays.length ? pays.map(p => `<tr data-no="${esc(p.no)}"><td>${esc(p.date)}</td><td class="mono">${esc(p.no)}</td><td><b>${esc(p.name)}</b></td><td class="r">${won(p.amount)}</td><td>${esc(p.method)}</td><td class="wrap">${esc(p.memo)}</td><td><button type="button" class="ad-ic" data-del="${esc(p.id)}" title="삭제" style="width:30px;height:30px;font-size:13px">✕</button></td></tr>`).join('') : '<tr><td colspan="7" class="ad-empty">입금 내역이 없습니다.</td></tr>';
+    const cq = (D.cancels || []).filter(c => !q || [c.name, c.no, c.reason].join(' ').toLowerCase().includes(q));
+    $('#cancelTable tbody').innerHTML = cq.length ? cq.map(c => `<tr data-no="${esc(c.no)}"><td>${esc(c.at)}</td><td class="mono">${esc(c.no)}</td><td class="ad-type">${esc(c.type)}</td><td><b>${esc(c.name)}</b></td><td class="r">${won(c.total)}</td><td class="r">${won(c.paid)}</td><td>${esc(c.prevStatus)}</td><td class="wrap">${esc(c.reason)}</td></tr>`).join('') : '<tr><td colspan="8" class="ad-empty">취소 내역이 없습니다.</td></tr>';
+    $('#cancelCount').textContent = `${cq.length}건`;
+    bindRows($('#cancelTable tbody'));
     bindRows(tb);
     tb.querySelectorAll('[data-del]').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); armed(b, async () => { try { await api('admin.delPay', { id: b.dataset.del }); toast('입금 기록을 삭제했습니다'); await load(); } catch (err) { toast(err.message, true); } }); }));
   }
@@ -174,7 +182,7 @@
     const cur = renderSales.year && years.includes(renderSales.year) ? renderSales.year : (years[0] || String(new Date().getFullYear()));
     renderSales.year = cur;
     const rows = D.sales.filter(s => s.month.startsWith(cur));
-    const t = rows.reduce((a, s) => { a.orders += s.orders; a.sales += s.sales; a.cost += s.cost; a.paid += s.paid; a.due += s.due; a.contacts += s.contacts; return a; }, { orders: 0, sales: 0, cost: 0, paid: 0, due: 0, contacts: 0 });
+    const t = rows.reduce((a, s) => { a.orders += s.orders; a.sales += s.sales; a.cost += s.cost; a.paid += s.paid; a.due += s.due; a.contacts += s.contacts; a.cancels += s.cancels || 0; return a; }, { orders: 0, sales: 0, cost: 0, paid: 0, due: 0, contacts: 0, cancels: 0 });
     const max = Math.max(1, ...rows.map(s => Math.max(s.sales, s.paid)));
     $('#v-sales').innerHTML = `
       <div class="ad-filters"><select id="sYear">${years.map(y => `<option ${y === cur ? 'selected' : ''}>${y}</option>`).join('') || `<option>${cur}</option>`}</select><span class="ad-count">수주는 접수일 기준(취소 제외), 입금은 입금일 기준 · 매출은 입금액으로 집계</span><button type="button" class="btn light sm" id="btnCsv" style="margin-left:auto">CSV 내려받기</button></div>
@@ -187,11 +195,11 @@
       </div>
       <div class="ad-grid2">
         <div class="ad-panel"><h2>월별 수주·입금 <small>갈색 수주 · 녹색 입금</small></h2><div class="ad-bars">${[...rows].reverse().map(s => `<div><span>${s.month.slice(5)}월</span><span><i style="width:${s.sales / max * 100}%"></i><i class="p" style="width:${s.paid / max * 100}%;margin-top:2px"></i></span><b>${won(s.sales)}<br><span style="color:var(--green)">${won(s.paid)}</span></b></div>`).join('') || '<div class="ad-empty">데이터가 없습니다.</div>'}</div></div>
-        <div class="ad-table-wrap"><table class="ad-table" style="min-width:0"><thead><tr><th>월</th><th class="r">주문</th><th class="r">수주액</th><th class="r">입금액</th><th class="r">미수</th><th class="r">원가</th><th class="r">문의</th></tr></thead><tbody>${rows.map(s => `<tr><td>${s.month}</td><td class="r">${s.orders}</td><td class="r">${won(s.sales)}</td><td class="r">${won(s.paid)}</td><td class="r">${won(s.due)}</td><td class="r">${won(s.cost)}</td><td class="r">${s.contacts}</td></tr>`).join('')}<tr style="font-weight:700;background:var(--bg)"><td>합계</td><td class="r">${t.orders}</td><td class="r">${won(t.sales)}</td><td class="r">${won(t.paid)}</td><td class="r">${won(t.due)}</td><td class="r">${won(t.cost)}</td><td class="r">${t.contacts}</td></tr></tbody></table></div>
+        <div class="ad-table-wrap"><table class="ad-table" style="min-width:0"><thead><tr><th>월</th><th class="r">주문</th><th class="r">수주액</th><th class="r">입금액</th><th class="r">미수</th><th class="r">원가</th><th class="r">문의</th><th class="r">취소</th></tr></thead><tbody>${rows.map(s => `<tr><td>${s.month}</td><td class="r">${s.orders}</td><td class="r">${won(s.sales)}</td><td class="r">${won(s.paid)}</td><td class="r">${won(s.due)}</td><td class="r">${won(s.cost)}</td><td class="r">${s.contacts}</td><td class="r">${s.cancels || 0}</td></tr>`).join('')}<tr style="font-weight:700;background:var(--bg)"><td>합계</td><td class="r">${t.orders}</td><td class="r">${won(t.sales)}</td><td class="r">${won(t.paid)}</td><td class="r">${won(t.due)}</td><td class="r">${won(t.cost)}</td><td class="r">${t.contacts}</td><td class="r">${t.cancels}</td></tr></tbody></table></div>
       </div>`;
     $('#sYear').addEventListener('change', e => { renderSales.year = e.target.value; renderSales(); });
     $('#btnCsv').addEventListener('click', () => {
-      const lines = [['월', '주문건수', '수주액', '입금액', '미수금', '원가', '문의']].concat(rows.map(s => [s.month, s.orders, s.sales, s.paid, s.due, s.cost, s.contacts]));
+      const lines = [['월', '주문건수', '수주액', '입금액', '미수금', '원가', '문의', '취소']].concat(rows.map(s => [s.month, s.orders, s.sales, s.paid, s.due, s.cost, s.contacts, s.cancels || 0]));
       const blob = new Blob(['﻿' + lines.map(l => l.join(',')).join('\n')], { type: 'text/csv;charset=utf-8' });
       const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `나무의공간_매출_${cur}.csv`; a.click();
     });

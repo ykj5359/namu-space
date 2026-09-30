@@ -25,7 +25,7 @@
 <footer class="site"><div class="wrap"><a class="logo" data-logo href="index.html"></a><div><b data-site="name"></b> · 대표 <span data-site="ceo"></span> · <span data-site="tel"></span> · <span data-site="email"></span> <a href="admin.html" class="gear" title="관리자" aria-label="관리자">⚙</a></div></div></footer>
 
 <script src="js/logos.js?v=20260928h"></script>
-<script src="js/main.js?v=20261001c"></script>
+<script src="js/main.js?v=20261001d"></script>
 <script src="js/cart.js?v=20261001c"></script>
 <script src="js/payments.js?v=20260929e"></script>
 <script>
@@ -65,12 +65,17 @@
   const dataFiles = () => order.items.map((it, i) => { const b = atob(it.sheet.split(',')[1]); const u = new Uint8Array(b.length); for (let j = 0; j < b.length; j++) u[j] = b.charCodeAt(j); return new File([u], `${order.no}_도면${i + 1}.jpg`, { type: 'image/jpeg' }); });
   document.getElementById('btnSave').addEventListener('click', () => { dataFiles().forEach((f, i) => setTimeout(() => { const a = document.createElement('a'); a.href = URL.createObjectURL(f); a.download = f.name; a.click(); }, i * 400)); });
   const subjectAll = `[주문] ${order.no} ${c.name} 님 · 도면 ${order.items.length}건 ${t.count}장`;
+  let sending = null;
   async function autoSend() {
     if (order.sent) return true;
+    if (sending) return sending;   // 자동 전송과 버튼 클릭이 겹쳐도 한 번만 보냄
+    sending = (async () => {
     const meta = { no: order.no, qty: t.count, area: +order.items.reduce((s, it) => s + it.calc.area * it.qty, 0).toFixed(3), supply: t.supply, vat: t.vat, total: t.total, cost: order.items.reduce((s, it) => s + NW_CART.cost(it).sub, 0), method: methodName };
     const ok = await NW_SEND({ type: 'order', subject: subjectAll, text: text(), customer: { name: c.name, tel: c.tel, email: c.email, addr: c.addr }, meta, files: dataFiles() });
     if (ok) { order = NW_PAY.setStatus(no, order.status, { sent: true }); const b = document.getElementById('btnMail'); b.textContent = '접수 완료 (메일 발송됨)'; b.disabled = true; const h = document.querySelector('#done .hint'); if (h) h.innerHTML = `주문서가 <b>${SITE.email}</b> 로 자동 접수되었고, <b>${c.email}</b> 로 접수 확인 메일을 보내 드렸습니다.`; }
     return ok;
+    })();
+    const r = await sending; sending = null; return r;
   }
   if (SITE.orderEndpoint) autoSend();
   document.getElementById('btnMail').addEventListener('click', async () => {

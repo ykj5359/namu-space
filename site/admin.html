@@ -31,7 +31,7 @@
     <nav class="ad-tabs" id="tabs">
       <button data-v="dash" class="on">대시보드</button>
       <button data-v="list">접수·주문</button>
-      <button data-v="pay">입금</button>
+      <button data-v="pay">입금·취소</button>
       <button data-v="sales">매출</button>
       <button data-v="settings">설정</button>
       <button data-v="account">계정</button>
@@ -57,6 +57,8 @@
     <section id="v-pay" class="ad-view" style="display:none">
       <div class="ad-filters"><input id="pQ" placeholder="이름·접수번호 검색"><span class="ad-count" id="payCount"></span></div>
       <div class="ad-table-wrap"><table class="ad-table" id="payTable"><thead><tr><th>입금일</th><th>접수번호</th><th>이름</th><th class="r">금액</th><th>방법</th><th>메모</th><th></th></tr></thead><tbody></tbody></table></div>
+      <div class="ad-filters" style="margin-top:10px"><b style="font-size:15px">취소 내역</b><span class="ad-count" id="cancelCount"></span></div>
+      <div class="ad-table-wrap"><table class="ad-table" id="cancelTable"><thead><tr><th>취소일시</th><th>접수번호</th><th>구분</th><th>이름</th><th class="r">합계</th><th class="r">입금액</th><th>이전 상태</th><th>취소 사유</th></tr></thead><tbody></tbody></table></div>
     </section>
     <section id="v-sales" class="ad-view" style="display:none"></section>
     <section id="v-settings" class="ad-view" style="display:none"></section>
@@ -70,6 +72,6 @@
 
 <script src="js/logos.js?v=20260928h"></script>
 <script src="js/main.js?v=20261001c"></script>
-<script src="js/admin.js?v=20261001d"></script>
+<script src="js/admin.js?v=20261001e"></script>
 </body>
 </html>

@@ -35,7 +35,8 @@ var DEFAULT_CONFIG = {
 var STATUSES = ['접수', '상담중', '견적확정', '입금대기', '입금완료', '제작중', '시공중', '완료', '취소'];
 var H_IN = ['번호', '접수일시', '구분', '이름', '연락처', '이메일', '주소', '제목', '내용', '수량', '면적㎡', '공급가', '부가세', '합계', '원가(추정)', '입금액', '상태', '결제방식', '메모', '도면', '갱신일시'];
 var H_PAY = ['입금ID', '입금일', '접수번호', '이름', '금액', '방법', '메모', '등록일시'];
-var H_SALES = ['월', '주문건수', '수주액(합계)', '원가(추정)', '입금액', '미수금', '문의건수'];
+var H_SALES = ['월', '주문건수', '수주액(합계)', '원가(추정)', '입금액', '미수금', '문의건수', '취소건수'];
+var H_CANCEL = ['취소일시', '번호', '구분', '이름', '연락처', '합계', '입금액', '이전 상태', '취소 사유'];
 var TYPE_NAME = { contact: '문의', drawing: '도면 주문', order: '장바구니 주문' };
 
 // =============================== 진입점 ===============================
@@ -86,6 +87,7 @@ function submit_(body) {
     return Utilities.newBlob(bytes, a.mime || 'image/jpeg', a.name || 'file.jpg');
   });
   var no = meta.no || ('R' + Utilities.formatDate(new Date(), TZ, 'yyMMdd') + '-' + Math.random().toString(36).slice(2, 6).toUpperCase());
+  if (meta.no && findRow_(meta.no)) return { ok: true, no: no, duplicate: true };   // 같은 주문번호가 이미 접수됨 → 중복 발송·기록 방지
 
   // 1) 도면·사진을 드라이브에 보관
   var links = [];
@@ -148,10 +150,14 @@ function adminList_() {
   var pays = sheetPay_().getDataRange().getValues().slice(1).filter(function (r) { return r[0]; }).map(function (r) {
     var o = {}; H_PAY.forEach(function (h, i) { o[KEY_PAY[i]] = r[i] instanceof Date ? Utilities.formatDate(r[i], TZ, 'yyyy-MM-dd') : r[i]; }); return o;
   });
-  return { ok: true, rows: rows.reverse(), payments: pays.reverse(), sales: salesData_(rows, pays), statuses: STATUSES, sheetUrl: ss_().getUrl(), folderUrl: folder_().getUrl(), config: getConfig_() };
+  var cancels = sheetCancel_().getDataRange().getValues().slice(1).filter(function (r) { return r[0]; }).map(function (r) {
+    var o = {}; KEY_CANCEL.forEach(function (k, i) { o[k] = r[i] instanceof Date ? stamp_(r[i]) : r[i]; }); o.tel = String(o.tel || '').replace(/^'/, ''); return o;
+  });
+  return { ok: true, rows: rows.reverse(), payments: pays.reverse(), cancels: cancels.reverse(), sales: salesData_(rows, pays), statuses: STATUSES, sheetUrl: ss_().getUrl(), folderUrl: folder_().getUrl(), config: getConfig_() };
 }
 var KEY_IN = ['no', 'at', 'type', 'name', 'tel', 'email', 'addr', 'subject', 'text', 'qty', 'area', 'supply', 'vat', 'total', 'cost', 'paid', 'status', 'method', 'memo', 'files', 'updated'];
 var KEY_PAY = ['id', 'date', 'no', 'name', 'amount', 'method', 'memo', 'created'];
+var KEY_CANCEL = ['at', 'no', 'type', 'name', 'tel', 'total', 'paid', 'prevStatus', 'reason'];
 
 function findRow_(no) {
   var sh = sheetIn_(), col = sh.getRange(1, 1, sh.getLastRow(), 1).getValues();
@@ -161,6 +167,11 @@ function findRow_(no) {
 function updateRow_(no, patch) {
   var r = findRow_(no); if (!r) return { ok: false, error: 'not found' };
   var sh = sheetIn_(), map = { status: 17, memo: 19, supply: 12, vat: 13, total: 14, cost: 15, method: 18, name: 4, tel: 5, email: 6, addr: 7 };
+  var prev = sh.getRange(r, 1, 1, 21).getValues()[0];
+  if (patch.status === '취소' && String(prev[16]) !== '취소') {   // 취소 내역 기록
+    sheetCancel_().appendRow([stamp_(), no, prev[2], prev[3], "'" + String(prev[4] || '').replace(/^'/, ''), num_(patch.total !== undefined ? patch.total : prev[13]), num_(prev[15]), String(prev[16]), String(patch.cancelReason || '')]);
+    if (patch.cancelReason) patch.memo = (patch.memo ? patch.memo + '\n' : '') + '[취소 사유] ' + patch.cancelReason;
+  }
   Object.keys(patch).forEach(function (k) { if (map[k]) sh.getRange(r, map[k]).setValue(k === 'tel' ? "'" + patch[k] : patch[k]); });
   sh.getRange(r, 21).setValue(stamp_());
   rebuildSales_();
@@ -203,11 +214,11 @@ function syncPaid_(no) {
 // =============================== 매출 집계 ===============================
 function salesData_(rows, pays) {
   var m = {};
-  var get = function (k) { return m[k] || (m[k] = { month: k, orders: 0, sales: 0, cost: 0, paid: 0, due: 0, contacts: 0 }); };
+  var get = function (k) { return m[k] || (m[k] = { month: k, orders: 0, sales: 0, cost: 0, paid: 0, due: 0, contacts: 0, cancels: 0 }); };
   rows.forEach(function (r) {
     var k = String(r.at || '').slice(0, 7); if (!k) return; var o = get(k);
     if (r.type === '문의') { o.contacts++; return; }
-    if (r.status === '취소') return;
+    if (r.status === '취소') { o.cancels++; return; }
     o.orders++; o.sales += num_(r.total); o.cost += num_(r.cost); o.due += Math.max(0, num_(r.total) - num_(r.paid));
   });
   pays.forEach(function (p) { var k = String(p.date || '').slice(0, 7); if (k) get(k).paid += num_(p.amount); });
@@ -216,9 +227,9 @@ function salesData_(rows, pays) {
 function rebuildSales_() {
   var d = adminListRaw_(), s = salesData_(d.rows, d.pays), sh = sheetSales_();
   var out = [H_SALES];
-  s.forEach(function (o) { out.push([o.month, o.orders, o.sales, o.cost, o.paid, o.due, o.contacts]); });
-  var t = s.reduce(function (a, o) { a[0] += o.orders; a[1] += o.sales; a[2] += o.cost; a[3] += o.paid; a[4] += o.due; a[5] += o.contacts; return a; }, [0, 0, 0, 0, 0, 0]);
-  out.push(['합계', t[0], t[1], t[2], t[3], t[4], t[5]]);
+  s.forEach(function (o) { out.push([o.month, o.orders, o.sales, o.cost, o.paid, o.due, o.contacts, o.cancels]); });
+  var t = s.reduce(function (a, o) { a[0] += o.orders; a[1] += o.sales; a[2] += o.cost; a[3] += o.paid; a[4] += o.due; a[5] += o.contacts; a[6] += o.cancels; return a; }, [0, 0, 0, 0, 0, 0, 0]);
+  out.push(['합계', t[0], t[1], t[2], t[3], t[4], t[5], t[6]]);
   sh.clearContents(); sh.getRange(1, 1, out.length, H_SALES.length).setValues(out);
   sh.getRange(2, 3, Math.max(1, out.length - 1), 4).setNumberFormat('#,##0');
 }
@@ -276,6 +287,7 @@ function sheetIn_() { return tab_('접수', H_IN); }
 function sheetPay_() { return tab_('입금', H_PAY); }
 function sheetSales_() { return tab_('매출', H_SALES); }
 function sheetCfg_() { return tab_('설정', ['키', '값(JSON)', '설명']); }
+function sheetCancel_() { return tab_('취소', H_CANCEL); }
 function folder_() {
   if (folder_.cache) return folder_.cache;
   var it = DriveApp.getFoldersByName(DRAWING_FOLDER);
@@ -296,9 +308,8 @@ function deepMerge_(a, b) {
 
 /** 설치: 편집기에서 한 번 실행해 드라이브 폴더·시트 탭을 만들고 권한을 승인합니다. */
 function setup() {
-  sheetIn_(); sheetPay_(); sheetSales_(); sheetCfg_();
-  Logger.log('시트: ' + ss_().getUrl() + '
-폴더: ' + folder_().getUrl());
+  sheetIn_(); sheetPay_(); sheetSales_(); sheetCfg_(); sheetCancel_();
+  Logger.log('시트: ' + ss_().getUrl() + '\n폴더: ' + folder_().getUrl());
 }
 
 /** 테스트: 편집기에서 실행하면 권한 승인 창이 뜨고 테스트 접수가 기록·발송됩니다. */
