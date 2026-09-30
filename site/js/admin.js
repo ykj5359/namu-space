@@ -108,7 +108,7 @@
           <label>연락처 <input name="tel" value="${esc(r.tel)}"></label>
           <label>이메일 <input name="email" value="${esc(r.email)}"></label>
         </div>
-        <label>주소 <input name="addr" value="${esc(r.addr)}"></label>
+        <label>배송 주소 <input name="addr" value="${esc(r.addr)}"></label>
         <div class="row3">
           <label>상태 <select name="status">${D.statuses.map(s => `<option ${s === r.status ? 'selected' : ''}>${s}</option>`).join('')}</select></label>
           <label>결제 방식 <input name="method" value="${esc(r.method)}" placeholder="카드 / 계좌이체 / 무통장"></label>

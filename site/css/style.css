@@ -242,3 +242,12 @@ footer.site b { color: #fff; }
 /* 푸터 관리자 톱니바퀴 */
 footer .gear { opacity: .45; font-size: 14px; margin-left: 4px; text-decoration: none; }
 footer .gear:hover { opacity: 1; }
+
+/* 배송 주소 입력 위젯 */
+.addr-box { display: grid; gap: 8px; }
+.addr-row { display: grid; grid-template-columns: 140px auto; gap: 8px; align-items: stretch; justify-content: start; }
+.addr-row .btn { padding: 0 18px; white-space: nowrap; }
+.addr-box input[readonly] { background: var(--bg); color: var(--ink-2); }
+.addr-embed { position: relative; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: #fff; }
+.addr-embed-in { height: 440px; }
+.addr-close { position: absolute; right: 6px; top: 6px; z-index: 2; width: 30px; height: 30px; border: 0; border-radius: 50%; background: var(--ink); color: #fff; font-size: 18px; cursor: pointer; }

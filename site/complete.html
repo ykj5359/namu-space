@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>주문 완료 | 나무의공간</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Nanum+Myeongjo:wght@700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=20261001c">
+<link rel="stylesheet" href="css/style.css?v=20261001k">
 </head>
 <body>
 <header class="site">
@@ -25,8 +25,8 @@
 <footer class="site"><div class="wrap"><a class="logo" data-logo href="index.html"></a><div><b data-site="name"></b> · 대표 <span data-site="ceo"></span> · <span data-site="tel"></span> · <span data-site="email"></span> <a href="admin.html" class="gear" title="관리자" aria-label="관리자">⚙</a></div></div></footer>
 
 <script src="js/logos.js?v=20260928h"></script>
-<script src="js/main.js?v=20261001j"></script>
-<script src="js/cart.js?v=20261001j"></script>
+<script src="js/main.js?v=20261001k"></script>
+<script src="js/cart.js?v=20261001k"></script>
 <script src="js/payments.js?v=20260929e"></script>
 <script>
 (function () {
@@ -48,7 +48,7 @@
       ${order.method === 'bank' || order.status === 'awaiting_deposit' ? `<tr><th style="text-align:left;padding:6px 10px;color:var(--wood-dark)">입금 계좌</th><td style="text-align:right;padding:6px 10px">${SITE.payment.bank}${SITE.payment.holder ? ' (예금주 ' + SITE.payment.holder + ')' : ''}</td></tr>` : ''}
       <tr><th style="text-align:left;padding:6px 10px;color:var(--wood-dark)">공급가 / 부가세</th><td style="text-align:right;padding:6px 10px">${won(t.supply)} / ${won(t.vat)}</td></tr>
       <tr><th style="text-align:left;padding:6px 10px;color:var(--wood-dark)">합계 (예상)</th><td style="text-align:right;padding:6px 10px;font-weight:800;font-size:16px">${won(t.total)}</td></tr>
-      <tr><th style="text-align:left;padding:6px 10px;color:var(--wood-dark)">납품·시공 주소</th><td style="text-align:right;padding:6px 10px">${c.addr || '-'}</td></tr>
+      <tr><th style="text-align:left;padding:6px 10px;color:var(--wood-dark)">배송 주소</th><td style="text-align:right;padding:6px 10px">${c.addr || '-'}</td></tr>
     </table>
     <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
       <button type="button" class="btn wood" id="btnMail">주문서 이메일로 보내기</button>

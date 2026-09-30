@@ -154,7 +154,7 @@ function renderDoc_(doc, cfg, no, imgKeys, forCustomer, ackHead) {
   out.push('<h3 style="margin:0 0 8px;font-size:15px;color:#8b5a2b">' + (kind === 'contact' ? '문의자 정보' : '주문자 정보') + '</h3>');
   out.push('<table style="width:100%;border-collapse:collapse;border-top:2px solid #b9814a;margin-bottom:22px">' +
     '<tr><th style="' + th + '">이름</th><td style="' + td + '">' + h(c.name || '-') + '</td><th style="' + th + '">연락처</th><td style="' + td + '">' + h(c.tel || '-') + '</td></tr>' +
-    '<tr><th style="' + th + '">이메일</th><td style="' + td + '">' + h(c.email || '-') + '</td><th style="' + th + '">' + (kind === 'contact' ? '관심 제품' : '납품·시공 주소') + '</th><td style="' + td + '">' + h(c.addr || '-') + '</td></tr></table>');
+    '<tr><th style="' + th + '">이메일</th><td style="' + td + '">' + h(c.email || '-') + '</td><th style="' + th + '">' + (kind === 'contact' ? '관심 제품' : '배송 주소') + '</th><td style="' + td + '">' + h(c.addr || '-') + '</td></tr></table>');
   // 품목
   var items = doc.items || [];
   if (items.length) {

@@ -282,18 +282,19 @@
       ['C 각재 길이 / D', `${r.C} / ${r.D}`],
       ['F / E / G', `${s.F} / ${r.Ereal} / ${Math.round(r.Gadj)}`],
       ['코너', s.corner === 'none' ? '없음' : ({ left: '좌측', right: '우측', both: '양쪽' })[s.corner] + ` (돌림 K=${s.K})`],
-      ['각재 개수', `${r.totalBattens}개 / 장 (본면 ${r.n}) · 원본 3600 ${NW_CART.sticks(r.totalBattens, r.C).sticks}본`],
+      ['각재 개수', `${r.totalBattens}개 / 장 (본면 ${r.n})`],
+      ['원본 각재 3600', (() => { const st = NW_CART.sticks(r.totalBattens, r.C); return `${st.sticks}본 사용 (1본당 ${st.per}개 × ${st.sticks}본)`; })()],
       ['합판 원장', r.sheets > 1 ? `1220×2440 × ${r.sheets}장 (${r.nx}×${r.ny})` : '1220×2440 1장'],
       ['마감', finishInfo(s).text], ['수량', `${s.qty}장`], ['시공', s.install],
       ['각재 총길이', `약 ${r.meters} m`], ['패널 면적', `약 ${r.area} ㎡`],
     ];
-    const rowH = s.corner !== 'none' ? 33 : 44;
+    const rowH = s.corner !== 'none' ? 31 : 41;   // 14행이 같은 높이에 들어가도록
     y += 6; text('사양', rx + 4, y + 24, { w: 700 }); y += 40;
     rows.forEach((rw2, i) => { ctx.fillStyle = i % 2 ? '#fff' : '#F7F2EA'; ctx.fillRect(rx - 4, y, rw + 8, rowH); text(rw2[0], rx + 4, y + rowH * 0.68, { c: '#8B5A2B', w: 700 }); text(rw2[1], rx + 200, y + rowH * 0.68); y += rowH; });
     const oy2 = el.y + el.h + 16;
     ctx.strokeStyle = '#ddd'; ctx.strokeRect(el.x, oy2, el.w, 1150 - oy2);
     text('주문자 정보', el.x + 14, oy2 + 32, { w: 700 });
-    const who = [['이름', s.name, 0, 0], ['연락처', s.tel, 1, 0], ['이메일', s.email, 2, 0], ['현장 주소', s.addr, 0, 1], ['메모', s.memo, 1, 1]];
+    const who = [['이름', s.name, 0, 0], ['연락처', s.tel, 1, 0], ['이메일', s.email, 2, 0], ['배송 주소', s.addr, 0, 1], ['메모', s.memo, 1, 1]];
     who.forEach(([k2, v2, cx2, ry2]) => {
       const bx = el.x + 14 + cx2 * 370, by = oy2 + 46 + ry2 * 92, bw = k2 === '메모' ? 740 - 14 : 350;
       ctx.fillStyle = '#F7F2EA'; ctx.fillRect(bx, by, bw, 82);
@@ -360,7 +361,7 @@
   function orderText() {
     const r = calc(), s = state;
     return `[나무의공간 템바보드 주문 접수]\n` +
-      `주문자: ${s.name}\n연락처: ${s.tel}\n이메일: ${s.email || '-'}\n현장 주소: ${s.addr || '-'}\n\n` +
+      `주문자: ${s.name}\n연락처: ${s.tel}\n이메일: ${s.email || '-'}\n배송 주소: ${s.addr || '-'}\n\n` +
       `제품: 30각 템바보드 (나왕 30×30, 간격 30, 합판 8)\n각재 방향: ${s.dir === 'h' ? '가로' : '세로'}\n` +
       `A 폭 ${s.A} × B 높이 ${s.B}\nC 각재 길이 ${r.C} / D 끝 여백 ${r.D}\nF ${s.F} / E ${r.Ereal} / G ${Math.round(r.Gadj)}\n` +
       `코너: ${s.corner === 'none' ? '없음' : s.corner + ' K=' + s.K}\n각재 개수: ${r.totalBattens}개/장 (원본 3600 ${NW_CART.sticks(r.totalBattens, r.C).sticks}본)\n합판 원장: ${r.sheets}장 (1220×2440)\n` +

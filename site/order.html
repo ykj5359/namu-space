@@ -6,7 +6,7 @@
 <title>도면 주문 | 나무의공간</title>
 <meta name="description" content="폭·높이·여백·코너를 입력하면 템바보드 도면이 자동으로 그려집니다. 도면 이미지와 함께 주문을 접수하세요.">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Nanum+Myeongjo:wght@700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=20261001c">
+<link rel="stylesheet" href="css/style.css?v=20261001k">
 <style>
   .order { display: grid; grid-template-columns: 400px 1fr; gap: 28px; align-items: start; padding: 30px 0 60px; }
   .panel { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 22px; position: sticky; top: 90px; max-height: calc(100vh - 110px); overflow: auto; }
@@ -168,7 +168,7 @@
         <label>이름 * <input type="text" data-k="name" placeholder="홍길동"></label>
         <label>연락처 * <input type="tel" data-k="tel" placeholder="010-0000-0000"></label>
         <label style="grid-column:1/-1">이메일 * <input type="email" data-k="email" placeholder="답장 받을 이메일 (필수)" required></label>
-        <label style="grid-column:1/-1">현장 주소 <input type="text" data-k="addr" placeholder="납품·시공 주소 (선택)"></label>
+        <label style="grid-column:1/-1">배송 주소 <span class="hint" style="font-weight:400">(선택 · 납품·시공 장소)</span><div data-addr="addr" data-k-mode></div></label>
         <label style="grid-column:1/-1">메모 <textarea data-k="memo" placeholder="희망 일정, 색상, 기타 요청"></textarea></label>
       </div>
     </aside>
@@ -210,11 +210,11 @@
 <div class="floating"><a data-tel href="#">전화</a><a class="dark" href="cart.html">장바구니</a></div>
 
 <script src="js/logos.js?v=20260928h"></script>
-<script src="js/main.js?v=20261001j"></script>
-<script src="js/cart.js?v=20261001j"></script>
+<script src="js/main.js?v=20261001k"></script>
+<script src="js/cart.js?v=20261001k"></script>
 <!-- 이메일 자동 발송(EmailJS)을 쓰려면 아래 주석을 풀고 main.js 의 SITE.emailjs 값을 채우세요.
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script> -->
-<script src="js/order.js?v=20261001j"></script>
+<script src="js/order.js?v=20261001k"></script>
 <script type="importmap">{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/" } }</script>
 <script type="module" src="js/view3d.js?v=20260930p"></script>
 <script>

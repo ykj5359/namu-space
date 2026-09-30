@@ -61,6 +61,42 @@ window.NW_SEND = async function (payload) {
   } catch (e) { console.warn('자동 접수 실패', e); return false; }
 };
 
+
+// ---- 배송 주소 입력 위젯: <div data-addr="addr" data-required="1"></div> → 우편번호 찾기(다음 우편번호 서비스, 무료·키 불필요) + 기본 주소 + 상세 주소 ----
+//  합쳐진 값은 숨은 input(name/data-k = data-addr 값)에 "[우편번호] 기본주소, 상세주소" 형식으로 들어가고, 바뀔 때마다 input 이벤트를 냅니다.
+window.NW_ADDR = (function () {
+  const escA = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+  let lib = null;
+  const load = () => lib || (lib = new Promise((res, rej) => { if (window.daum && daum.Postcode) return res(); const s = document.createElement('script'); s.src = 'https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js'; s.onload = res; s.onerror = () => { lib = null; rej(new Error('load')); }; document.head.appendChild(s); }));
+  const parse = v => { const m = /^\[(\d{5})\]\s*(.*?)(?:,\s*(.*))?$/.exec(String(v || '').trim()); return m ? { zip: m[1], base: m[2], detail: m[3] || '' } : { zip: '', base: String(v || '').trim(), detail: '' }; };
+  function mount(box) {
+    if (box.dataset.mounted) return; box.dataset.mounted = '1';
+    const key = box.dataset.addr || 'addr', useK = box.hasAttribute('data-k-mode'), init = parse(box.dataset.value || '');
+    box.className = (box.className + ' addr-box').trim();
+    box.innerHTML = `<div class="addr-row"><input type="text" class="addr-zip" placeholder="우편번호" readonly value="${escA(init.zip)}"><button type="button" class="btn ghost sm addr-find">주소 찾기</button></div>
+      <input type="text" class="addr-base" placeholder="주소 찾기를 눌러 도로명·지번 주소를 선택하세요" readonly value="${escA(init.base)}">
+      <input type="text" class="addr-detail" placeholder="상세 주소 (동·호수, 건물명 등)" value="${escA(init.detail)}">
+      <div class="addr-embed" style="display:none"><button type="button" class="addr-close" aria-label="닫기">×</button><div class="addr-embed-in"></div></div>
+      <input type="hidden" ${useK ? `data-k="${key}"` : `name="${key}"`} value="${escA(box.dataset.value || '')}">`;
+    const zip = box.querySelector('.addr-zip'), base = box.querySelector('.addr-base'), det = box.querySelector('.addr-detail'), hid = box.querySelector('input[type=hidden]'), emb = box.querySelector('.addr-embed'), embIn = box.querySelector('.addr-embed-in');
+    const sync = () => { const v = base.value ? `${zip.value ? '[' + zip.value + '] ' : ''}${base.value}${det.value ? ', ' + det.value.trim() : ''}` : det.value.trim(); if (hid.value !== v) { hid.value = v; hid.dispatchEvent(new Event('input', { bubbles: true })); hid.dispatchEvent(new Event('change', { bubbles: true })); } };
+    det.addEventListener('input', sync);
+    box.querySelector('.addr-close').addEventListener('click', () => { emb.style.display = 'none'; });
+    box.querySelector('.addr-find').addEventListener('click', async () => {
+      try { await load(); } catch (e) { base.readOnly = false; base.placeholder = '주소 검색을 불러오지 못했습니다. 직접 입력해 주세요'; base.focus(); base.addEventListener('input', sync); return; }
+      emb.style.display = ''; embIn.innerHTML = '';
+      new daum.Postcode({ oncomplete: d => { zip.value = d.zonecode; base.value = (d.roadAddress || d.jibunAddress) + (d.buildingName && d.roadAddress ? ' (' + d.buildingName + ')' : ''); emb.style.display = 'none'; sync(); det.focus(); }, width: '100%', height: '100%' }).embed(embIn, { autoClose: true });
+      emb.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    });
+    box.NW_set = v => { const p = parse(v); zip.value = p.zip; base.value = p.base; det.value = p.detail; hid.value = String(v || ''); };
+    box.NW_valid = () => !!base.value || !!det.value.trim();
+    return box;
+  }
+  const mountAll = () => document.querySelectorAll('[data-addr]').forEach(mount);
+  mountAll(); document.addEventListener('DOMContentLoaded', mountAll);   // 스크립트가 본문 끝에 있으므로 즉시 장착(본문 파싱 중이라 readyState 는 아직 loading) → 뒤따르는 order.js·checkout 이 hidden 입력을 바로 사용
+  return { mount, parse, set(sel, v) { const b = document.querySelector(sel); if (b && b.NW_set) b.NW_set(v); }, valid(sel) { const b = document.querySelector(sel); return b && b.NW_valid ? b.NW_valid() : true; } };
+})();
+
 (function () {
   // 로고 삽입: <a class="logo" data-logo></a> 에 선택된 SVG 를 넣음
   function currentLogoId() {

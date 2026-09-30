@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>결제 | 나무의공간</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Nanum+Myeongjo:wght@700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=20261001c">
+<link rel="stylesheet" href="css/style.css?v=20261001k">
 </head>
 <body>
 <header class="site">
@@ -33,7 +33,7 @@
           <label>연락처 * <input name="tel" required placeholder="010-0000-0000"></label>
         </div>
         <label>이메일 * <input name="email" type="email" required placeholder="답장 받을 이메일 (필수)"></label>
-        <label>납품·시공 주소 * <input name="addr" required placeholder="시·군·구부터 상세 주소까지"></label>
+        <label>배송 주소 * <span class="hint" style="font-weight:400">(납품·시공 장소)</span><div data-addr="addr" id="coAddr"></div></label>
         <label>요청 사항 <textarea name="memo" placeholder="희망 일정, 색상, 현장 조건 등"></textarea></label>
       </form>
       <div class="f" style="background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:26px;display:grid;gap:12px">
@@ -55,8 +55,8 @@
 <footer class="site"><div class="wrap"><a class="logo" data-logo href="index.html"></a><div><b data-site="name"></b> · 대표 <span data-site="ceo"></span> · <span data-site="tel"></span> · <span data-site="email"></span><br><span style="opacity:.7">사업자등록번호 <span data-site="bizno"></span> (<span data-site="bizname"></span>) · <span data-site="address"></span> <a href="admin.html" class="gear" title="관리자" aria-label="관리자">⚙</a></span></div></div></footer>
 
 <script src="js/logos.js?v=20260928h"></script>
-<script src="js/main.js?v=20261001j"></script>
-<script src="js/cart.js?v=20261001j"></script>
+<script src="js/main.js?v=20261001k"></script>
+<script src="js/cart.js?v=20261001k"></script>
 <script src="js/payments.js?v=20260929e"></script>
 <script>
 (function () {
@@ -72,7 +72,8 @@
   }
   applyPay(); document.addEventListener('nw:config', applyPay);
   // 저장된 주문자 정보 채우기
-  const c = NW_CART.customer(); ['name', 'tel', 'email', 'addr', 'memo'].forEach(k => { if (c[k] && form[k]) form[k].value = c[k]; });
+  const c = NW_CART.customer(); ['name', 'tel', 'email', 'memo'].forEach(k => { if (c[k] && form[k]) form[k].value = c[k]; });
+  if (c.addr) NW_ADDR.set('#coAddr', c.addr);
   form.addEventListener('input', () => NW_CART.customer(Object.fromEntries(new FormData(form).entries())));
   function render() {
     const items = NW_CART.items(), t = NW_CART.totals(items);
@@ -86,6 +87,7 @@
   }
   async function submit() {
     if (!form.reportValidity()) return;
+    if (!NW_ADDR.valid('#coAddr')) { alert('배송 주소를 입력해 주세요. "주소 찾기"를 눌러 주소를 선택하세요.'); document.querySelector('#coAddr .addr-find').focus(); return; }
     if (!document.getElementById('agree').checked) { alert('주문 내용 확인에 동의해 주세요.'); return; }
     const items = NW_CART.items(); if (!items.length) return;
     const btn = document.getElementById('btnPay'); btn.disabled = true; btn.textContent = '처리 중…';
