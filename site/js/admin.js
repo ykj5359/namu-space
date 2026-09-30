@@ -126,7 +126,7 @@
         </div>` : ''}
         <label id="cancelRow" style="display:none">취소 사유 <input name="cancelReason" placeholder="예: 고객 요청 / 견적 불일치 / 연락 두절"></label>
         <label>메모 (관리자) <textarea name="memo">${esc(r.memo)}</textarea></label>
-        <div class="ad-actions"><button type="submit" class="btn wood sm">저장</button><a class="btn light sm" href="tel:${esc(String(r.tel).replace(/-/g, ''))}">📞 전화</a><a class="btn light sm" href="sms:${esc(String(r.tel).replace(/-/g, ''))}">💬 문자</a>${r.email ? `<a class="btn light sm" href="mailto:${esc(r.email)}">✉ 메일</a>` : ''}<button type="button" class="btn ghost sm" id="dDel" style="margin-left:auto;color:#b91c1c;border-color:#b91c1c">접수 삭제</button></div>
+        <div class="ad-actions"><button type="submit" class="btn wood sm">저장</button><a class="btn light sm" href="tel:${esc(String(r.tel).replace(/-/g, ''))}">📞 전화</a><a class="btn light sm" href="sms:${esc(String(r.tel).replace(/-/g, ''))}">💬 문자</a>${r.email ? `<a class="btn light sm" href="mailto:${esc(r.email)}">✉ 메일</a>` : ''}${r.status !== '취소' ? `<button type="button" class="btn light sm" id="dCancel" style="color:#b91c1c">✕ 취소</button>` : ''}<button type="button" class="btn ghost sm" id="dDel" style="margin-left:auto;color:#b91c1c;border-color:#b91c1c">접수 삭제</button></div>
       </form>
       <div><b style="font-size:14px">접수 내용</b><pre class="ad-pre">${esc(r.text)}</pre></div>
       ${files.length ? `<div class="ad-files"><b style="font-size:14px">도면·사진</b><br>${files.map((u, i) => `<a href="${esc(u)}" target="_blank" rel="noopener">파일 ${i + 1} 열기</a>`).join('')}</div>` : ''}
@@ -143,6 +143,7 @@
     $('#detailBox [data-x]').addEventListener('click', closeDetail);
     const stSel = $('#dForm [name=status]'), cancelRow = $('#cancelRow');
     stSel.addEventListener('change', () => { cancelRow.style.display = stSel.value === '취소' && r.status !== '취소' ? '' : 'none'; });
+    const dc = $('#dCancel'); if (dc) dc.addEventListener('click', () => { stSel.value = '취소'; stSel.dispatchEvent(new Event('change')); const inp = $('#dForm [name=cancelReason]'); inp.scrollIntoView({ block: 'center' }); inp.focus(); toast('취소 사유를 적고 저장을 누르면 취소 처리됩니다'); });
     $('#dForm').addEventListener('submit', async e => {
       e.preventDefault(); const f = e.target, patch = {};
       ['name', 'tel', 'email', 'addr', 'status', 'method', 'memo', 'supply', 'vat', 'total', 'cost'].forEach(k => { if (f[k]) patch[k] = f[k].type === 'number' ? +f[k].value : f[k].value; });
