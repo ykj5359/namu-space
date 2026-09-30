@@ -35,7 +35,7 @@
 
 <script src="js/logos.js?v=20260928h"></script>
 <script src="js/main.js?v=20261001p"></script>
-<script src="js/cart.js?v=20261001p"></script>
+<script src="js/cart.js?v=20261001r"></script>
 <script>
 (function () {
   const list = document.getElementById('cartList'), sum = document.getElementById('cartSum'), ADMIN = new URLSearchParams(location.search).get('admin') === '1';
@@ -51,7 +51,7 @@
         <div>
           <h4>도면 ${i + 1} · ${it.dir === 'v' ? '세로 배열' : '가로 배열'} ${it.A} × ${it.B}</h4>
           <div class="meta">각재 길이 C ${c.C} · 끝 여백 D ${c.D} · F/E/G ${it.F}/${c.Ereal}/${c.Gadj}<br>
-            코너 ${it.corner === 'none' ? '없음' : ({ left: '좌측', right: '우측', both: '양쪽' })[it.corner] + ' (K=' + it.K + ')'} · ${it.finishText || it.finish} · ${it.install}<br>
+            면 구성 ${({ none: '1면', left: '2면 좌측', right: '2면 우측', both: '3면 ㄷ자', column: '4면 기둥' })[it.corner] || it.corner}${it.corner !== 'none' ? ' (K=' + it.K + ')' : ''} · ${it.finishText || it.finish} · ${it.install}<br>
             각재 ${c.totalBattens}개 (원본 3600 ${NW_CART.sticks(c.totalBattens, c.C).sticks}본) · 합판 원장 ${c.sheets}장 · 면적 ${c.area} ㎡</div>
           <div class="acts"><a href="order.html?item=${it.id}">수정</a><button type="button" data-act="dup">복제</button><button type="button" data-act="del">삭제</button></div>
         </div>

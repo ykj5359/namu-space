@@ -17,6 +17,8 @@
   .row-finish { display: grid; grid-template-columns: 1fr 96px 150px; gap: 10px; align-items: end; }
   .g.g3 { grid-template-columns: 1fr 1fr 1.3fr; }
   .seg-sm span { padding: 8px 4px; font-size: 13px; }
+  .seg-face span { padding: 7px 4px; line-height: 1.2; }
+  .seg-face small { display: block; font-size: 11px; font-weight: 500; opacity: .75; margin-top: 2px; }
   @media (max-width: 1200px) { .order { grid-template-columns: 460px 1fr; } }
   @media (max-width: 600px) { .row-dim, .row-corner, .g.g3 { grid-template-columns: 1fr 1fr; } .row-dim .seg { grid-column: 1/-1; } }
   .panel h3:first-child { margin-top: 0; }
@@ -153,15 +155,17 @@
       </details>
       <p class="hint" id="dirNote" style="display:none"></p>
 
-      <h3>2. 코너형 옵션</h3>
-      <div class="seg">
-        <label><input type="radio" name="corner" data-k="corner" value="none" checked><span>없음</span></label>
-        <label><input type="radio" name="corner" data-k="corner" value="left"><span>좌측</span></label>
-        <label><input type="radio" name="corner" data-k="corner" value="right"><span>우측</span></label>
-        <label><input type="radio" name="corner" data-k="corner" value="both"><span>양쪽</span></label>
+      <h3>2. 면 구성 (코너 · 기둥) <span class="hint">몇 면을 감싸는지</span></h3>
+      <div class="seg seg-face">
+        <label><input type="radio" name="corner" data-k="corner" value="none" checked><span>1면<small>평면</small></span></label>
+        <label><input type="radio" name="corner" data-k="corner" value="left"><span>2면<small>좌측 코너</small></span></label>
+        <label><input type="radio" name="corner" data-k="corner" value="right"><span>2면<small>우측 코너</small></span></label>
+        <label><input type="radio" name="corner" data-k="corner" value="both"><span>3면<small>ㄷ자 감싸기</small></span></label>
+        <label><input type="radio" name="corner" data-k="corner" value="column"><span>4면<small>기둥 감싸기</small></span></label>
       </div>
+      <p class="hint" style="margin:6px 0 0">1면은 벽에 붙이는 평판, 2·3면은 모서리를 ㄱ자·ㄷ자로 돌리는 형태, 4면은 기둥을 한 바퀴 감싸는 형태입니다. 돌아가는 면의 폭은 K 입니다.</p>
       <div id="cornerK" class="g" style="margin-top:10px">
-        <label>K 코너 돌림 길이 (mm) <span class="hint">ㄱ자로 꺾여 돌아가는 면의 폭</span><input type="number" data-k="K" min="30" max="12000" step="10"></label>
+        <label><span id="kLabel">K 코너 돌림 길이 (mm) <span class="hint">ㄱ자로 꺾여 돌아가는 면의 폭</span></span><input type="number" data-k="K" min="30" max="12000" step="10"></label>
       </div>
 
       <h3>3. 마감 · 수량 · 시공</h3>
@@ -209,7 +213,7 @@
     <div class="sec-head"><div><div class="eyebrow">Order Sheet</div><h2 class="sec-title" style="font-size:24px;margin-bottom:4px">주문 도면</h2><p class="hint" style="margin:0">입력한 치수로 자동 작성된 주문서입니다. 접수·결제 시 이 도면이 그대로 첨부됩니다.</p></div></div>
     <div class="sheet-wrap"><canvas id="sheet"></canvas></div>
     <div class="legend">
-      <span><b>A</b> 패널 폭 · <b>B</b> 패널 높이 · <b>C</b> 각재 길이 · <b>D</b> 각재 끝 여백 · <b>F</b> 시작 여백 · <b>E</b> 각재 구간 · <b>G</b> 끝 여백 · <b>K</b> 코너 돌림 길이</span>
+      <span><b>A</b> 패널 폭 · <b>B</b> 패널 높이 · <b>C</b> 각재 길이 · <b>D</b> 각재 끝 여백 · <b>F</b> 시작 여백 · <b>E</b> 각재 구간 · <b>G</b> 끝 여백 · <b>K</b> 코너·기둥 옆면 폭 (2·3·4면)</span>
       <span>파란 치수선은 mm 단위, 주황 점선은 코너 접힘선, 회색 점선은 합판 원장(1220×2440) 이음선입니다.</span>
     </div>
     <div id="cartSheetsWrap" style="display:none">
@@ -229,10 +233,10 @@
 
 <script src="js/logos.js?v=20260928h"></script>
 <script src="js/main.js?v=20261001p"></script>
-<script src="js/cart.js?v=20261001p"></script>
+<script src="js/cart.js?v=20261001r"></script>
 <!-- 이메일 자동 발송(EmailJS)을 쓰려면 아래 주석을 풀고 main.js 의 SITE.emailjs 값을 채우세요.
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script> -->
-<script src="js/order.js?v=20261001q"></script>
+<script src="js/order.js?v=20261001s"></script>
 <script type="importmap">{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/" } }</script>
 <script type="module" src="js/view3d.js?v=20260930p"></script>
 <script>

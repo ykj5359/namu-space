@@ -37,16 +37,19 @@
     const n = Math.max(0, Math.floor((E + GAP) / PITCH));  // 각재 개수
     const Ereal = n > 0 ? n * PITCH - GAP : 0;               // E = 첫 각재 왼쪽 끝 ~ 마지막 각재 오른쪽 끝 (마지막 간격 제외), 남는 치수는 G에 더함
     const Gadj = s.G + (E - Ereal);
-    const cornerN = (s.corner === 'left' || s.corner === 'both' ? 1 : 0) + (s.corner === 'right' || s.corner === 'both' ? 1 : 0);
-    const left = (s.corner === 'left' || s.corner === 'both') ? s.K : 0, right = (s.corner === 'right' || s.corner === 'both') ? s.K : 0;
+    const col = s.corner === 'column';                                                  // 4면(기둥): 앞면 A + 좌·우 옆면 K + 뒷면 A
+    const faces = { none: 1, left: 2, right: 2, both: 3, column: 4 }[s.corner] || 1;      // 면 수
+    const cornerN = faces - 1;                                                          // 추가 면 수 (코너 추가금 기준)
+    const left = (s.corner === 'left' || s.corner === 'both' || col) ? s.K : 0, right = (s.corner === 'right' || s.corner === 'both' || col) ? s.K : 0, back = col ? s.A : 0;
+    const sideN = (left ? 1 : 0) + (right ? 1 : 0);
     const cornerBattens = s.dir === 'h' ? n : Math.floor((s.K + GAP) / PITCH);
-    const totalBattens = s.dir === 'h' ? n : n + cornerN * cornerBattens;
-    const battenLen = s.dir === 'h' ? C + cornerN * s.K : C;
-    const totW = s.A + left + right, totH = s.B;
+    const totalBattens = s.dir === 'h' ? n : n * (col ? 2 : 1) + sideN * cornerBattens;
+    const battenLen = s.dir === 'h' ? C + sideN * s.K + (col ? C : 0) : C;
+    const totW = s.A + left + right + back, totH = s.B;
     const o1 = Math.ceil(totW / SHEET_L) * Math.ceil(totH / SHEET_W), o2 = Math.ceil(totW / SHEET_W) * Math.ceil(totH / SHEET_L);
     const sheetX = o1 <= o2 ? SHEET_L : SHEET_W, sheetY = o1 <= o2 ? SHEET_W : SHEET_L;
     const nx = Math.ceil(totW / sheetX), ny = Math.ceil(totH / sheetY);
-    return { along, across, C, D, E, n, Ereal, Gadj, cornerN, left, right, cornerBattens, totalBattens, battenLen, totW, totH, sheetX, sheetY, nx, ny, sheets: nx * ny,
+    return { along, across, C, D, E, n, Ereal, Gadj, cornerN, faces, col, left, right, back, sideN, cornerBattens, totalBattens, battenLen, totW, totH, sheetX, sheetY, nx, ny, sheets: nx * ny,
       meters: Math.round(totalBattens * battenLen / 1000 * s.qty * 10) / 10, area: Math.round(totW * totH / 1e6 * s.qty * 100) / 100 };
   }
 
@@ -78,15 +81,18 @@
         if (r.left) it.push({ t: 'batten', x: X(r.left - BAT - i * PITCH), y: T, w: bw, h: r.C * ky, stain });
         if (r.right) it.push({ t: 'batten', x: X(r.left + s.A + i * PITCH), y: T, w: bw, h: r.C * ky, stain });
       }
+      if (r.back) for (let i = 0; i < r.n; i++) it.push({ t: 'batten', x: X(r.left + s.A + r.right + s.F + i * PITCH), y: T, w: bw, h: r.C * ky, stain });
     } else {
       for (let i = 0; i < r.n; i++) it.push({ t: 'batten', x: L, y: Y(s.F + i * PITCH), w: (r.left + r.C) * kx, h: bh, stain });
       if (r.right) for (let i = 0; i < r.n; i++) it.push({ t: 'batten', x: X(r.left + s.A), y: Y(s.F + i * PITCH), w: r.right * kx, h: bh, stain });
+      if (r.back) for (let i = 0; i < r.n; i++) it.push({ t: 'batten', x: X(r.left + s.A + r.right), y: Y(s.F + i * PITCH), w: r.C * kx, h: bh, stain });
     }
     // 합판 이음선(회색 점선) · 코너 접힘선(주황 점선)
     for (let i = 1; i < r.nx; i++) { const x = X(r.sheetX * i); it.push({ t: 'line', x1: x, y1: T, x2: x, y2: Bm, stroke: '#6b7280', w: 1.5, dash: [6, 6] }); it.push({ t: 'text', x: x + 6, y: T + 26, str: `이음 ${r.sheetX * i}`, color: dark ? '#d4d0cc' : '#6b7280' }); }
     for (let i = 1; i < r.ny; i++) { const y = Y(r.sheetY * i); it.push({ t: 'line', x1: L, y1: y, x2: R, y2: y, stroke: '#6b7280', w: 1.5, dash: [6, 6] }); it.push({ t: 'text', x: L + 8, y: y - 8, str: `이음 ${r.sheetY * i}`, color: dark ? '#d4d0cc' : '#6b7280' }); }
     if (r.left) it.push({ t: 'line', x1: X(r.left), y1: T, x2: X(r.left), y2: Bm, stroke: '#c2410c', w: 2, dash: [8, 6] });
     if (r.right) it.push({ t: 'line', x1: X(r.left + s.A), y1: T, x2: X(r.left + s.A), y2: Bm, stroke: '#c2410c', w: 2, dash: [8, 6] });
+    if (r.back) { const xb = X(r.left + s.A + r.right); it.push({ t: 'line', x1: xb, y1: T, x2: xb, y2: Bm, stroke: '#c2410c', w: 2, dash: [8, 6] }); it.push({ t: 'text', x: xb + 10 * M, y: T - 12 * M, str: `뒷면 (A=${s.A})`, color: '#c2410c' }); it.push({ t: 'text', x: X(r.left) + 10 * M, y: Bm + 30 * M, str: '앞면', color: '#c2410c' }); }
     // 길이 2400 초과는 절단(중략) 기호
     { // 각재 길이 방향은 압축해 그리므로 중간 생략 파단선(2점쇄선) 두 줄을 항상 표시
       if (s.dir === 'v') { const y = Y(r.C * 0.55); it.push({ t: 'break', axis: 'h', a: y - 7, b: y + 7, from: L - 10, to: R + 10 }); }
@@ -125,7 +131,7 @@
     // 아래: A · 코너 K · 전체
     dimH(yA, X(r.left), X(r.left + s.A), 'A', s.A, unitC((X(r.left) + X(r.left + s.A)) / 2, yA + 14), Bm);
     if (r.left) dimH(yA, L, X(r.left), 'K', s.K, { x: L - LY.UW - 6, y: yA + 14 * M }, Bm);
-    if (r.right) dimH(yA, X(r.left + s.A), R, 'K', s.K, { x: R + 6, y: yA + 14 * M }, Bm);
+    if (r.right) dimH(yA, X(r.left + s.A), X(r.left + s.A + r.right), 'K', s.K, { x: r.back ? X(r.left + s.A + r.right / 2) - LY.UW / 2 : R + 6, y: yA + (r.back ? LY.UH + 30 : 14) * M }, Bm);
     return { it, r };
   }
 
@@ -158,7 +164,7 @@
         if (o.side === 'v') { g += line(o.ext[0], o.y1, o.ext[1], o.y1, BL, 1.5) + line(o.ext[0], o.y2, o.ext[1], o.y2, BL, 1.5); if (o.y2 - o.y1 > 14) g += line(o.x, o.y1 + 6, o.x, o.y2 - 6, BL, 2) + `<polygon points="${o.x},${o.y1} ${o.x - 5},${o.y1 + 12} ${o.x + 5},${o.y1 + 12}" fill="${BL}"/><polygon points="${o.x},${o.y2} ${o.x - 5},${o.y2 - 12} ${o.x + 5},${o.y2 - 12}" fill="${BL}"/>`; else g += line(o.x - 8, (o.y1 + o.y2) / 2, o.x + 8, (o.y1 + o.y2) / 2, BL, 2); }
         else { g += line(o.x1, o.ext[0], o.x1, o.ext[1], BL, 1.5) + line(o.x2, o.ext[0], o.x2, o.ext[1], BL, 1.5); if (o.x2 - o.x1 > 14) g += line(o.x1 + 6, o.y, o.x2 - 6, o.y, BL, 2) + `<polygon points="${o.x1},${o.y} ${o.x1 + 12},${o.y - 5} ${o.x1 + 12},${o.y + 5}" fill="${BL}"/><polygon points="${o.x2},${o.y} ${o.x2 - 12},${o.y - 5} ${o.x2 - 12},${o.y + 5}" fill="${BL}"/>`; else g += line((o.x1 + o.x2) / 2, o.y - 8, (o.x1 + o.x2) / 2, o.y + 8, BL, 2); }
         const u = o.unit; g += `<text x="${u.x}" y="${u.y + (LY.BOXH * 0.76) * M}" font-family="Noto Sans KR, sans-serif" font-weight="800" font-size="${30 * M}" fill="#111">${o.key} =</text>`;
-        if (o.key === '전체') { const bx = 92 * M; g += `<rect x="${u.x + bx}" y="${u.y}" width="${95 * M}" height="${LY.BOXH * M}" fill="#fff" stroke="#222" stroke-width="2"/><text x="${u.x + bx + 47 * M}" y="${u.y + (LY.BOXH * 0.74) * M}" text-anchor="middle" font-family="Noto Sans KR, sans-serif" font-weight="700" font-size="${28 * M}" fill="#111">${o.val}</text>`; }
+        if (o.key === '전체' || pos[o.key]) { const bx = 92 * M; g += `<rect x="${u.x + bx}" y="${u.y}" width="${95 * M}" height="${LY.BOXH * M}" fill="#fff" stroke="#222" stroke-width="2"/><text x="${u.x + bx + 47 * M}" y="${u.y + (LY.BOXH * 0.74) * M}" text-anchor="middle" font-family="Noto Sans KR, sans-serif" font-weight="700" font-size="${28 * M}" fill="#111">${o.val}</text>`; }
         else pos[o.key] = [u.x + 58 * M, u.y];
       }
     }
@@ -233,6 +239,21 @@
     if (corner) {
       // 코너 평면 상세 — 손도면(182518) 기준. 바깥 모서리를 원점으로, 본면(가로 합판)은 위쪽에 각재, 돌림면(세로 합판)은 바깥(왼쪽)에 각재.
       // 우측 코너는 좌우 반전. 단위 mm, kc 배율.
+      if (state.corner === 'column') {   // 기둥 평면: 앞·뒤 A, 좌·우 K 를 각재가 둘러쌈
+        text('기둥 평면 상세 (4면 감싸기)', x, yy + 30, { w: 700 });
+        const A = Math.max(60, state.A), K = Math.max(60, state.K), kp = Math.min(200 / Math.max(A, K), 0.6), ox = x + 90, oy1 = yy + 90;
+        const aw = A * kp, kh = K * kp, bp = Math.max(4, BAT * kp), pp = Math.max(2, PLY * kp);
+        ctx.fillStyle = '#d6d3d1'; ctx.fillRect(ox, oy1, aw, kh); ctx.strokeStyle = '#8B5A2B'; ctx.strokeRect(ox, oy1, aw, kh);   // 기둥 몸체
+        ctx.fillStyle = plyc; ctx.fillRect(ox - pp, oy1 - pp, aw + 2 * pp, pp); ctx.fillRect(ox - pp, oy1 + kh, aw + 2 * pp, pp); ctx.fillRect(ox - pp, oy1, pp, kh); ctx.fillRect(ox + aw, oy1, pp, kh); // 합판 4면
+        const nA = Math.max(0, Math.floor((A - 2 * state.F + GAP) / PITCH)), nK = Math.max(0, Math.floor((K + GAP) / PITCH));
+        for (let i = 0; i < nA; i++) { const bx = ox + (state.F + i * PITCH) * kp; woodRect(bx, oy1 - pp - bp, bp, bp, stain); woodRect(bx, oy1 + kh + pp, bp, bp, stain); }
+        for (let i = 0; i < nK; i++) { const by = oy1 + (i * PITCH) * kp; woodRect(ox - pp - bp, by, bp, bp, stain); woodRect(ox + aw + pp, by, bp, bp, stain); }
+        smallDim(ox, oy1 + kh + pp + bp + 10, ox + aw, oy1 + kh + pp + bp + 10, `A=${state.A}`, 24, 'h');
+        smallDim(ox + aw + pp + bp + 10, oy1, ox + aw + pp + bp + 10, oy1 + kh, `K=${state.K}`, 26, 'v');
+        ctx.save(); ctx.fillStyle = '#c2410c'; ctx.font = `700 ${FS}px "Noto Sans KR", sans-serif`; ctx.textAlign = 'center'; ctx.fillText('기둥', ox + aw / 2, oy1 + kh / 2 + 8); ctx.restore();
+        text('앞·뒤 A면과 좌·우 K면을 모두 감쌈 · 코너에서 각재끼리 맞닿음', x, oy1 + kh + 92, { c: '#555' });
+        return oy1 + kh + 102;
+      }
       const side = state.corner === 'right' ? '우측' : state.corner === 'both' ? '양쪽(좌측 기준)' : '좌측';
       text(`코너 평면 상세 (ㄱ자 돌림 · ${side})`, x, yy + 30, { w: 700 });
       const kc = 1.0, m = state.corner === 'right' ? -1 : 1;                    // m: 좌우 반전
@@ -281,7 +302,7 @@
       ['A 폭 × B 높이', `${s.A} × ${s.B}`],
       ['C 각재 길이 / D', `${r.C} / ${r.D}`],
       ['F / E / G', `${s.F} / ${r.Ereal} / ${Math.round(r.Gadj)}`],
-      ['코너', s.corner === 'none' ? '없음' : ({ left: '좌측', right: '우측', both: '양쪽' })[s.corner] + ` (돌림 K=${s.K})`],
+      ['면 구성', ({ none: '1면 (평면)', left: '2면 (좌측 코너)', right: '2면 (우측 코너)', both: '3면 (ㄷ자)', column: '4면 (기둥 감싸기)' })[s.corner] + (s.corner === 'none' ? '' : ` · K=${s.K}`)],
       ['각재 개수', `${r.totalBattens}개 / 장 (본면 ${r.n})`],
       ['원본 각재 3600', (() => { const st = NW_CART.sticks(r.totalBattens, r.C); return `${st.sticks}본 사용 (1본당 ${st.per}개 × ${st.sticks}본)`; })()],
       ['합판 원장', r.sheets > 1 ? `1220×2440 × ${r.sheets}장 (${r.nx}×${r.ny})` : '1220×2440 1장'],
@@ -309,14 +330,14 @@
     const it = {}; DIM_KEYS.forEach(k => it[k] = s[k]); it.calc = { area: r.totW * r.totH / 1e6, C: r.C, totalBattens: r.totalBattens, sheets: r.sheets }; it.qty = Math.max(1, +s.qty || 1); it.finish = s.finish; it.extra = s.extra; it.corner = s.corner; it.install = s.install;
     const a = it.calc.area, pr = NW_CART.price(it), tt = NW_CART.totals([it]);
     const rate = s.finish === '무도장' ? (P.natural || 0) : (P.stain || 0), base = rate * a;
-    const cornerN = s.corner === 'none' ? 0 : (s.corner === 'both' ? 2 : 1), cornerAmt = cornerN * (P.corner || 0);
+    const cornerN = r.cornerN, cornerAmt = cornerN * (P.corner || 0);
     const installAmt = s.install === '현장 시공 포함' ? (P.install || 0) * a : 0;
     const exRate = s.finish === '추가옵션' ? (s.extra === '합판 흑도장' ? (P.plyBlack || 0) : (P.paint || 0)) : 0, exAmt = exRate * a;
     const raw = base + cornerAmt + installAmt + exAmt;
     const rows = [
-      ['패널 면적', `${r.totW} × ${r.totH} ÷ 1,000,000 = <em>${a.toFixed(2)} ㎡</em>${r.left || r.right ? ' (코너 돌림 K 포함)' : ''}`],
+      ['패널 면적', `${r.totW} × ${r.totH} ÷ 1,000,000 = <em>${a.toFixed(2)} ㎡</em>${r.left || r.right ? (r.col ? ' (앞 A + 좌·우 K + 뒤 A)' : ' (코너 돌림 K 포함)') : ''}`],
       ['기본 금액', `${a.toFixed(2)} ㎡ × ${won(rate)}/㎡ (${s.finish === '무도장' ? '무도장' : '오일 스테인'}) = <em>${won(base)}</em>`],
-      ['코너 추가', cornerN ? `${cornerN}면 × ${won(P.corner || 0)} = <em>${won(cornerAmt)}</em>` : '없음'],
+      ['코너 추가', cornerN ? `${r.faces}면 구성 → 추가 ${cornerN}면 × ${won(P.corner || 0)} = <em>${won(cornerAmt)}</em>` : '없음 (1면)'],
       ['현장 시공', installAmt ? `${a.toFixed(2)} ㎡ × ${won(P.install || 0)}/㎡ = <em>${won(installAmt)}</em>` : '없음 (자재 납품)'],
       ['추가옵션', s.finish === '추가옵션' ? (exRate ? `${s.extra} · ${a.toFixed(2)} ㎡ × ${won(exRate)}/㎡ = <em>${won(exAmt)}</em>` : `${s.extra} · 추가금 없음 (접수 후 안내)`) : '없음'],
       ['1장 단가', `${won(raw)} → 100원 단위 반올림${pr.unit > Math.round(raw / 100) * 100 ? ` · 최소 ${won(P.min || 0)} 적용` : ''} = <em>${won(pr.unit)}</em>`],
@@ -365,8 +386,9 @@
     const extraUI = () => { const box = $('#extraOpts'); if (!box) return; box.style.display = state.finish === '추가옵션' ? '' : 'none'; const pc = $('#paintRow'); if (pc) pc.style.display = (state.finish === '추가옵션' && state.extra !== '합판 흑도장') ? 'flex' : 'none'; const pl = $('#paintLabel'); if (pl) pl.textContent = state.extra === '각재만 도색' ? '각재 도색 색상' : state.extra === '합판만 도색' ? '합판 도색 색상' : '각재 도색 색상'; const p2 = $('#paintRow2'); if (p2) p2.style.display = (state.finish === '추가옵션' && state.extra === '합판+각재 도색') ? 'flex' : 'none'; };
     document.querySelectorAll('input[name=finish], input[name=extra]').forEach(el => el.addEventListener('change', () => setTimeout(extraUI, 0)));
     extraUI(); window.NW_EXTRA_UI = extraUI;
-    $('#cornerK').style.display = state.corner === 'none' ? 'none' : '';
-    document.querySelectorAll('input[name=corner]').forEach(el => el.addEventListener('change', () => { $('#cornerK').style.display = state.corner === 'none' ? 'none' : ''; if (state.corner !== 'none' && !(state.K > 0)) { state.K = 300; syncInputs('K', null); } if (state.corner === 'none' && state.K) { state.K = 0; syncInputs('K', null); } syncDerived(); draw(); }));
+    const kLabel = () => { const l = $('#kLabel'); if (l) l.innerHTML = state.corner === 'column' ? 'K 기둥 옆면 폭 (mm) <span class="hint">앞·뒤는 A, 좌·우 옆면은 K</span>' : 'K 코너 돌림 길이 (mm) <span class="hint">ㄱ자로 꺾여 돌아가는 면의 폭</span>'; }; window.NW_KLABEL = kLabel;
+    $('#cornerK').style.display = state.corner === 'none' ? 'none' : ''; kLabel();
+    document.querySelectorAll('input[name=corner]').forEach(el => el.addEventListener('change', () => { kLabel(); $('#cornerK').style.display = state.corner === 'none' ? 'none' : ''; if (state.corner !== 'none' && !(state.K > 0)) { state.K = 300; syncInputs('K', null); } if (state.corner === 'none' && state.K) { state.K = 0; syncInputs('K', null); } syncDerived(); draw(); }));
   }
 
   // ---- 저장·전송 ----
@@ -398,7 +420,7 @@
   function loadItem(it) {
     DIM_KEYS.forEach(k => { if (it[k] !== undefined) state[k] = it[k]; });
     DIM_KEYS.forEach(k => syncInputs(k, null));
-    $('#cornerK').style.display = state.corner === 'none' ? 'none' : ''; if (window.NW_EXTRA_UI) NW_EXTRA_UI(); syncDerived(); draw();
+    $('#cornerK').style.display = state.corner === 'none' ? 'none' : ''; if (window.NW_KLABEL) NW_KLABEL(); if (window.NW_EXTRA_UI) NW_EXTRA_UI(); syncDerived(); draw();
   }
   function resetItem() { loadItem({ dir: 'v', A: 1200, B: 2400, D: 100, F: 60, G: 60, corner: 'none', K: 0, finish: '오일 스테인', extra: '합판 흑도장', paint: '#2a2724', paint2: '#2a2724', ply: '내추럴', install: '자재 납품' }); }
   window.NW_ORDER = { get: () => ({ s: state, r: calc(), fi: finishInfo(state), BAT, GAP, PITCH, PLY }), snapshot, load: loadItem, reset: resetItem, finishInfo };

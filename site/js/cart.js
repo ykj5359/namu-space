@@ -11,7 +11,7 @@
   function price(item) {
     const P = SITE.price, a = item.calc.area;                       // 1장 면적(㎡, 코너 돌림 포함)
     const base = (item.finish === '무도장' ? P.natural : P.stain) * a;
-    const corner = item.corner === 'none' ? 0 : (item.corner === 'both' ? 2 : 1) * P.corner;
+    const corner = (({ none: 0, left: 1, right: 1, both: 2, column: 3 })[item.corner] || 0) * P.corner;   // 추가 면 수 × 코너 단가
     const install = item.install === '현장 시공 포함' ? P.install * a : 0;
     const ex = item.finish === '추가옵션' ? (item.extra === '합판 흑도장' ? (P.plyBlack || 0) : (P.paint || 0)) * a : 0; // 추가옵션 추가금 (㎡당)
     const ply = ex;
@@ -35,7 +35,7 @@
     const vat = SITE.price && SITE.price.vat === false ? 0 : Math.round(supply * 0.1);
     return { supply, vat, total: supply + vat, count: items.reduce((s, it) => s + it.qty, 0) };
   }
-  const label = it => `${it.dir === 'v' ? '세로' : '가로'} ${it.A}×${it.B}${it.corner !== 'none' ? ' · 코너 ' + ({ left: '좌', right: '우', both: '양쪽' })[it.corner] + ' K' + it.K : ''} · ${it.finishText || it.finish}${it.install === '현장 시공 포함' ? ' · 시공' : ''}`;
+  const label = it => `${it.dir === 'v' ? '세로' : '가로'} ${it.A}×${it.B}${it.corner !== 'none' ? ' · 코너 ' + ({ left: '2면 좌', right: '2면 우', both: '3면', column: '4면 기둥' })[it.corner] + ' K' + it.K : ''} · ${it.finishText || it.finish}${it.install === '현장 시공 포함' ? ' · 시공' : ''}`;
 
   const api = {
     get: load, save, price, cost, totals, sticks, won, label,
