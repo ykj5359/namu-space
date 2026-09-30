@@ -13,6 +13,7 @@
  */
 var SHEET_NAME = '나무의공간 접수대장';
 var DRAWING_FOLDER = '나무의공간 도면';
+var IMAGE_FOLDER = '나무의공간 이미지';         // 관리자 페이지에서 올린 팝업 이미지 (링크 공개)
 var INITIAL_PW = '';                          // 저장소 사본은 비워 둠 (배포 시에만 입력)
 var SECRET = '';                              // 선택: 홈페이지 SITE.orderSecret 과 같은 값
 var TZ = 'Asia/Seoul';
@@ -29,7 +30,8 @@ var DEFAULT_CONFIG = {
   cost: { batten: 3600, battenLen: 3600, plywood: 18000, labor: 30000, stain: 0 },
   payment: { bank: '농협 000-0000-0000-00', holder: '이영석', clientKey: '', methods: { card: true, transfer: true, vbank: true, bank: true } },
   texts: { heroTitle: '나무가 만드는\n공간의 결', hero: '서두르는 손이 아니라 준비된 나무가 벽을 완성합니다. 현장은 고요하고, 마감은 고릅니다.',
-    notice: { on: false, text: '', from: '', to: '' } },
+    notice: { on: false, text: '', from: '', to: '' },
+    popup: { on: true, image: 'img/popup/sample.jpg', link: 'index.html?sample=1#contact', title: '템바보드 샘플 무료 배송 이벤트', from: '', to: '', pages: 'home' } },
   ship: { later: { label: '협의 후 결정', mode: 'separate', amount: 0 }, parcel: { label: '택배 (소량·소형, 1장 기준 1200 이하)', mode: 'amount', amount: 6000 }, freight: { label: '화물·용달 (대형·다량)', mode: 'cod', amount: 0 }, pickup: { label: '직접 방문 수령 (충남 홍성 공방)', mode: 'amount', amount: 0 }, site: { label: '현장 시공 (시공 포함 주문 · 직접 설치)', mode: 'separate', amount: 0 } },
   logo: 1,
 };
@@ -68,6 +70,7 @@ function doPost(e) {
       case 'admin.restore': return json_(restoreRow_(body.no));
       case 'admin.changePw': return json_(changePw_(body.pw));
       case 'admin.rebuild': rebuildSales_(); return json_({ ok: true });
+      case 'admin.upload': return json_(uploadImage_(body));
       default: return json_({ ok: false, error: 'unknown action' });
     }
   } catch (err) {
@@ -388,6 +391,15 @@ function sheetPay_() { return tab_('입금', H_PAY); }
 function sheetSales_() { return tab_('매출', H_SALES); }
 function sheetCfg_() { return tab_('설정', ['키', '값(JSON)', '설명']); }
 function sheetCancel_() { return tab_('취소', H_CANCEL); }
+// 관리자 이미지 업로드 → 드라이브 '나무의공간 이미지' 폴더, 링크 있는 모든 사용자 보기 → 홈페이지에서 바로 표시되는 주소 반환
+function uploadImage_(b) {
+  var data = String(b.data || '').replace(/^data:[^,]+,/, ''); if (!data) return { ok: false, error: 'no data' };
+  var mime = b.mime || 'image/jpeg', name = (b.name || 'popup.jpg').replace(/[\\/:*?"<>|]/g, '_');
+  var it = DriveApp.getFoldersByName(IMAGE_FOLDER), folder = it.hasNext() ? it.next() : DriveApp.createFolder(IMAGE_FOLDER);
+  var file = folder.createFile(Utilities.newBlob(Utilities.base64Decode(data), mime, Utilities.formatDate(new Date(), TZ, 'yyMMdd_HHmm') + '_' + name));
+  file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+  return { ok: true, id: file.getId(), url: 'https://lh3.googleusercontent.com/d/' + file.getId(), driveUrl: file.getUrl() };
+}
 function folder_() {
   if (folder_.cache) return folder_.cache;
   var it = DriveApp.getFoldersByName(DRAWING_FOLDER);

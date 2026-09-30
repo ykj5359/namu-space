@@ -9,7 +9,9 @@ window.SITE = {
   bizno: '131-36-54075',
   kakao: '',                       // 카카오톡 채널 주소 (미정)
   hours: '평일 09:00 ~ 18:00',      // 상담 가능 시간
-  texts: { heroTitle: '나무가 만드는\n공간의 결', hero: '서두르는 손이 아니라 준비된 나무가 벽을 완성합니다. 현장은 고요하고, 마감은 고릅니다.', notice: { on: false, text: '', from: '', to: '' } },
+  texts: { heroTitle: '나무가 만드는\n공간의 결', hero: '서두르는 손이 아니라 준비된 나무가 벽을 완성합니다. 현장은 고요하고, 마감은 고릅니다.', notice: { on: false, text: '', from: '', to: '' },
+    // 팝업창: 홈 첫 방문 시 이미지 팝업 (관리자 설정 → 팝업창 에서 이미지 업로드·기간·링크 변경). pages: 'home'(홈만) | 'all'(모든 페이지)
+    popup: { on: true, image: 'img/popup/sample.jpg', link: 'index.html?sample=1#contact', title: '템바보드 샘플 무료 배송 이벤트', from: '', to: '', pages: 'home' } },
   defaultLogo: 1,                  // 기본 로고 번호 (logo.html 에서 선택하면 브라우저에 저장됨)
   // 이메일 자동 전송(EmailJS) — 계정 발급 후 아래 세 값을 채우면 주문서가 자동 발송됩니다.
   emailjs: { publicKey: '', serviceId: '', templateId: '' },
@@ -34,7 +36,7 @@ window.NW_APPLY_CONFIG = function (c) {
   if (c.price) Object.assign(SITE.price, c.price);
   if (c.cost) Object.assign(SITE.cost, c.cost);
   if (c.payment) { const pm = SITE.payment.methods; Object.assign(SITE.payment, c.payment); if (c.payment.methods) SITE.payment.methods = Object.assign({}, pm, c.payment.methods); }
-  if (c.texts) { SITE.texts = Object.assign({}, SITE.texts, c.texts); if (c.texts.notice) SITE.texts.notice = Object.assign({}, c.texts.notice); }
+  if (c.texts) { SITE.texts = Object.assign({}, SITE.texts, c.texts); if (c.texts.notice) SITE.texts.notice = Object.assign({}, c.texts.notice); if (c.texts.popup) SITE.texts.popup = Object.assign({}, c.texts.popup); }
   if (c.ship) Object.keys(c.ship).forEach(k => { SITE.ship[k] = Object.assign({}, SITE.ship[k] || {}, c.ship[k]); });
   if (c.logo) SITE.defaultLogo = +c.logo;
   SITE.configLoaded = true;
@@ -127,6 +129,22 @@ window.NW_ADDR = (function () {
     document.querySelectorAll('[data-text]').forEach(el => { const v = T[el.getAttribute('data-text')]; if (v) el.innerHTML = escH(v).replace(/\n/g, '<br>'); });
     document.querySelectorAll('[data-kakao-row]').forEach(el => { el.style.display = SITE.kakao ? '' : 'none'; const a = el.querySelector('a[data-kakao]'); if (a) a.href = SITE.kakao || '#'; });
     document.querySelectorAll('[data-hours]').forEach(el => { el.style.display = SITE.hours ? '' : 'none'; });
+    // 이미지 팝업창 (홈 첫 방문 · 하루 동안 닫기 가능)
+    const P = T.popup || {}, isHome = /(^|\/)(index\.html)?$/.test(location.pathname);
+    const hideUntil = (() => { try { return localStorage.getItem('nw_popup_hide') || ''; } catch (e) { return ''; } })();
+    const d1 = new Date(), todayS = `${d1.getFullYear()}-${String(d1.getMonth() + 1).padStart(2, '0')}-${String(d1.getDate()).padStart(2, '0')}`;
+    const showPop = P.on && P.image && (P.pages === 'all' || isHome) && (!P.from || P.from <= todayS) && (!P.to || P.to >= todayS) && hideUntil !== todayS && !document.body.classList.contains('admin') && !new URLSearchParams(location.search).get('only');
+    let pop = document.getElementById('nwPopup');
+    if (showPop && !pop && !fill.popShown) {
+      fill.popShown = true;
+      pop = document.createElement('div'); pop.id = 'nwPopup'; pop.className = 'nw-popup';
+      pop.innerHTML = `<div class="nw-popup-box"><button type="button" class="nw-popup-x" aria-label="닫기">×</button>${P.link ? `<a href="${escH(P.link)}" class="nw-popup-img">` : '<div class="nw-popup-img">'}<img src="${escH(P.image)}" alt="${escH(P.title || '이벤트')}">${P.link ? '</a>' : '</div>'}<div class="nw-popup-bar"><label><input type="checkbox" id="nwPopupToday"> 오늘 하루 보지 않기</label><button type="button" class="nw-popup-close">닫기</button></div></div>`;
+      document.body.appendChild(pop);
+      const close = () => { try { if (document.getElementById('nwPopupToday').checked) localStorage.setItem('nw_popup_hide', todayS); } catch (e) {} pop.remove(); };
+      pop.querySelector('.nw-popup-x').addEventListener('click', close); pop.querySelector('.nw-popup-close').addEventListener('click', close);
+      pop.addEventListener('click', e => { if (e.target === pop) close(); });
+      const lk = pop.querySelector('a.nw-popup-img'); if (lk) lk.addEventListener('click', () => { try { localStorage.setItem('nw_popup_hide', todayS); } catch (e) {} pop.remove(); });
+    } else if (!showPop && pop && !fill.popShown) pop.remove();
     // 공지 배너 (기간 안에서만)
     const d0 = new Date(), n = T.notice || {}, today = `${d0.getFullYear()}-${String(d0.getMonth() + 1).padStart(2, '0')}-${String(d0.getDate()).padStart(2, '0')}`;
     const show = n.on && n.text && (!n.from || n.from <= today) && (!n.to || n.to >= today);
@@ -160,6 +178,7 @@ window.NW_ADDR = (function () {
     // 문의 폼 → mailto (이메일 자동전송은 보류 상태)
     const cf = document.querySelector('form.f');
     if (cf) {
+      if (new URLSearchParams(location.search).get('sample')) { const ps = cf.querySelector('select[name=product]'); if (ps) { ps.value = '무료 샘플 신청 (30×50 cm)'; const msg = cf.querySelector('textarea[name=msg]'); if (msg && !msg.value) msg.value = '무료 샘플(가로 30 × 세로 50 cm) 신청합니다.\n받을 주소: '; } setTimeout(() => cf.scrollIntoView({ behavior: 'smooth', block: 'start' }), 300); }
       // 현장 사진 첨부: 미리보기 + 긴 변 1600px 로 축소 (최대 8장)
       let photos = [];
       const fin = cf.querySelector('#cfPhotos'), pv = cf.querySelector('#cfPreview');

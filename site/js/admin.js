@@ -268,10 +268,31 @@
         ${['later', 'parcel', 'freight', 'pickup', 'site'].map(k => `<div class="row3">${F('ship.' + k + '.label', '배송 방법 이름')}${F('ship.' + k + '.mode', '배송비 방식', { type: 'select', options: [{ v: 'amount', t: '금액 (합계에 추가)' }, { v: 'cod', t: '착불 (배송 시 결제)' }, { v: 'separate', t: '별도 (접수 후 안내)' }] })}${F('ship.' + k + '.amount', '금액', { type: 'num', unit: '원' })}</div>`).join('')}
         <small class="help">현장 시공은 시공 포함 주문일 때 도면 페이지 예상 금액에 미리 표시되고, 나머지는 주문 접수 페이지에서 배송 방법을 고를 때 합계에 반영됩니다.</small>
       </div></div>
+      <div class="ad-panel"><h2>8. 팝업창 <small>홈 첫 화면에 뜨는 이미지 팝업 · 이미지를 올리거나 기본 이미지를 쓰고, 기간과 클릭 시 이동할 주소를 정합니다</small></h2><div class="ad-form">
+        <div class="row3">${F('texts.popup.on', '팝업 켜기', { type: 'check' })}${F('texts.popup.from', '시작일', { type: 'date' })}${F('texts.popup.to', '종료일', { type: 'date', help: '비우면 기간 제한 없음' })}</div>
+        <div class="row2">${F('texts.popup.title', '팝업 제목 (대체 문구)', { ph: '템바보드 샘플 무료 배송 이벤트' })}${F('texts.popup.pages', '표시 위치', { type: 'select', options: [{ v: 'home', t: '홈 첫 화면만' }, { v: 'all', t: '모든 페이지' }] })}</div>
+        ${F('texts.popup.link', '클릭 시 이동 주소', { ph: 'index.html?sample=1#contact (문의 폼에서 무료 샘플 신청이 선택됨)', help: '비우면 클릭해도 이동하지 않음' })}
+        ${F('texts.popup.image', '팝업 이미지 주소', { help: '아래 업로드를 쓰면 자동 입력. 기본 이미지: img/popup/sample.jpg' })}
+        <div class="row2"><label>이미지 올리기 <span class="hint">JPG·PNG, 세로형 권장(가로 900 기준), 자동으로 1400px 이하로 줄여 저장</span><input type="file" id="popupFile" accept="image/*"></label><div class="ad-actions"><button type="button" class="btn light sm" id="popupDefault">기본 이미지 사용</button><span class="ad-count" id="popupUpMsg"></span></div></div>
+        <div id="popupPrev" style="max-width:260px;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#2b2b2b"></div>
+      </div></div>
       <div class="ad-save"><span class="ad-count" id="cfgMsg">저장하면 홈페이지에 바로 반영됩니다(방문자는 새로 열 때 적용).</span><button type="button" class="btn light" id="cfgReset">되돌리기</button><button type="submit" class="btn wood">설정 저장</button></div>
     </form>`;
     const prev = () => { const id = +$('[data-p="logo"]').value, l = (window.NW_LOGOS || []).find(x => x.id === id); $('#logoPrev').innerHTML = l ? `<div style="height:52px">${l.svg.replace('<svg', '<svg style="height:52px;width:auto"')}</div>` : ''; };
     prev(); $('[data-p="logo"]').addEventListener('change', prev);
+    // 팝업 이미지 미리보기 · 업로드 · 기본 이미지
+    const pImg = $('[data-p="texts.popup.image"]'), pPrev = $('#popupPrev');
+    const pShow = () => { pPrev.innerHTML = pImg.value ? `<img src="${esc(pImg.value)}" style="width:100%;display:block" alt="">` : '<div style="padding:20px;color:#aaa;font-size:12px">이미지 없음</div>'; };
+    pShow(); pImg.addEventListener('input', pShow);
+    $('#popupDefault').addEventListener('click', () => { pImg.value = 'img/popup/sample.jpg'; pShow(); });
+    $('#popupFile').addEventListener('change', async e => {
+      const f = e.target.files[0]; if (!f) return; const msg = $('#popupUpMsg'); msg.textContent = '이미지 줄이는 중…';
+      const data = await new Promise(res => { const img = new Image(); img.onload = () => { const k = Math.min(1, 1400 / Math.max(img.width, img.height)); const c = document.createElement('canvas'); c.width = Math.round(img.width * k); c.height = Math.round(img.height * k); c.getContext('2d').drawImage(img, 0, 0, c.width, c.height); URL.revokeObjectURL(img.src); res(c.toDataURL('image/jpeg', 0.88)); }; img.src = URL.createObjectURL(f); });
+      msg.textContent = '올리는 중…';
+      try { const j = await api('admin.upload', { name: f.name.replace(/\.[^.]+$/, '') + '.jpg', mime: 'image/jpeg', data: data.split(',')[1] }); pImg.value = j.url; pShow(); msg.textContent = '업로드 완료 · 저장을 눌러 적용'; }
+      catch (err) { msg.textContent = '실패: ' + err.message; }
+      e.target.value = '';
+    });
     $('#cfgReset').addEventListener('click', () => { cfgDraft = JSON.parse(JSON.stringify(D.config)); renderSettings(); });
     $('#cfgForm').addEventListener('submit', async e => {
       e.preventDefault();
