@@ -12,8 +12,21 @@
   cv.width = W; cv.height = H;
 
   // 세로 배열 기본: A=1200·B=2400, 가로 배열로 바꾸면 A=2400·B=1200
-  const state = { dir: 'v', A: 1200, B: 2400, D: 100, F: 60, G: 60, corner: 'none', K: 0, finish: '오일 스테인', qty: 1, install: '자재 납품', name: '', tel: '', email: '', addr: '', memo: '' };
+  const state = { dir: 'v', A: 1200, B: 2400, D: 100, F: 60, G: 60, corner: 'none', K: 0, finish: '오일 스테인', extra: '합판 흑도장', paint: '#2a2724', paint2: '#2a2724', ply: '내추럴', qty: 1, install: '자재 납품', name: '', tel: '', email: '', addr: '', memo: '' };
 
+  // ---- 마감 해석: 합판·각재 색 ----
+  //  오일 스테인 / 무도장 / 추가옵션(합판 흑도장 · 각재만 도색 · 합판만 도색 · 합판+각재 도색)
+  //  plyColor/battenColor 가 null 이면 나무 그대로(스테인 여부는 stain), 문자열이면 그 색으로 도색
+  function finishInfo(s = state) {
+    const stain = s.finish !== '무도장';
+    if (s.finish !== '추가옵션') return { stain, plyColor: null, battenColor: null, text: s.finish };
+    const p = s.paint || '#2a2724', p2 = s.paint2 || p;   // p: 각재 도색, p2: 합판 도색 (합판+각재 도색일 때)
+    const m = { '합판 흑도장': { plyColor: '#1f1c1a', battenColor: null, text: '오일 스테인 · 합판 흑도장' },
+                '각재만 도색': { plyColor: null, battenColor: p, text: `각재만 도색(${p})` },
+                '합판만 도색': { plyColor: p, battenColor: null, text: `합판만 도색(${p})` },
+                '합판+각재 도색': { plyColor: p2, battenColor: p, text: `합판+각재 도색(각재 ${p} · 합판 ${p2})` } };
+    return Object.assign({ stain: true }, m[s.extra] || m['합판 흑도장']);
+  }
   // ---- 계산 ----
   function calc() {
     const s = state;
@@ -53,8 +66,10 @@
     const kx = BW / r.totW, ky = BH / r.totH;
     const L = LY.PX, T = LY.PY, R = L + BW, Bm = T + BH;
     const X = mm => L + mm * kx, Y = mm => T + mm * ky;
-    const stain = s.finish !== '무도장';
-    it.push({ t: 'rect', x: L, y: T, w: BW, h: BH, fill: '#E8D7B5', stroke: '#8B5A2B' });
+    const fi = finishInfo(s), stain = fi.battenColor || fi.stain;   // battenColor(문자열)이면 도색
+    const dark = fi.plyColor && parseInt(fi.plyColor.slice(1, 3), 16) < 100;
+    const PLYC = fi.plyColor || '#E8D7B5', PLYS = dark ? '#111' : '#8B5A2B';
+    it.push({ t: 'rect', x: L, y: T, w: BW, h: BH, fill: PLYC, stroke: PLYS });
     // 각재
     const bw = Math.max(3, BAT * kx), bh = Math.max(3, BAT * ky);
     if (s.dir === 'v') {
@@ -68,8 +83,8 @@
       if (r.right) for (let i = 0; i < r.n; i++) it.push({ t: 'batten', x: X(r.left + s.A), y: Y(s.F + i * PITCH), w: r.right * kx, h: bh, stain });
     }
     // 합판 이음선(회색 점선) · 코너 접힘선(주황 점선)
-    for (let i = 1; i < r.nx; i++) { const x = X(r.sheetX * i); it.push({ t: 'line', x1: x, y1: T, x2: x, y2: Bm, stroke: '#6b7280', w: 1.5, dash: [6, 6] }); it.push({ t: 'text', x: x + 6, y: T + 26, str: `이음 ${r.sheetX * i}`, color: '#6b7280' }); }
-    for (let i = 1; i < r.ny; i++) { const y = Y(r.sheetY * i); it.push({ t: 'line', x1: L, y1: y, x2: R, y2: y, stroke: '#6b7280', w: 1.5, dash: [6, 6] }); it.push({ t: 'text', x: L + 8, y: y - 8, str: `이음 ${r.sheetY * i}`, color: '#6b7280' }); }
+    for (let i = 1; i < r.nx; i++) { const x = X(r.sheetX * i); it.push({ t: 'line', x1: x, y1: T, x2: x, y2: Bm, stroke: '#6b7280', w: 1.5, dash: [6, 6] }); it.push({ t: 'text', x: x + 6, y: T + 26, str: `이음 ${r.sheetX * i}`, color: dark ? '#d4d0cc' : '#6b7280' }); }
+    for (let i = 1; i < r.ny; i++) { const y = Y(r.sheetY * i); it.push({ t: 'line', x1: L, y1: y, x2: R, y2: y, stroke: '#6b7280', w: 1.5, dash: [6, 6] }); it.push({ t: 'text', x: L + 8, y: y - 8, str: `이음 ${r.sheetY * i}`, color: dark ? '#d4d0cc' : '#6b7280' }); }
     if (r.left) it.push({ t: 'line', x1: X(r.left), y1: T, x2: X(r.left), y2: Bm, stroke: '#c2410c', w: 2, dash: [8, 6] });
     if (r.right) it.push({ t: 'line', x1: X(r.left + s.A), y1: T, x2: X(r.left + s.A), y2: Bm, stroke: '#c2410c', w: 2, dash: [8, 6] });
     // 길이 2400 초과는 절단(중략) 기호
@@ -132,7 +147,7 @@
     const line = (x1, y1, x2, y2, st, w, dash) => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${st}" stroke-width="${w}"${dash ? ` stroke-dasharray="${dash.join(' ')}"` : ''}/>`;
     for (const o of it) {
       if (o.t === 'rect') g += `<rect x="${o.x}" y="${o.y}" width="${o.w}" height="${o.h}" fill="${o.fill}" stroke="${o.stroke}" stroke-width="2"/>`;
-      else if (o.t === 'batten') g += `<rect x="${o.x}" y="${o.y}" width="${o.w}" height="${o.h}" fill="url(#${o.stain ? 'wgs' : 'wg'})" stroke="#6B3F1D" stroke-width="0.8"/>`;
+      else if (o.t === 'batten') g += `<rect x="${o.x}" y="${o.y}" width="${o.w}" height="${o.h}" fill="${typeof o.stain === 'string' ? o.stain : 'url(#' + (o.stain ? 'wgs' : 'wg') + ')'}" stroke="${typeof o.stain === 'string' ? '#333' : '#6B3F1D'}" stroke-width="0.8"/>`;
       else if (o.t === 'line') g += line(o.x1, o.y1, o.x2, o.y2, o.stroke, o.w, o.dash);
       else if (o.t === 'text') g += `<text x="${o.x}" y="${o.y}" font-family="Noto Sans KR, sans-serif" font-size="${22 * M}" fill="${o.color}">${o.str}</text>`;
       else if (o.t === 'break') {
@@ -156,6 +171,7 @@
   // ---- 렌더러 2: 캔버스 (주문 도면 시트) ----
   function text(t, x, y, o = {}) { ctx.save(); ctx.font = `${o.w || 400} ${FS}px "Noto Sans KR", sans-serif`; ctx.fillStyle = o.c || '#222'; ctx.textAlign = o.a || 'left'; ctx.textBaseline = o.b || 'alphabetic'; ctx.fillText(t, x, y); ctx.restore(); }
   function woodRect(x, y, w, h, stain) {
+    if (typeof stain === 'string') { ctx.fillStyle = stain; ctx.fillRect(x, y, w, h); ctx.strokeStyle = '#333'; ctx.lineWidth = .8; ctx.strokeRect(x, y, w, h); return; }
     const g = ctx.createLinearGradient(x, y, x + w, y + h);
     if (stain) { g.addColorStop(0, '#8B5A2B'); g.addColorStop(.5, '#A86F3C'); g.addColorStop(1, '#7A4A22'); }
     else { g.addColorStop(0, '#D9B27F'); g.addColorStop(.5, '#C8955C'); g.addColorStop(1, '#B9814A'); }
@@ -196,7 +212,7 @@
     ctx.restore();
   }
   function drawSection(x, y, w, corner) {
-    const s = state, r = calc(), stain = s.finish !== '무도장';
+    const s = state, r = calc(), fi = finishInfo(s), stain = fi.battenColor || fi.stain;
     text('단면 상세 (mm)', x, y, { w: 700 });
     // 합판 끝 여백 F · 각재 30 · 간격 30 … · 끝 여백 G (여백은 20~90mm 범위로 축약해 표시)
     const Fd = Math.min(90, Math.max(20, s.F)), Gd = Math.min(90, Math.max(20, Math.round(r.Gadj)));
@@ -204,7 +220,8 @@
     const total = lastEnd + Gd;
     const k = (w - 90) / total;
     const oy = y + 40 + BAT * k + 40;
-    ctx.fillStyle = '#E8D7B5'; ctx.fillRect(x, oy, total * k, PLY * k); ctx.strokeStyle = '#8B5A2B'; ctx.strokeRect(x, oy, total * k, PLY * k);
+    const plyc = fi.plyColor || '#E8D7B5';
+    ctx.fillStyle = plyc; ctx.fillRect(x, oy, total * k, PLY * k); ctx.strokeStyle = '#8B5A2B'; ctx.strokeRect(x, oy, total * k, PLY * k);
     for (let i = 0; i < 3; i++) woodRect(x + (Fd + i * PITCH) * k, oy - BAT * k, BAT * k, BAT * k, stain);
     smallDim(x, oy - BAT * k, x + Fd * k, oy - BAT * k, `F=${s.F}`, -18, 'h');
     smallDim(x + Fd * k, oy - BAT * k, x + (Fd + BAT) * k, oy - BAT * k, '30', -18, 'h');
@@ -223,8 +240,8 @@
       const PX = mm => ox + m * mm * kc, PY = mm => oy0 + mm * kc;
       const rect = (x1, y1, x2, y2, fill) => { const a = PX(Math.min(x1, x2)), b2 = PX(Math.max(x1, x2)); const l = Math.min(a, b2), w2 = Math.abs(b2 - a); ctx.fillStyle = fill; ctx.fillRect(l, PY(y1), w2, (y2 - y1) * kc); ctx.strokeStyle = '#8B5A2B'; ctx.lineWidth = 1; ctx.strokeRect(l, PY(y1), w2, (y2 - y1) * kc); };
       const wood = (x1, y1, x2, y2) => { const a = PX(Math.min(x1, x2)), b2 = PX(Math.max(x1, x2)); woodRect(Math.min(a, b2), PY(y1), Math.abs(b2 - a), (y2 - y1) * kc, stain); };
-      rect(0, 30, 200, 38, '#E8D7B5');                                            // 본면 합판 (가로)
-      rect(0, 38, 8, 210, '#E8D7B5');                                             // 돌림면 합판 (세로)
+      rect(0, 30, 200, 38, plyc);                                                 // 본면 합판 (가로)
+      rect(0, 38, 8, 210, plyc);                                                  // 돌림면 합판 (세로)
       [0, 60, 120].forEach(bx => wood(bx, 0, bx + 30, 30));                       // 본면 각재 (바깥 = 위)
       [30, 90, 150, 210].forEach(by => wood(-30, by, 0, by + 30));                // 돌림면 각재 (바깥 = 왼쪽) — 첫 각재가 코너 각재 아래에 바로 맞닿음
       // 치수: 각재 30 · 간격 30 · 노출 22 · 합판 8
@@ -267,7 +284,7 @@
       ['코너', s.corner === 'none' ? '없음' : ({ left: '좌측', right: '우측', both: '양쪽' })[s.corner] + ` (돌림 K=${s.K})`],
       ['각재 개수', `${r.totalBattens}개 / 장 (본면 ${r.n})`],
       ['합판 원장', r.sheets > 1 ? `1220×2440 × ${r.sheets}장 (${r.nx}×${r.ny})` : '1220×2440 1장'],
-      ['마감', s.finish], ['수량', `${s.qty}장`], ['시공', s.install],
+      ['마감', finishInfo(s).text], ['수량', `${s.qty}장`], ['시공', s.install],
       ['각재 총길이', `약 ${r.meters} m`], ['패널 면적', `약 ${r.area} ㎡`],
     ];
     const rowH = s.corner !== 'none' ? 33 : 44;
@@ -328,6 +345,9 @@
       if (!el.checked) return;
       state[el.dataset.k] = el.value; syncDerived(); draw();
     }));
+    const extraUI = () => { const box = $('#extraOpts'); if (!box) return; box.style.display = state.finish === '추가옵션' ? '' : 'none'; const pc = $('#paintRow'); if (pc) pc.style.display = (state.finish === '추가옵션' && state.extra !== '합판 흑도장') ? 'flex' : 'none'; const pl = $('#paintLabel'); if (pl) pl.textContent = state.extra === '각재만 도색' ? '각재 도색 색상' : state.extra === '합판만 도색' ? '합판 도색 색상' : '각재 도색 색상'; const p2 = $('#paintRow2'); if (p2) p2.style.display = (state.finish === '추가옵션' && state.extra === '합판+각재 도색') ? 'flex' : 'none'; };
+    document.querySelectorAll('input[name=finish], input[name=extra]').forEach(el => el.addEventListener('change', () => setTimeout(extraUI, 0)));
+    extraUI(); window.NW_EXTRA_UI = extraUI;
     $('#cornerK').style.display = state.corner === 'none' ? 'none' : '';
     document.querySelectorAll('input[name=corner]').forEach(el => el.addEventListener('change', () => { $('#cornerK').style.display = state.corner === 'none' ? 'none' : ''; if (state.corner !== 'none' && !(state.K > 0)) { state.K = 300; syncInputs('K', null); } if (state.corner === 'none' && state.K) { state.K = 0; syncInputs('K', null); } syncDerived(); draw(); }));
   }
@@ -343,7 +363,7 @@
       `제품: 30각 템바보드 (나왕 30×30, 간격 30, 합판 8)\n각재 방향: ${s.dir === 'h' ? '가로' : '세로'}\n` +
       `A 폭 ${s.A} × B 높이 ${s.B}\nC 각재 길이 ${r.C} / D 끝 여백 ${r.D}\nF ${s.F} / E ${r.Ereal} / G ${Math.round(r.Gadj)}\n` +
       `코너: ${s.corner === 'none' ? '없음' : s.corner + ' K=' + s.K}\n각재 개수: ${r.totalBattens}개/장\n합판 원장: ${r.sheets}장 (1220×2440)\n` +
-      `마감: ${s.finish}\n수량: ${s.qty}장\n시공: ${s.install}\n메모: ${s.memo || '-'}\n\n※ 도면 이미지(${fileName()})를 첨부해 주세요.`;
+      `마감: ${finishInfo(s).text}\n수량: ${s.qty}장\n시공: ${s.install}\n메모: ${s.memo || '-'}\n\n※ 도면 이미지(${fileName()})를 첨부해 주세요.`;
   }
   function validate() {
     if (!state.name || !state.tel) { alert('주문자 이름과 연락처를 입력해 주세요.'); $('[data-k=name]').focus(); return false; }
@@ -356,6 +376,13 @@
     const blob = await toBlob();
     const file = new File([blob], fileName(), { type: 'image/png' });
     const subject = `[템바보드 주문] ${state.name} 님 ${state.A}×${state.B}${state.corner !== 'none' ? ' 코너형' : ''} ${state.qty}장`;
+    const btnS = $('#btnSend'); btnS.disabled = true; btnS.textContent = '접수 중…';
+    const meta = (() => { try { const r = calc(); const it = {}; DIM_KEYS.forEach(k => it[k] = state[k]); it.calc = { area: r.totW * r.totH / 1e6, C: r.C, totalBattens: r.totalBattens, sheets: r.sheets }; it.qty = Math.max(1, +state.qty || 1); it.finish = state.finish; it.extra = state.extra; it.corner = state.corner; it.install = state.install;
+      const t = NW_CART.totals([it]), c = NW_CART.cost(it); return { qty: it.qty, area: +(it.calc.area * it.qty).toFixed(3), supply: t.supply, vat: t.vat, total: t.total, cost: c.sub, method: '' }; } catch (e) { return {}; } })();
+    const estText = meta.total ? `\n\n예상 금액: ${NW_CART.won(meta.total)} (공급가 ${NW_CART.won(meta.supply)} + 부가세 ${NW_CART.won(meta.vat)})` : '';
+    const sentAuto = await NW_SEND({ type: 'drawing', subject, text: orderText() + estText, customer: { name: state.name, tel: state.tel, email: state.email, addr: state.addr }, meta, files: [file] });
+    btnS.disabled = false; btnS.textContent = '주문서 이메일로 접수';
+    if (sentAuto) { $('#done').style.display = ''; $('#done').innerHTML = `<b>주문서가 접수되었습니다.</b> ${state.email} 로 접수 확인 메일을 보내 드렸고, 담당자가 확인 후 연락드리겠습니다.`; return; }
     const ej = SITE.emailjs;
     if (ej && ej.publicKey && ej.serviceId && ej.templateId && window.emailjs) {
       try {
@@ -385,11 +412,11 @@
     if (el.type === 'radio') { const r = document.querySelector(`input[name=${k}][value="${v}"]`); if (r) r.checked = true; } else el.value = state[k];
   });
   // ---- 장바구니 연동: 현재 도면 스냅샷 / 불러오기 / 새 도면 ----
-  const DIM_KEYS = ['dir', 'A', 'B', 'D', 'F', 'G', 'corner', 'K', 'finish', 'install'];
+  const DIM_KEYS = ['dir', 'A', 'B', 'D', 'F', 'G', 'corner', 'K', 'finish', 'extra', 'paint', 'paint2', 'ply', 'install'];
   function scaled(w, q) { const c = document.createElement('canvas'); c.width = w; c.height = Math.round(H * w / W); c.getContext('2d').drawImage(cv, 0, 0, c.width, c.height); return c.toDataURL('image/jpeg', q); }
   function snapshot(qty) {
     draw(); const r = calc(); const it = {};
-    DIM_KEYS.forEach(k => it[k] = state[k]); it.qty = Math.max(1, qty | 0);
+    DIM_KEYS.forEach(k => it[k] = state[k]); it.qty = Math.max(1, qty | 0); it.finishText = finishInfo(state).text;
     it.calc = { C: r.C, D: r.D, Ereal: r.Ereal, Gadj: Math.round(r.Gadj), n: r.n, totalBattens: r.totalBattens, totW: r.totW, totH: r.totH, sheets: r.sheets, area: Math.round(r.totW * r.totH / 1e6 * 100) / 100, meters: Math.round(r.totalBattens * r.battenLen / 1000 * 10) / 10 };
     it.thumb = scaled(320, 0.7); it.sheet = scaled(1200, 0.78);
     return it;
@@ -397,10 +424,10 @@
   function loadItem(it) {
     DIM_KEYS.forEach(k => { if (it[k] !== undefined) state[k] = it[k]; });
     DIM_KEYS.forEach(k => syncInputs(k, null));
-    $('#cornerK').style.display = state.corner === 'none' ? 'none' : ''; syncDerived(); draw();
+    $('#cornerK').style.display = state.corner === 'none' ? 'none' : ''; if (window.NW_EXTRA_UI) NW_EXTRA_UI(); syncDerived(); draw();
   }
-  function resetItem() { loadItem({ dir: 'v', A: 1200, B: 2400, D: 100, F: 60, G: 60, corner: 'none', K: 0, finish: '오일 스테인', install: '자재 납품' }); }
-  window.NW_ORDER = { get: () => ({ s: state, r: calc(), BAT, GAP, PITCH, PLY }), snapshot, load: loadItem, reset: resetItem };
+  function resetItem() { loadItem({ dir: 'v', A: 1200, B: 2400, D: 100, F: 60, G: 60, corner: 'none', K: 0, finish: '오일 스테인', extra: '합판 흑도장', paint: '#2a2724', paint2: '#2a2724', ply: '내추럴', install: '자재 납품' }); }
+  window.NW_ORDER = { get: () => ({ s: state, r: calc(), fi: finishInfo(state), BAT, GAP, PITCH, PLY }), snapshot, load: loadItem, reset: resetItem, finishInfo };
   if (qp.get('dir') === 'h' && !qp.has('A') && !qp.has('B')) { state.A = 2400; state.B = 1200; syncInputs('A', null); syncInputs('B', null); } // 가로 배열 링크: 기본 A=2400·B=1200
   bind(); initDiagram(); syncDerived();
   if (qp.get('only') === '1') { document.body.innerHTML = ''; document.body.style.margin = '0'; cv.style.width = W + 'px'; document.body.appendChild(cv); }
@@ -420,6 +447,13 @@
       if (editId && NW_CART.find(editId)) { NW_CART.update(editId, it); toast('도면을 수정했습니다.'); history.replaceState(null, '', 'order.html'); }
       else { NW_CART.add(it); toast(`장바구니에 ${it.qty}장을 담았습니다.`); }
       NW_CART.open();
+    });
+    // 결제하기: 현재 도면을 장바구니에 담고(수정 중이면 갱신) 결제 페이지로 이동
+    const btnPay = $('#btnPay');
+    if (btnPay) btnPay.addEventListener('click', () => {
+      const it = snapshot(+qtyEl.value || 1);
+      if (editId && NW_CART.find(editId)) NW_CART.update(editId, it); else NW_CART.add(it);
+      location.href = 'checkout.html';
     });
     $('#btnNew').addEventListener('click', () => { resetItem(); qtyEl.value = 1; est(); history.replaceState(null, '', 'order.html'); $('#diagram').scrollIntoView({ behavior: 'smooth', block: 'center' }); });
     est();

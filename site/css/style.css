@@ -234,3 +234,11 @@ footer.site b { color: #fff; }
 .done-box .no { font-family: var(--serif); font-size: 32px; color: var(--wood-dark); margin: 8px 0 16px; }
 .sheets { display: grid; gap: 14px; margin-top: 26px; } .sheets img { width: 100%; border: 1px solid var(--line); border-radius: 8px; }
 @media (max-width: 900px) { .cart-wrap { grid-template-columns: 1fr; } .sumbox { position: static; } .ci { grid-template-columns: 1fr; } .ci img { width: 100%; } .ci .right { justify-items: start; text-align: left; } .cart-pop { right: 46px; } }
+
+/* 공지 배너 (관리자 페이지에서 설정) */
+.notice-bar { background: var(--wood-dark); color: #fff; font-size: 14px; font-weight: 500; padding: 9px 0; text-align: center; }
+.notice-bar .wrap { line-height: 1.5; }
+
+/* 푸터 관리자 톱니바퀴 */
+footer .gear { opacity: .45; font-size: 14px; margin-left: 4px; text-decoration: none; }
+footer .gear:hover { opacity: 1; }

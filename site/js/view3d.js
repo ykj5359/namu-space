@@ -13,6 +13,7 @@ const host = document.getElementById('view3d'); if (!host) throw new Error('no #
 const note = document.getElementById('view3dNote');
 const MM = 0.001;
 let sceneMode = 'auto';
+{ const q = new URLSearchParams(location.search).get('scene'); if (q) { sceneMode = q; document.querySelectorAll('#scene3d button').forEach(b => b.classList.toggle('on', b.dataset.scene === q)); } } // ?scene=upper 로 장면 지정
 const isMobile = matchMedia('(max-width: 760px)').matches;
 
 // ---- 렌더러 · 환경광 · 후처리(AO, 안티앨리어싱) ----
@@ -88,6 +89,9 @@ const wNat = woodTextures('#DCB07C', '#93683E', '#F0D8B4', 11, 0.95), wSt = wood
 const matBattenNatural = new THREE.MeshPhysicalMaterial({ map: wNat.map, bumpMap: wNat.bump, bumpScale: 0.25, roughness: 0.58, clearcoat: 0.08, clearcoatRoughness: 0.6 });
 const matBattenStain = new THREE.MeshPhysicalMaterial({ map: wSt.map, bumpMap: wSt.bump, bumpScale: 0.2, roughness: 0.38, clearcoat: 0.45, clearcoatRoughness: 0.45 });
 const matPlyNatural = new THREE.MeshStandardMaterial({ map: wPlyN.map, bumpMap: wPlyN.bump, bumpScale: 0.12, roughness: 0.82 });
+const paintCache = {};
+function paintMat(hex, ply = false) { const k = hex + (ply ? 'p' : 'b'); if (!paintCache[k]) paintCache[k] = new THREE.MeshPhysicalMaterial({ color: hex, bumpMap: ply ? wPlyS.bump : wSt.bump, bumpScale: 0.05, roughness: 0.45, clearcoat: 0.4, clearcoatRoughness: 0.45 }); return paintCache[k]; } // 도색 재질: 색상 그대로(나무결 색 지도 없이 요철만 살짝) — 흰색 등 밝은 색도 그대로 보임
+const matPlyBlack = new THREE.MeshPhysicalMaterial({ color: '#1f1c1a', map: wPlyS.map, bumpMap: wPlyS.bump, bumpScale: 0.1, roughness: 0.55, clearcoat: 0.3, clearcoatRoughness: 0.5 }); // 검정 도장 합판
 const matPlyStain = new THREE.MeshPhysicalMaterial({ map: wPlyS.map, bumpMap: wPlyS.bump, bumpScale: 0.12, roughness: 0.6, clearcoat: 0.2, clearcoatRoughness: 0.6 });
 const matWall = new THREE.MeshStandardMaterial({ map: plasterTex(31), roughness: 0.96 });
 const matWall2 = new THREE.MeshStandardMaterial({ color: '#d9d3c8', map: plasterTex(32), roughness: 0.96 });
@@ -112,7 +116,8 @@ function cyl(r, h, mat, x, y, z, rt = r) { const m = new THREE.Mesh(new THREE.Cy
 // ---- 패널 (정면 +z, 왼쪽 아래 원점) ----
 function buildPanel(opt = {}) {
   const { s, r, BAT, GAP, PITCH, PLY } = window.NW_ORDER.get();
-  const g = new THREE.Group(); const matB = s.finish === '무도장' ? matBattenNatural : matBattenStain, matPly = s.finish === '무도장' ? matPlyNatural : matPlyStain;
+  const fi = window.NW_ORDER.get().fi || { stain: true };
+  const g = new THREE.Group(); const matB = fi.battenColor ? paintMat(fi.battenColor) : (fi.stain ? matBattenStain : matBattenNatural), matPly = fi.plyColor ? paintMat(fi.plyColor, true) : (fi.stain ? matPlyStain : matPlyNatural);
   const widthMM = opt.width || s.A;                                    // 폭을 지정하면(기둥 옆면) 그 폭으로 같은 규칙 적용
   let nV = opt.width ? Math.max(0, Math.floor((widthMM - s.F - s.G + GAP) / PITCH)) : r.n, Fmm = s.F;
   if (opt.centered) { nV = Math.max(0, Math.floor((widthMM - GAP) / PITCH)); Fmm = (widthMM - (nV * PITCH - GAP)) / 2; } // 기둥 면: 양쪽 여백 동일(≥30)
@@ -147,7 +152,7 @@ function windowPane(x, y, z, w, h, ry = 0) { const g = new THREE.Group(); g.add(
 // ---- 장면 ----
 let world = new THREE.Group(); scene.add(world);
 function clear() { scene.remove(world); world = new THREE.Group(); scene.add(world); }
-function pickAuto(s, r) { if (s.corner !== 'none') return 'column'; if (r.along >= 1800) return 'wall'; return (s.B <= 1200 && s.A <= 2400) ? 'desk' : 'upper'; } // 짧고 폭도 책상 크기면 상담 책상, 폭이 넓으면 벽 상단
+function pickAuto(s, r) { if (s.corner !== 'none') return 'column'; if (r.along >= 1800) return 'wall'; return (s.B <= 1200 && s.A <= 2400) ? 'desk' : 'mid'; } // 짧고 폭도 책상 크기면 상담 책상, 폭이 넓으면 벽 상단
 const auto = { on: true, base: null, t0: performance.now(), resumeAt: 0 };
 function placeCam(target, dist, elev, azim) { camera.position.set(target.x + dist * Math.sin(azim) * Math.cos(elev), target.y + dist * Math.sin(elev), target.z + dist * Math.cos(azim) * Math.cos(elev)); }
 function lookAt(target, dist, elev = 0.3, azim = 0.55) { controls.target.copy(target); placeCam(target, dist, elev, azim); auto.base = { target: target.clone(), dist, elev, azim }; auto.t0 = performance.now(); controls.update(); }
@@ -183,9 +188,9 @@ function build() {
   const { s, r } = window.NW_ORDER.get();
   const p = buildPanel();
   const mode = sceneMode === 'auto' ? pickAuto(s, r) : sceneMode;
-  const labels = { wall: '벽면 부착', column: '기둥 감싸기', desk: '상담 책상 전면', upper: '벽 상단 부착', product: '제품만' };
-  note.textContent = `${sceneMode === 'auto' ? '자동 · ' : ''}${labels[mode]}  ·  ${s.A}×${s.B}mm · 각재 ${r.totalBattens}개 · ${s.finish}`;
-  document.dispatchEvent(new CustomEvent('scene3d', { detail: { mode, finish: s.finish, dir: s.dir } }));
+  const labels = { wall: '벽면 부착', column: '기둥 감싸기', desk: '상담 책상 전면', mid: '벽 중간 부착', upper: '벽 상단 부착', product: '제품만' };
+  note.textContent = `${sceneMode === 'auto' ? '자동 · ' : ''}${labels[mode]}  ·  ${s.A}×${s.B}mm · 각재 ${r.totalBattens}개 · ${(window.NW_ORDER.get().fi || {}).text || s.finish}`;
+  document.dispatchEvent(new CustomEvent('scene3d', { detail: { mode, finish: s.finish === '무도장' ? '무도장' : '오일 스테인', dir: s.dir, black: s.finish === '추가옵션' && s.extra === '합판 흑도장' } }));
   const A = p.A, B = p.B, K = p.K;
   if (mode === 'product') {
     const grid = new THREE.GridHelper(6, 24, '#b8b0a4', '#d6cfc4'); grid.position.y = -0.001; world.add(grid);
@@ -211,7 +216,7 @@ function build() {
     const right = buildPanel({ ...o, width: depth / MM }).g; right.rotation.y = Math.PI / 2; right.position.set(A / 2 + 0.001, 0, 0); world.add(right);      // 우측면 (+x)
     const left = buildPanel({ ...o, width: depth / MM }).g; left.rotation.y = -Math.PI / 2; left.position.set(-A / 2 - 0.001, 0, -depth); world.add(left);  // 좌측면 (−x)
     // 모서리 각재: 다른 각재와 같은 길이(C)·같은 높이
-    const matB = s.finish === '무도장' ? matBattenNatural : matBattenStain;
+    const fi2 = window.NW_ORDER.get().fi || { stain: true }; const matB = fi2.battenColor ? paintMat(fi2.battenColor) : (fi2.stain ? matBattenStain : matBattenNatural);
     if (s.dir === 'v') [[A / 2 + ply, ply], [-A / 2 - skin, ply], [A / 2 + ply, -depth - skin], [-A / 2 - skin, -depth - skin]].forEach(([x, z]) => world.add(box(bat, Cm, bat, matB, x, y0, z, 0.002))); // 세로 배열만 모서리 각재 (가로 배열은 각재가 모서리를 돌아감)
     // 상단 쫄대 마감: 각재 윗면을 덮는 띠 (사방)
     const tH = 0.045, tD = 0.014, ox = A / 2 + skin, oz = depth + skin;
@@ -236,9 +241,10 @@ function build() {
     p.g.position.set(-A / 2, 0, zf + 0.001); world.add(p.g);                                                                // 패널: 책상 앞면
     world.add(chair(-0.35, zf + 0.85, Math.PI)); world.add(chair(0.35, zf + 0.85, Math.PI)); world.add(plant(deskW / 2 + 0.55, zf - 0.3));
     lookAt(new THREE.Vector3(0, B / 2 + 0.2, zf), Math.max(A, B) * 1.6 + 2.0, 0.3, 0.42);
-  } else if (mode === 'upper') {
-    // 벽 상단: 벽 폭은 5m 고정 (제품 크기와 무관, 5m를 넘는 제품만 예외로 확장), 패널은 가운데 배치
-    const roomW = Math.max(5.0, A + 0.004), roomD = 6, roomH = 2.7, top = Math.min(roomH - 0.15, 2.35), y0 = Math.max(0.3, Math.min(0.9, top - B)); // 높은 패널은 천장 안에 들어오도록 아래로
+  } else if (mode === 'mid' || mode === 'upper') {
+    // 벽 중간: 벤치 위 0.9m 높이에서 시작 · 벽 상단: 천장에 붙여 아래로 내려옴. 벽 폭은 5m 고정 (5m를 넘는 제품만 예외로 확장), 패널은 가운데 배치
+    const roomW = Math.max(5.0, A + 0.004), roomD = 6, roomH = Math.max(2.7, mode === 'upper' ? B + 0.9 : 2.7), top = Math.min(roomH - 0.15, 2.35);
+    const y0 = mode === 'upper' ? roomH - B : Math.max(0.3, Math.min(0.9, top - B)); // 상단: 천장에서 B 만큼 내려옴 / 중간: 높은 패널은 천장 안에 들어오도록 아래로
     world.add(plane(roomW, roomD, matFloorWood, 0, 0, roomD / 2 - 0.01, -Math.PI / 2));
     world.add(plane(roomW, roomH, matWall, 0, roomH / 2, -0.01));
     world.add(plane(roomD, roomH, matWall2, -roomW / 2, roomH / 2, roomD / 2 - 0.01, 0, Math.PI / 2));
@@ -246,13 +252,13 @@ function build() {
     world.add(plane(roomW, roomD, matCeil, 0, roomH, roomD / 2 - 0.01, Math.PI / 2));
     world.add(box(roomW, 0.09, 0.012, matWall2, -roomW / 2, 0, -0.012));
     world.add(box(0.012, 0.09, roomD, matWall2, -roomW / 2, 0, 0)); world.add(box(0.012, 0.09, roomD, matWall2, roomW / 2 - 0.012, 0, 0));
-    world.add(box(roomW, y0 - 0.02, 0.015, matWall2, -roomW / 2, 0, -0.005));                  // 하부 벽(웨인스코트)
+    if (mode === 'mid') world.add(box(roomW, y0 - 0.02, 0.015, matWall2, -roomW / 2, 0, -0.005)); // 하부 벽(웨인스코트, 벽 중간일 때만)
     world.add(windowPane(-roomW / 2 + 0.03, 0.9, 2.4, 1.6, 1.3, Math.PI / 2));
     world.add(downlights(roomH, Math.min(roomW, 5), 1.2, 3));
     p.g.position.set(-A / 2, y0, 0.002); world.add(p.g);
     { // 패널 둘레 흰색 쫄대 (기둥과 같은 마감)
       const tD = 0.014, tH = 0.045, skin = 0.008 + 0.03;
-      world.add(box(A + 2 * tD, tH, skin + tD, matTrim, -A / 2 - tD, y0 + B - tH, 0.002));            // 위
+      if (mode === 'mid') world.add(box(A + 2 * tD, tH, skin + tD, matTrim, -A / 2 - tD, y0 + B - tH, 0.002)); // 위 (상단 부착은 천장에 맞닿아 생략)
       world.add(box(A + 2 * tD, tH, skin + tD, matTrim, -A / 2 - tD, y0, 0.002));                     // 아래
       world.add(box(tD, B, skin + tD, matTrim, -A / 2 - tD, y0, 0.002));                              // 왼쪽
       world.add(box(tD, B, skin + tD, matTrim, A / 2, y0, 0.002));                                    // 오른쪽
@@ -260,7 +266,7 @@ function build() {
     const benchW = roomW - 0.6; world.add(bench(0, 0.35, benchW));                            // 벤치·테이블은 벽 폭 기준으로 고정 배치
     [-1.5, 0, 1.5].forEach(x => { world.add(table(x, 1.05, 0.6, 0.5)); world.add(pendant(x, 1.05, roomH)); });
     world.add(plant(roomW / 2 - 0.4, 1.9));
-    lookAt(new THREE.Vector3(0, Math.min(y0 + B / 2, 1.6), 0), 6.4, 0.12, 0.4);
+    lookAt(new THREE.Vector3(0, mode === 'upper' ? Math.max(1.5, roomH - B / 2 - 0.3) : Math.min(y0 + B / 2, 1.6), 0), mode === 'upper' ? 7.0 : 6.4, mode === 'upper' ? -0.02 : 0.12, 0.38);
   }
 }
 document.querySelectorAll('#scene3d button').forEach(b => b.addEventListener('click', () => { document.querySelectorAll('#scene3d button').forEach(x => x.classList.remove('on')); b.classList.add('on'); sceneMode = b.dataset.scene; build(); }));

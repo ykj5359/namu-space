@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Nanum+Myeongjo:wght@400;700;800&display=swap" rel="stylesheet">
 <link rel="canonical" href="https://namuspace.kr/">
-<link rel="stylesheet" href="css/style.css?v=20260930h">
+<link rel="stylesheet" href="css/style.css?v=20261001c">
 </head>
 <body>
 
@@ -34,8 +34,8 @@
   <img class="bg" src="img/interior/hero.jpg" alt="템바보드 거실 아트월">
   <div class="wrap">
     <span class="tag" style="background:rgba(255,255,255,.18);color:#fff">나왕 원목 · 합판 바탕 · 주문 제작</span>
-    <h1>나무가 만드는<br>공간의 결</h1>
-    <p>서두르는 손이 아니라 준비된 나무가 벽을 완성합니다. 현장은 고요하고, 마감은 고릅니다.</p>
+    <h1 data-text="heroTitle">나무가 만드는<br>공간의 결</h1>
+    <p data-text="hero">서두르는 손이 아니라 준비된 나무가 벽을 완성합니다. 현장은 고요하고, 마감은 고릅니다.</p>
     <div class="btns">
       <a class="btn wood" href="order.html">도면으로 주문하기</a>
       <a class="btn ghost" href="#products">제품 보기</a>
@@ -156,9 +156,13 @@
     <h2 class="sec-title">이렇게 쓰입니다</h2>
     <p class="sec-lead">실제 제품 사진과 시공 현장을 바탕으로 연출한 공간 이미지입니다. 상가·약국·병원의 기둥과 벽면 세로 시공부터 아트월, 천장, 가벽까지 다양하게 적용됩니다.</p>
     <div class="filters" data-target="#igal">
-      <button class="on" data-f="all">전체</button><button data-f="vert">세로 시공 · 상가</button><button data-f="home">주거</button><button data-f="shop">상업 공간</button><button data-f="office">사무·숙박</button>
+      <button class="on" data-f="all">전체</button><button data-f="vert">세로 시공 · 상가</button><button data-f="black">합판 흑도장 · 일식</button><button data-f="home">주거</button><button data-f="shop">상업 공간</button><button data-f="office">사무·숙박</button>
     </div>
     <div class="gallery" id="igal">
+      <figure data-cat="black"><img src="img/interior/sim_black_wall_v.jpg" alt=""><figcaption>일식 카운터 벽 · 합판 흑도장 · 세로</figcaption></figure>
+      <figure data-cat="black"><img src="img/interior/sim_black_column_v.jpg" alt=""><figcaption>일식 홀 기둥 · 합판 흑도장 · 세로</figcaption></figure>
+      <figure data-cat="black"><img src="img/interior/sim_black_wall_h.jpg" alt=""><figcaption>일식 카운터 벽 · 합판 흑도장 · 가로</figcaption></figure>
+      <figure data-cat="black"><img src="img/interior/sim_black_column_h.jpg" alt=""><figcaption>일식 홀 기둥 · 합판 흑도장 · 가로</figcaption></figure>
       <figure data-cat="vert"><img src="img/interior/v_pharmacy.jpg" alt=""><figcaption>약국 카운터·기둥 · 30각 세로</figcaption></figure>
       <figure data-cat="vert"><img src="img/interior/v_shop_front.jpg" alt=""><figcaption>상가 기둥·후면 벽 · 30각 세로</figcaption></figure>
       <figure data-cat="vert"><img src="img/interior/v_clinic.jpg" alt=""><figcaption>병원 접수·대기실 · 30각 세로</figcaption></figure>
@@ -238,7 +242,8 @@
         <div class="i"><b>대표</b><span data-site="ceo"></span></div>
         <div class="i"><b>전화</b><span><a data-tel href="#" data-site="tel"></a></span></div>
         <div class="i"><b>이메일</b><span><a data-mail href="#" data-site="email"></a></span></div>
-        <div class="i"><b>대표 이메일</b><span data-site="email2"></span></div>
+        <div class="i" data-hours><b>상담 시간</b><span data-site="hours"></span></div>
+        <div class="i" data-kakao-row style="display:none"><b>카카오톡</b><span><a data-kakao href="#" target="_blank" rel="noopener">카카오톡 채널로 문의</a></span></div>
         <div class="i"><b>주소</b><span data-site="address"></span></div>
         <div class="i"><b>사업자번호</b><span><span data-site="bizno"></span> (<span data-site="bizname"></span>)</span></div>
         <div class="i"><b>주문</b><span><a href="order.html" style="color:var(--wood-dark)">도면 주문 페이지 →</a></span></div>
@@ -267,8 +272,8 @@
 <footer class="site">
   <div class="wrap">
     <a class="logo" data-logo href="index.html"></a>
-    <div><b data-site="name"></b> · 대표 <span data-site="ceo"></span> · <span data-site="tel"></span> · <span data-site="email"></span><br><span style="opacity:.7">사업자등록번호 <span data-site="bizno"></span> (<span data-site="bizname"></span>) · <span data-site="address"></span></span></div>
-    <div><a href="logo.html" style="opacity:.6">로고 선택</a></div>
+    <div><b data-site="name"></b> · 대표 <span data-site="ceo"></span> · <span data-site="tel"></span> · <span data-site="email"></span><br><span style="opacity:.7">사업자등록번호 <span data-site="bizno"></span> (<span data-site="bizname"></span>) · <span data-site="address"></span> <a href="admin.html" class="gear" title="관리자" aria-label="관리자">⚙</a></span></div>
+    <div data-admin-only style="display:none"><a href="logo.html" style="opacity:.6">로고 선택</a></div>
   </div>
 </footer>
 
@@ -279,7 +284,7 @@
 <div class="lb"><button class="x">×</button><img alt=""></div>
 
 <script src="js/logos.js?v=20260928h"></script>
-<script src="js/main.js?v=20260930i"></script>
-<script src="js/cart.js?v=20260930i"></script>
+<script src="js/main.js?v=20261001c"></script>
+<script src="js/cart.js?v=20261001c"></script>
 </body>
 </html>

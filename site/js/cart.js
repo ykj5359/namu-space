@@ -13,7 +13,9 @@
     const base = (item.finish === '무도장' ? P.natural : P.stain) * a;
     const corner = item.corner === 'none' ? 0 : (item.corner === 'both' ? 2 : 1) * P.corner;
     const install = item.install === '현장 시공 포함' ? P.install * a : 0;
-    const unit = Math.max(P.min, Math.round((base + corner + install) / 100) * 100);
+    const ex = item.finish === '추가옵션' ? (item.extra === '합판 흑도장' ? (P.plyBlack || 0) : (P.paint || 0)) * a : 0; // 추가옵션 추가금 (㎡당)
+    const ply = ex;
+    const unit = Math.max(P.min, Math.round((base + corner + install + ply) / 100) * 100);
     return { unit, sub: unit * item.qty };
   }
   // 원가 (관리자 참고): 각재 30×30-3600 본 수×단가 + 합판 원장 수×단가 + 인건비 ㎡ + 스테인 재료비 ㎡
@@ -28,10 +30,10 @@
   }
   function totals(items) {
     const supply = items.reduce((s, it) => s + price(it).sub, 0);
-    const vat = Math.round(supply * 0.1);
+    const vat = SITE.price && SITE.price.vat === false ? 0 : Math.round(supply * 0.1);
     return { supply, vat, total: supply + vat, count: items.reduce((s, it) => s + it.qty, 0) };
   }
-  const label = it => `${it.dir === 'v' ? '세로' : '가로'} ${it.A}×${it.B}${it.corner !== 'none' ? ' · 코너 ' + ({ left: '좌', right: '우', both: '양쪽' })[it.corner] + ' K' + it.K : ''} · ${it.finish}${it.install === '현장 시공 포함' ? ' · 시공' : ''}`;
+  const label = it => `${it.dir === 'v' ? '세로' : '가로'} ${it.A}×${it.B}${it.corner !== 'none' ? ' · 코너 ' + ({ left: '좌', right: '우', both: '양쪽' })[it.corner] + ' K' + it.K : ''} · ${it.finishText || it.finish}${it.install === '현장 시공 포함' ? ' · 시공' : ''}`;
 
   const api = {
     get: load, save, price, cost, totals, won, label,
@@ -47,7 +49,7 @@
 
   // ---- 우측 주문내역 플로팅 버튼 + 팝업 ----
   function mountPanel() {
-    if (document.getElementById('cartFab')) return;
+    if (document.getElementById('cartFab') || new URLSearchParams(location.search).get('only') === '1') return; // 도면 캡처 모드(only=1)에서는 표시 안 함
     const fab = document.createElement('button'); fab.id = 'cartFab'; fab.className = 'cart-fab'; fab.type = 'button'; fab.innerHTML = '주문내역<b id="cartFabN">0</b>';
     const pop = document.createElement('aside'); pop.id = 'cartPop'; pop.className = 'cart-pop';
     document.body.appendChild(fab); document.body.appendChild(pop);
@@ -62,7 +64,7 @@
     const base = location.pathname.endsWith('/') ? '' : '';
     pop.innerHTML = `<div class="cp-head"><b>주문내역</b><span>${items.length}건 · ${t.count}장</span><button type="button" class="cp-x" aria-label="닫기">×</button></div>
       ${items.length ? `<ul class="cp-list">${items.map(it => `<li><img src="${it.thumb}" alt=""><div><b>${label(it)}</b><span>${it.qty}장 × ${won(price(it).unit)}</span></div><em>${won(price(it).sub)}</em></li>`).join('')}</ul>
-      <div class="cp-sum"><div><span>공급가</span><b>${won(t.supply)}</b></div><div><span>부가세 10%</span><b>${won(t.vat)}</b></div><div class="tot"><span>예상 합계</span><b>${won(t.total)}</b></div><p>예상 금액입니다. 실제 견적은 접수 후 확인해 드립니다.</p></div>
+      <div class="cp-sum"><div><span>공급가</span><b>${won(t.supply)}</b></div><div><span>${t.vat ? '부가세 10%' : '부가세 없음'}</span><b>${won(t.vat)}</b></div><div class="tot"><span>예상 합계</span><b>${won(t.total)}</b></div><p>예상 금액입니다. 실제 견적은 접수 후 확인해 드립니다.</p></div>
       <div class="cp-btns"><a class="btn ghost sm" href="cart.html">장바구니로 가기</a><a class="btn wood sm" href="checkout.html">결제하기</a></div>`
       : `<p class="cp-empty">담긴 도면이 없습니다.<br>도면에 치수를 넣고 <b>장바구니에 담기</b>를 눌러 주세요.</p><div class="cp-btns"><a class="btn wood sm" href="order.html">도면으로 주문하기</a></div>`}`;
     pop.querySelector('.cp-x').addEventListener('click', () => pop.classList.remove('open'));

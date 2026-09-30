@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>로고 선택 | 나무의공간</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Nanum+Myeongjo:wght@400;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=20260930h">
+<link rel="stylesheet" href="css/style.css?v=20261001c">
 <style>
   .logos { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-top: 30px; }
   .lg { background: #fff; border: 2px solid var(--line); border-radius: var(--radius); padding: 20px; cursor: pointer; transition: .2s; }
@@ -50,11 +50,13 @@
 <footer class="site"><div class="wrap"><a class="logo" data-logo href="index.html"></a><div><b data-site="name"></b> · <span data-site="tel"></span></div></div></footer>
 
 <script src="js/logos.js?v=20260928h"></script>
-<script src="js/main.js?v=20260930i"></script>
-<script src="js/cart.js?v=20260930i"></script>
+<script src="js/main.js?v=20261001c"></script>
+<script src="js/cart.js?v=20261001c"></script>
 <script>
 (function () {
   const grid = document.getElementById('grid');
+  let adm = false; try { adm = !!sessionStorage.getItem('nw_admin_token'); } catch (e) {}
+  if (!adm) { grid.innerHTML = '<div style="grid-column:1/-1;background:#fff;border:1px solid var(--line);border-radius:14px;padding:30px;text-align:center"><b>관리자 전용 페이지입니다.</b><br><span style="color:var(--ink-2)">관리자 페이지에 로그인한 뒤 이용해 주세요. 홈페이지 로고는 관리자 페이지 → 설정 → 로고에서 바꿉니다.</span><br><a class="btn wood sm" href="admin.html" style="margin-top:14px">관리자 로그인</a></div>'; return; }
   function cur() { try { return +(localStorage.getItem('nw_logo') || SITE.defaultLogo); } catch (e) { return SITE.defaultLogo; } }
   function render() {
     const c = cur();

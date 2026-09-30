@@ -5,3 +5,4 @@ tools/ref/
 tools/*.log
 .claude/
 __pycache__/
+tools/apps-script/관리자.md

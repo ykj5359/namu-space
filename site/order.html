@@ -6,7 +6,7 @@
 <title>도면 주문 | 나무의공간</title>
 <meta name="description" content="폭·높이·여백·코너를 입력하면 템바보드 도면이 자동으로 그려집니다. 도면 이미지와 함께 주문을 접수하세요.">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Nanum+Myeongjo:wght@700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=20260930h">
+<link rel="stylesheet" href="css/style.css?v=20261001c">
 <style>
   .order { display: grid; grid-template-columns: 400px 1fr; gap: 28px; align-items: start; padding: 30px 0 60px; }
   .panel { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 22px; position: sticky; top: 90px; max-height: calc(100vh - 110px); overflow: auto; }
@@ -89,7 +89,7 @@
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
       <div><h3 style="margin:0">3D 시뮬레이션</h3><p class="hint" style="margin:2px 0 0">치수에 맞춰 자동으로 장면을 고릅니다. 화면이 천천히 돌아가며, 마우스로 직접 돌리거나 휠로 확대할 수 있습니다.</p></div>
       <div class="filters" id="scene3d" style="margin:0">
-        <button class="on" data-scene="auto">자동</button><button data-scene="wall">벽면</button><button data-scene="column">기둥</button><button data-scene="desk">상담 책상</button><button data-scene="upper">벽 상단</button><button data-scene="product">제품만</button>
+        <button class="on" data-scene="auto">자동</button><button data-scene="wall">벽면</button><button data-scene="column">기둥</button><button data-scene="desk">상담 책상</button><button data-scene="mid">벽 중간</button><button data-scene="upper">벽 상단</button><button data-scene="product">제품만</button>
       </div>
     </div>
     <div class="sim-grid">
@@ -144,6 +144,17 @@
       <div class="seg">
         <label><input type="radio" name="finish" data-k="finish" value="오일 스테인" checked><span>오일 스테인</span></label>
         <label><input type="radio" name="finish" data-k="finish" value="무도장"><span>무도장</span></label>
+        <label><input type="radio" name="finish" data-k="finish" value="추가옵션"><span>추가옵션</span></label>
+      </div>
+      <div id="extraOpts" style="display:none;margin-top:10px;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--bg)">
+        <div class="seg" style="flex-direction:column;gap:6px">
+          <label><input type="radio" name="extra" data-k="extra" value="합판 흑도장" checked><span style="text-align:left">1. 합판 흑도장 <small class="hint">— 각재는 오일 스테인, 합판만 검정 (일식·다이닝 추천)</small></span></label>
+          <label><input type="radio" name="extra" data-k="extra" value="각재만 도색"><span style="text-align:left">2. 각재만 도색</span></label>
+          <label><input type="radio" name="extra" data-k="extra" value="합판만 도색"><span style="text-align:left">3. 합판만 도색</span></label>
+          <label><input type="radio" name="extra" data-k="extra" value="합판+각재 도색"><span style="text-align:left">4. 합판 + 각재 도색</span></label>
+        </div>
+        <div id="paintRow" style="display:none;margin-top:10px;align-items:center;gap:10px;font-size:13px;font-weight:600;color:var(--ink-2)"><span id="paintLabel" style="min-width:96px">각재 도색 색상</span> <input type="color" data-k="paint" value="#2a2724" style="width:48px;height:32px;padding:0;border:1px solid var(--line);border-radius:6px;background:#fff"> <span class="hint">원하는 색을 고르면 도면과 3D에 반영됩니다</span></div>
+        <div id="paintRow2" style="display:none;margin-top:8px;align-items:center;gap:10px;font-size:13px;font-weight:600;color:var(--ink-2)"><span style="min-width:96px">합판 도색 색상</span> <input type="color" data-k="paint2" value="#2a2724" style="width:48px;height:32px;padding:0;border:1px solid var(--line);border-radius:6px;background:#fff"></div>
       </div>
       <div class="g" style="margin-top:10px">
         <label>수량 (장) <input type="number" data-k="qty" min="1" max="9999" step="1"></label>
@@ -177,6 +188,7 @@
         <button class="btn wood" id="btnSend">주문서 이메일로 접수</button>
         <button class="btn ghost" id="btnDown">도면 이미지 저장 (PNG)</button>
         <button class="btn ghost" id="btnPrint">인쇄</button>
+        <button class="btn" id="btnPay" style="background:var(--green)">결제하기</button>
       </div>
       <div id="done" style="display:none"></div>
       <div class="legend">
@@ -191,25 +203,26 @@
 <footer class="site">
   <div class="wrap">
     <a class="logo" data-logo href="index.html"></a>
-    <div><b data-site="name"></b> · 대표 <span data-site="ceo"></span> · <span data-site="tel"></span> · <span data-site="email"></span><br><span style="opacity:.7">사업자등록번호 <span data-site="bizno"></span> (<span data-site="bizname"></span>) · <span data-site="address"></span></span></div>
+    <div><b data-site="name"></b> · 대표 <span data-site="ceo"></span> · <span data-site="tel"></span> · <span data-site="email"></span><br><span style="opacity:.7">사업자등록번호 <span data-site="bizno"></span> (<span data-site="bizname"></span>) · <span data-site="address"></span> <a href="admin.html" class="gear" title="관리자" aria-label="관리자">⚙</a></span></div>
   </div>
 </footer>
 <div class="floating"><a data-tel href="#">전화</a><a class="dark" href="cart.html">장바구니</a></div>
 
 <script src="js/logos.js?v=20260928h"></script>
-<script src="js/main.js?v=20260930i"></script>
-<script src="js/cart.js?v=20260930i"></script>
+<script src="js/main.js?v=20261001c"></script>
+<script src="js/cart.js?v=20261001c"></script>
 <!-- 이메일 자동 발송(EmailJS)을 쓰려면 아래 주석을 풀고 main.js 의 SITE.emailjs 값을 채우세요.
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script> -->
-<script src="js/order.js?v=20260930g"></script>
+<script src="js/order.js?v=20261001c"></script>
 <script type="importmap">{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/" } }</script>
-<script type="module" src="js/view3d.js?v=20260930b"></script>
+<script type="module" src="js/view3d.js?v=20260930p"></script>
 <script>
 // 3D 장면·마감에 맞는 실사 예시 사진
 document.addEventListener('scene3d', e => {
-  const { mode, finish, dir } = e.detail; const fin = finish === '무도장' ? 'natural' : 'stain', pre = dir === 'h' ? 'sim_h_' : 'sim_';
-  const map = { wall: 'wall', column: 'column', desk: 'desk', upper: 'upper', product: 'wall' };
-  const names = { wall: '벽면 부착', column: '기둥 감싸기', desk: '상담 책상 전면', upper: '벽 상단 부착', product: '벽면 부착' };
+  const { mode, finish, dir, black } = e.detail; const fin = finish === '무도장' ? 'natural' : 'stain', pre = dir === 'h' ? 'sim_h_' : 'sim_';
+  if (black) { const kind = mode === 'column' ? 'column' : 'wall'; document.querySelector('#simPhoto img').src = `img/interior/sim_black_${kind}_${dir === 'h' ? 'h' : 'v'}.jpg`; document.getElementById('simPhotoCap').textContent = `${kind === 'column' ? '기둥 감싸기' : '벽면 부착'} · ${dir === 'h' ? '가로 배열' : '세로 배열'} · 합판 흑도장 (일식)`; return; }
+  const map = { wall: 'wall', column: 'column', desk: 'desk', mid: 'upper', upper: 'upper', product: 'wall' };
+  const names = { wall: '벽면 부착', column: '기둥 감싸기', desk: '상담 책상 전면', mid: '벽 중간 부착', upper: '벽 상단 부착', product: '벽면 부착' };
   document.querySelector('#simPhoto img').src = `img/interior/${pre}${map[mode]}_${fin}.jpg`;
   document.getElementById('simPhotoCap').textContent = `${names[mode]} · ${dir === 'h' ? '가로 배열' : '세로 배열'} · ${finish}`;
 });

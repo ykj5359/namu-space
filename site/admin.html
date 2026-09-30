@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>관리자 | 나무의공간</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css?v=20261001c">
+<link rel="stylesheet" href="css/admin.css?v=20261001c">
+</head>
+<body class="admin">
+
+<!-- 로그인 -->
+<div id="login" class="ad-login">
+  <form id="loginForm" class="ad-login-box" autocomplete="off">
+    <a class="logo" data-logo href="index.html"></a>
+    <h1>관리자 로그인</h1>
+    <label>비밀번호 <input type="password" id="pw" required autocomplete="current-password" placeholder="관리자 비밀번호"></label>
+    <button type="submit" class="btn wood" id="loginBtn">로그인</button>
+    <p class="ad-err" id="loginErr"></p>
+    <p class="ad-hint">접수·입금·매출과 홈페이지 설정을 관리하는 페이지입니다. 비밀번호를 잊으면 스크립트 편집기에서 ADMIN_HASH 속성을 지우고 초기 비밀번호로 다시 로그인하세요.</p>
+  </form>
+</div>
+
+<!-- 관리자 화면 -->
+<div id="app" class="ad-app" style="display:none">
+  <header class="ad-head">
+    <a class="logo" data-logo href="index.html" title="홈페이지"></a>
+    <b>관리자</b>
+    <nav class="ad-tabs" id="tabs">
+      <button data-v="dash" class="on">대시보드</button>
+      <button data-v="list">접수·주문</button>
+      <button data-v="pay">입금</button>
+      <button data-v="sales">매출</button>
+      <button data-v="settings">설정</button>
+      <button data-v="account">계정</button>
+    </nav>
+    <div class="ad-tools">
+      <button type="button" class="ad-ic" id="btnReload" title="새로고침">⟳</button>
+      <a class="ad-ic" id="lnkSheet" href="#" target="_blank" rel="noopener" title="스프레드시트 열기">📊</a>
+      <button type="button" class="ad-ic" id="btnLogout" title="로그아웃">⏻</button>
+    </div>
+  </header>
+
+  <main class="ad-main">
+    <section id="v-dash" class="ad-view"></section>
+    <section id="v-list" class="ad-view" style="display:none">
+      <div class="ad-filters">
+        <select id="fType"><option value="">전체 구분</option><option>장바구니 주문</option><option>도면 주문</option><option>문의</option></select>
+        <select id="fStatus"><option value="">전체 상태</option></select>
+        <input id="fQ" placeholder="이름·연락처·번호·주소 검색">
+        <span class="ad-count" id="listCount"></span>
+      </div>
+      <div class="ad-table-wrap"><table class="ad-table" id="listTable"><thead><tr><th>번호</th><th>접수일시</th><th>구분</th><th>이름</th><th>연락처</th><th>내역</th><th class="r">합계</th><th class="r">입금</th><th>상태</th></tr></thead><tbody></tbody></table></div>
+    </section>
+    <section id="v-pay" class="ad-view" style="display:none">
+      <div class="ad-filters"><input id="pQ" placeholder="이름·접수번호 검색"><span class="ad-count" id="payCount"></span></div>
+      <div class="ad-table-wrap"><table class="ad-table" id="payTable"><thead><tr><th>입금일</th><th>접수번호</th><th>이름</th><th class="r">금액</th><th>방법</th><th>메모</th><th></th></tr></thead><tbody></tbody></table></div>
+    </section>
+    <section id="v-sales" class="ad-view" style="display:none"></section>
+    <section id="v-settings" class="ad-view" style="display:none"></section>
+    <section id="v-account" class="ad-view" style="display:none"></section>
+  </main>
+
+  <!-- 접수 상세 -->
+  <div class="ad-modal" id="detail" style="display:none"><div class="ad-modal-box" id="detailBox"></div></div>
+  <div class="ad-toast" id="toast"></div>
+</div>
+
+<script src="js/logos.js?v=20260928h"></script>
+<script src="js/main.js?v=20261001c"></script>
+<script src="js/admin.js?v=20261001c"></script>
+</body>
+</html>

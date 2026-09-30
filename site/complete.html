@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>주문 완료 | 나무의공간</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Nanum+Myeongjo:wght@700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=20260930h">
+<link rel="stylesheet" href="css/style.css?v=20261001c">
 </head>
 <body>
 <header class="site">
@@ -22,11 +22,11 @@
   <div class="sheets" id="sheets"></div>
 </div>
 
-<footer class="site"><div class="wrap"><a class="logo" data-logo href="index.html"></a><div><b data-site="name"></b> · 대표 <span data-site="ceo"></span> · <span data-site="tel"></span> · <span data-site="email"></span></div></div></footer>
+<footer class="site"><div class="wrap"><a class="logo" data-logo href="index.html"></a><div><b data-site="name"></b> · 대표 <span data-site="ceo"></span> · <span data-site="tel"></span> · <span data-site="email"></span> <a href="admin.html" class="gear" title="관리자" aria-label="관리자">⚙</a></div></div></footer>
 
 <script src="js/logos.js?v=20260928h"></script>
-<script src="js/main.js?v=20260930i"></script>
-<script src="js/cart.js?v=20260930i"></script>
+<script src="js/main.js?v=20261001c"></script>
+<script src="js/cart.js?v=20261001c"></script>
 <script src="js/payments.js?v=20260929e"></script>
 <script>
 (function () {
@@ -45,7 +45,7 @@
     <p style="color:var(--ink-2)">${c.name} 님, 도면 ${order.items.length}건(총 ${t.count}장)의 주문을 받았습니다. 담당자가 도면을 확인한 뒤 <b>${c.tel}</b> 또는 <b>${c.email}</b>로 연락드립니다.</p>
     <table class="spec" style="margin:14px auto 18px;max-width:520px;font-size:14px;border-collapse:collapse;width:100%">
       <tr><th style="text-align:left;padding:6px 10px;color:var(--wood-dark)">결제 방법</th><td style="text-align:right;padding:6px 10px">${methodName}</td></tr>
-      ${order.method === 'bank' || order.status === 'awaiting_deposit' ? `<tr><th style="text-align:left;padding:6px 10px;color:var(--wood-dark)">입금 계좌</th><td style="text-align:right;padding:6px 10px">${SITE.payment.bank}</td></tr>` : ''}
+      ${order.method === 'bank' || order.status === 'awaiting_deposit' ? `<tr><th style="text-align:left;padding:6px 10px;color:var(--wood-dark)">입금 계좌</th><td style="text-align:right;padding:6px 10px">${SITE.payment.bank}${SITE.payment.holder ? ' (예금주 ' + SITE.payment.holder + ')' : ''}</td></tr>` : ''}
       <tr><th style="text-align:left;padding:6px 10px;color:var(--wood-dark)">공급가 / 부가세</th><td style="text-align:right;padding:6px 10px">${won(t.supply)} / ${won(t.vat)}</td></tr>
       <tr><th style="text-align:left;padding:6px 10px;color:var(--wood-dark)">합계 (예상)</th><td style="text-align:right;padding:6px 10px;font-weight:800;font-size:16px">${won(t.total)}</td></tr>
       <tr><th style="text-align:left;padding:6px 10px;color:var(--wood-dark)">납품·시공 주소</th><td style="text-align:right;padding:6px 10px">${c.addr || '-'}</td></tr>
@@ -59,13 +59,23 @@
   sheets.innerHTML = order.items.map((it, i) => `<figure style="margin:0"><img src="${it.sheet}" alt="도면 ${i + 1}"><figcaption style="font-size:14px;color:var(--ink-2);margin-top:6px">도면 ${i + 1} · ${NW_CART.label(it)} · ${it.qty}장 · ${won(NW_CART.price(it).sub)}</figcaption></figure>`).join('');
   // 주문서 텍스트
   const text = () => `[나무의공간 템바보드 주문] ${order.no}\n주문자: ${c.name} / ${c.tel} / ${c.email}\n주소: ${c.addr}\n결제: ${methodName} · 합계(예상) ${won(t.total)} (공급가 ${won(t.supply)} + 부가세 ${won(t.vat)})\n요청: ${c.memo || '-'}\n\n` +
-    order.items.map((it, i) => { const k = it.calc; return `${i + 1}. ${it.dir === 'v' ? '세로' : '가로'} A${it.A}×B${it.B} · C${k.C}/D${k.D} · F${it.F}/E${k.Ereal}/G${k.Gadj} · 코너 ${it.corner === 'none' ? '없음' : it.corner + ' K' + it.K} · ${it.finish} · ${it.install} · 각재 ${k.totalBattens}개 · 원장 ${k.sheets}장 · ${it.qty}장 · ${won(NW_CART.price(it).sub)}`; }).join('\n') +
+    order.items.map((it, i) => { const k = it.calc; return `${i + 1}. ${it.dir === 'v' ? '세로' : '가로'} A${it.A}×B${it.B} · C${k.C}/D${k.D} · F${it.F}/E${k.Ereal}/G${k.Gadj} · 코너 ${it.corner === 'none' ? '없음' : it.corner + ' K' + it.K} · ${it.finishText || it.finish} · ${it.install} · 각재 ${k.totalBattens}개 · 원장 ${k.sheets}장 · ${it.qty}장 · ${won(NW_CART.price(it).sub)}`; }).join('\n') +
     `\n\n[원가 참고] ` + order.items.map((it, i) => { const c = NW_CART.cost(it); return `${i + 1}: 각재 30×30-3600 ${c.sticks}본(${it.calc.totalBattens}개) ${won(c.battens)} + 합판 2400×1200×8t ${it.calc.sheets}장 ${won(c.ply)} + 인건비 ${won(c.labor)} = ${won(c.unit)}/장 ×${it.qty}`; }).join(' / ') +
     `\n\n※ 도면 이미지 ${order.items.length}장을 첨부해 주세요.`;
   const dataFiles = () => order.items.map((it, i) => { const b = atob(it.sheet.split(',')[1]); const u = new Uint8Array(b.length); for (let j = 0; j < b.length; j++) u[j] = b.charCodeAt(j); return new File([u], `${order.no}_도면${i + 1}.jpg`, { type: 'image/jpeg' }); });
   document.getElementById('btnSave').addEventListener('click', () => { dataFiles().forEach((f, i) => setTimeout(() => { const a = document.createElement('a'); a.href = URL.createObjectURL(f); a.download = f.name; a.click(); }, i * 400)); });
+  const subjectAll = `[주문] ${order.no} ${c.name} 님 · 도면 ${order.items.length}건 ${t.count}장`;
+  async function autoSend() {
+    if (order.sent) return true;
+    const meta = { no: order.no, qty: t.count, area: +order.items.reduce((s, it) => s + it.calc.area * it.qty, 0).toFixed(3), supply: t.supply, vat: t.vat, total: t.total, cost: order.items.reduce((s, it) => s + NW_CART.cost(it).sub, 0), method: methodName };
+    const ok = await NW_SEND({ type: 'order', subject: subjectAll, text: text(), customer: { name: c.name, tel: c.tel, email: c.email, addr: c.addr }, meta, files: dataFiles() });
+    if (ok) { order = NW_PAY.setStatus(no, order.status, { sent: true }); const b = document.getElementById('btnMail'); b.textContent = '접수 완료 (메일 발송됨)'; b.disabled = true; const h = document.querySelector('#done .hint'); if (h) h.innerHTML = `주문서가 <b>${SITE.email}</b> 로 자동 접수되었고, <b>${c.email}</b> 로 접수 확인 메일을 보내 드렸습니다.`; }
+    return ok;
+  }
+  if (SITE.orderEndpoint) autoSend();
   document.getElementById('btnMail').addEventListener('click', async () => {
-    const subject = `[주문] ${order.no} ${c.name} 님 · 도면 ${order.items.length}건 ${t.count}장`;
+    if (SITE.orderEndpoint) { const b = document.getElementById('btnMail'); b.textContent = '접수 중…'; if (await autoSend()) return; b.textContent = '주문서 이메일로 보내기'; }
+    const subject = subjectAll;
     const files = dataFiles();
     if (navigator.canShare && navigator.canShare({ files })) { try { await navigator.share({ files, title: subject, text: text() + `\n받는 곳: ${SITE.email}` }); return; } catch (e) { if (e.name === 'AbortError') return; } }
     document.getElementById('btnSave').click();
