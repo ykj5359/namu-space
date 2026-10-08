@@ -3,7 +3,7 @@ window.SITE = {
   name: '나무의공간',
   ceo: '이영석',
   tel: '010-3509-2230',
-  email: 'ykj5359@daum.net',       // 주문서 수신 이메일
+  email: 'namuspace@daum.net',       // 주문서 수신 이메일
   bizname: '둥지인테리어',           // 사업자등록증상 상호
   address: '충청남도 홍성군 서부면 지산1길 25-17',
   bizno: '131-36-54075',

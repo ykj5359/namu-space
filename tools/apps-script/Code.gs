@@ -21,10 +21,10 @@ var TOKEN_HOURS = 12;
 
 // 기본 설정 (관리자 페이지에서 저장하기 전까지 사용)
 var DEFAULT_CONFIG = {
-  mail: { to: ['ykj5359@daum.net'], cc: [], fromName: '나무의공간 홈페이지', ackEnabled: true,
+  mail: { to: ['namuspace@daum.net'], cc: [], fromName: '나무의공간 홈페이지', ackEnabled: true,
     ackText: '{name} 님, 아래 내용으로 접수되었습니다.\n담당자가 확인 후 {tel} 로 연락드리겠습니다.',
     prefix: { contact: '[문의]', drawing: '[도면 주문]', order: '[주문]' } },
-  company: { name: '나무의공간', ceo: '이영석', tel: '010-3509-2230', email: 'ykj5359@daum.net', bizname: '둥지인테리어',
+  company: { name: '나무의공간', ceo: '이영석', tel: '010-3509-2230', email: 'namuspace@daum.net', bizname: '둥지인테리어',
     address: '충청남도 홍성군 서부면 지산1길 25-17', bizno: '131-36-54075', kakao: '', hours: '평일 09:00 ~ 18:00' },
   price: { natural: 140000, stain: 140000, corner: 30000, install: 40000, plyBlack: 0, paint: 0, min: 50000, vat: true },
   cost: { batten: 3600, battenLen: 3600, plywood: 18000, labor: 30000, stain: 0 },

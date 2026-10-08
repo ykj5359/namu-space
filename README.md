@@ -73,7 +73,7 @@ img-original/          제미나이 생성 원본 PNG (보관용)
 
 1. **결제대행사(PG) 가입**: 토스페이먼츠(tosspayments.com) 또는 포트원(portone.io)에 사업자등록증·통장으로 가맹 신청. 심사 후 클라이언트 키와 시크릿 키를 받습니다. (테스트 키는 즉시 발급되어 결제창 동작을 먼저 확인할 수 있습니다.)
 2. **클라이언트 키 입력**: `SITE.payment.clientKey` 에 넣으면 결제하기 버튼이 토스 결제창(카드·계좌이체·가상계좌)을 엽니다. 이 코드는 이미 `js/payments.js` 에 있습니다.
-3. **승인 서버 만들기 (필수)**: 결제창에서 성공하면 `complete.html?paymentKey=…&orderId=…&amount=…` 로 돌아오는데, 이 결제를 **확정(승인)** 하려면 시크릿 키로 토스 승인 API(`POST /v1/payments/confirm`)를 호출해야 합니다. 시크릿 키는 홈페이지에 넣으면 안 되므로 작은 서버가 필요합니다. GitHub Pages 는 서버가 없으니 **Cloudflare Workers(무료)** 나 **Vercel Functions** 에 승인 함수 하나를 올리고, `complete.html` 에서 그 주소로 `paymentKey/orderId/amount` 를 보내 승인 결과를 받으면 됩니다. 같은 서버에서 주문 내용을 이메일(ykj5359@daum.net)로 보내면 주문 접수까지 자동화됩니다.
+3. **승인 서버 만들기 (필수)**: 결제창에서 성공하면 `complete.html?paymentKey=…&orderId=…&amount=…` 로 돌아오는데, 이 결제를 **확정(승인)** 하려면 시크릿 키로 토스 승인 API(`POST /v1/payments/confirm`)를 호출해야 합니다. 시크릿 키는 홈페이지에 넣으면 안 되므로 작은 서버가 필요합니다. GitHub Pages 는 서버가 없으니 **Cloudflare Workers(무료)** 나 **Vercel Functions** 에 승인 함수 하나를 올리고, `complete.html` 에서 그 주소로 `paymentKey/orderId/amount` 를 보내 승인 결과를 받으면 됩니다. 같은 서버에서 주문 내용을 이메일(namuspace@daum.net)로 보내면 주문 접수까지 자동화됩니다.
 4. **정산·환불**: PG 관리자 화면에서 처리합니다. 가상계좌 입금 통보(웹훅)도 3의 서버가 받습니다.
 
 서버 없이 당장 쓰려면: 무통장입금(현재 방식) 또는 토스/카카오페이 **송금 링크**를 완료 페이지에 넣는 방법이 있습니다. 카드 결제는 반드시 PG 가맹과 승인 서버가 있어야 합니다.
@@ -84,7 +84,7 @@ img-original/          제미나이 생성 원본 PNG (보관용)
 
 1. https://script.google.com 접속(구글 계정 로그인) → **새 프로젝트**
 2. 편집기의 기본 코드를 지우고 `tools/apps-script/Code.gs` 내용을 붙여넣기 → 저장(프로젝트 이름: 나무의공간 접수)
-3. 상단 함수 선택에서 `setup` 선택 → **실행** → 권한 승인(고급 → 안전하지 않은 페이지로 이동 → 허용). 시트·드라이브 폴더가 만들어지고, `testSend` 를 실행하면 ykj5359@daum.net 에 테스트 메일이 옴
+3. 상단 함수 선택에서 `setup` 선택 → **실행** → 권한 승인(고급 → 안전하지 않은 페이지로 이동 → 허용). 시트·드라이브 폴더가 만들어지고, `testSend` 를 실행하면 namuspace@daum.net 에 테스트 메일이 옴
 4. **배포 → 새 배포** → 유형 선택(톱니) **웹 앱** → 실행 사용자 **나**, 액세스 권한 **모든 사용자** → 배포 → **웹 앱 URL** 복사
 5. `site/js/main.js` 의 `SITE.orderEndpoint` 에 그 URL 을 넣고 배포하면 끝. (코드를 고친 뒤에는 배포 → 배포 관리 → 새 버전으로 다시 배포해야 반영)
 
