@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 120">
+    <defs><linearGradient id="g8" x1="0" x2="1"><stop offset="0" stop-color="#D9B27F"/><stop offset="1" stop-color="#8B5A2B"/></linearGradient>
+    <clipPath id="c8"><circle cx="60" cy="60" r="46"/></clipPath></defs>
+    <circle cx="60" cy="60" r="46" fill="#F3EBDD"/>
+    <g clip-path="url(#c8)" fill="url(#g8)"><rect x="18" y="10" width="8" height="100"/><rect x="31" y="10" width="8" height="100"/><rect x="44" y="10" width="8" height="100"/><rect x="57" y="10" width="8" height="100"/><rect x="70" y="10" width="8" height="100"/><rect x="83" y="10" width="8" height="100"/><rect x="96" y="10" width="8" height="100"/></g>
+    <text x="126" y="66" font-family="'Noto Sans KR','Malgun Gothic','Apple SD Gothic Neo',sans-serif" font-weight="700" font-size="40" fill="#2B2B2B">나무의공간</text>
+    <text x="128" y="94" font-family="'Noto Sans KR','Malgun Gothic','Apple SD Gothic Neo',sans-serif" font-size="14" letter-spacing="5" fill="#8B5A2B">NAMU SPACE STUDIO</text>
+  </svg>

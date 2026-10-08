@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 120">
+    <g fill="none" stroke="#2F4A3A" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M30 96 C 30 40, 70 20, 104 22 C 104 60, 84 96, 30 96 Z"/>
+      <path d="M32 94 C 50 70, 70 50, 100 26"/>
+    </g>
+    <text x="126" y="66" font-family="'Noto Sans KR','Malgun Gothic','Apple SD Gothic Neo',sans-serif" font-weight="300" font-size="40" letter-spacing="2" fill="#2B2B2B">나무의공간</text>
+    <text x="129" y="94" font-family="'Noto Sans KR','Malgun Gothic','Apple SD Gothic Neo',sans-serif" font-size="13" letter-spacing="6" fill="#2F4A3A">THE SPACE OF WOOD</text>
+  </svg>

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 120">
+    <g fill="#B9814A">
+      <rect x="18" y="22" width="12" height="76" rx="2"/><rect x="38" y="22" width="12" height="76" rx="2"/>
+      <rect x="58" y="22" width="12" height="76" rx="2"/><rect x="78" y="22" width="12" height="76" rx="2"/>
+      <rect x="98" y="22" width="12" height="76" rx="2"/>
+    </g>
+    <text x="130" y="68" font-family="'Noto Sans KR','Malgun Gothic','Apple SD Gothic Neo',sans-serif" font-weight="700" font-size="40" fill="#2B2B2B">나무의공간</text>
+    <text x="130" y="100" font-family="'Noto Sans KR','Malgun Gothic','Apple SD Gothic Neo',sans-serif" font-weight="600" font-size="21" textLength="184" lengthAdjust="spacing" fill="#B9814A">NAMU SPACE</text>
+  </svg>

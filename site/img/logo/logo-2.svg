@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 120">
+    <g fill="none" stroke="#B9814A" stroke-width="3">
+      <circle cx="60" cy="60" r="44"/><circle cx="60" cy="60" r="32" stroke-width="2.5"/>
+      <circle cx="60" cy="60" r="21" stroke-width="2"/><circle cx="60" cy="60" r="11" stroke-width="2"/>
+      <circle cx="60" cy="60" r="3" fill="#B9814A" stroke="none"/>
+    </g>
+    <text x="122" y="70" font-family="'Nanum Myeongjo','Noto Serif KR','Batang',serif" font-weight="700" font-size="42" fill="#2B2B2B">나무의공간</text>
+    <text x="126" y="96" font-family="'Noto Sans KR','Malgun Gothic','Apple SD Gothic Neo',sans-serif" font-size="14" letter-spacing="5" fill="#777">나왕 템바보드 · 인테리어 목재</text>
+  </svg>
